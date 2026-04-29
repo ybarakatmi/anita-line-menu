@@ -396,8 +396,10 @@ export function MenuBoard({
     setNavActive(id);
     const target = document.getElementById(id);
     if (target) {
-      // Offset for sticky topbar (~80px) + sticky nav (~52px) + a little breathing room
-      const stickyOffset = 80 + 52 + 8;
+      // Measure actual sticky header heights at call time so the offset is always correct
+      const topbar = document.querySelector<HTMLElement>(".topbar");
+      const nav = document.querySelector<HTMLElement>(".nav");
+      const stickyOffset = (topbar?.offsetHeight ?? 80) + (nav?.offsetHeight ?? 52) + 8;
       const top = target.getBoundingClientRect().top + window.scrollY - stickyOffset;
       window.scrollTo({ top, behavior: "smooth" });
     }
