@@ -411,9 +411,19 @@ export function MenuBoard({
 
   const navTo = (id: string, btn?: HTMLElement | null) => {
     setNavActive(id);
-    // scrollIntoView respects scroll-margin-top which is kept in sync with
-    // the real sticky header height via the --sticky-offset CSS variable.
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const target = document.getElementById(id);
+    if (!target) return;
+
+    // Re-measure sticky stack right now — handles iOS URL bar shrink/expand
+    const topbar = document.querySelector<HTMLElement>(".topbar");
+    const nav = document.querySelector<HTMLElement>(".nav");
+    const stickyOffset = (topbar?.offsetHeight ?? 0) + (nav?.offsetHeight ?? 0) + 8;
+    document.documentElement.style.setProperty("--sticky-offset", `${stickyOffset}px`);
+
+    // Compute absolute target using current page scroll position; works from any scroll position.
+    const targetTop = target.getBoundingClientRect().top + window.scrollY - stickyOffset;
+    window.scrollTo({ top: Math.max(0, targetTop), behavior: "smooth" });
+
     if (btn) {
       btn.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
     }
