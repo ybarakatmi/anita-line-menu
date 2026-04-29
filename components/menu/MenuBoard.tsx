@@ -269,6 +269,22 @@ function useFadeSections(deps: unknown) {
   }, [deps]);
 }
 
+/** Keeps --sticky-offset CSS variable in sync with the combined height of
+ *  .topbar + .nav so scroll-margin-top on sections always matches exactly. */
+function useStickyOffset() {
+  useEffect(() => {
+    function update() {
+      const topbar = document.querySelector<HTMLElement>(".topbar");
+      const nav = document.querySelector<HTMLElement>(".nav");
+      const h = (topbar?.offsetHeight ?? 0) + (nav?.offsetHeight ?? 0) + 8;
+      document.documentElement.style.setProperty("--sticky-offset", `${h}px`);
+    }
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+}
+
 type GelatoFilter = "all" | "new" | "choc" | "nut" | "fruit";
 
 function useCarouselTrack() {
@@ -326,6 +342,7 @@ export function MenuBoard({
   const sorbetCarousel = useCarouselTrack();
 
   useFadeSections(items.length);
+  useStickyOffset();
 
   const reload = useCallback(async () => {
     if (mode !== "live") return;
@@ -394,15 +411,9 @@ export function MenuBoard({
 
   const navTo = (id: string, btn?: HTMLElement | null) => {
     setNavActive(id);
-    const target = document.getElementById(id);
-    if (target) {
-      // Measure actual sticky header heights at call time so the offset is always correct
-      const topbar = document.querySelector<HTMLElement>(".topbar");
-      const nav = document.querySelector<HTMLElement>(".nav");
-      const stickyOffset = (topbar?.offsetHeight ?? 80) + (nav?.offsetHeight ?? 52) + 8;
-      const top = target.getBoundingClientRect().top + window.scrollY - stickyOffset;
-      window.scrollTo({ top, behavior: "smooth" });
-    }
+    // scrollIntoView respects scroll-margin-top which is kept in sync with
+    // the real sticky header height via the --sticky-offset CSS variable.
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
     if (btn) {
       btn.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
     }

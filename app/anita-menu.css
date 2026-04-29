@@ -709,7 +709,7 @@ body {
 
 .menu-section {
   padding: 44px 0 28px;
-  scroll-margin-top: calc(80px + 52px + 8px);
+  scroll-margin-top: var(--sticky-offset, 140px);
 }
 .menu-section.sage-bg {
   background: var(--sage-lt);
@@ -780,7 +780,7 @@ body {
 .coffee-section {
   background: #ccd6c3;
   padding: 44px 0 36px;
-  scroll-margin-top: calc(80px + 52px + 8px);
+  scroll-margin-top: var(--sticky-offset, 140px);
 }
 .coffee-section .sec-the {
   color: #000000;
