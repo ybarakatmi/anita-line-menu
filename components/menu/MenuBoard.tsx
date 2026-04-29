@@ -420,13 +420,18 @@ export function MenuBoard({
     const stickyOffset = (topbar?.offsetHeight ?? 0) + (nav?.offsetHeight ?? 0) + 8;
     document.documentElement.style.setProperty("--sticky-offset", `${stickyOffset}px`);
 
-    // Compute absolute target using current page scroll position; works from any scroll position.
+    // First, instantly center the nav button horizontally — no smooth animation,
+    // so it doesn't compete with / cancel the page scroll that follows.
+    if (btn && nav) {
+      const navEl = nav as HTMLElement;
+      const left =
+        btn.offsetLeft - navEl.clientWidth / 2 + btn.offsetWidth / 2;
+      navEl.scrollTo({ left, behavior: "auto" });
+    }
+
+    // Now scroll the page smoothly to the target section.
     const targetTop = target.getBoundingClientRect().top + window.scrollY - stickyOffset;
     window.scrollTo({ top: Math.max(0, targetTop), behavior: "smooth" });
-
-    if (btn) {
-      btn.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-    }
   };
 
   const ticker = settings.ticker_segments ?? [];
