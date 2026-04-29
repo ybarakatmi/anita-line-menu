@@ -420,8 +420,8 @@ export function MenuBoard({
     const stickyOffset = (topbar?.offsetHeight ?? 0) + (nav?.offsetHeight ?? 0) + 8;
     document.documentElement.style.setProperty("--sticky-offset", `${stickyOffset}px`);
 
-    // First, instantly center the nav button horizontally — no smooth animation,
-    // so it doesn't compete with / cancel the page scroll that follows.
+    // Instantly center the nav button horizontally on the .nav container only —
+    // this avoids the smooth-scroll-cancellation race with the page scroll below.
     if (btn && nav) {
       const navEl = nav as HTMLElement;
       const left =
@@ -429,9 +429,9 @@ export function MenuBoard({
       navEl.scrollTo({ left, behavior: "auto" });
     }
 
-    // Now scroll the page smoothly to the target section.
-    const targetTop = target.getBoundingClientRect().top + window.scrollY - stickyOffset;
-    window.scrollTo({ top: Math.max(0, targetTop), behavior: "smooth" });
+    // scrollIntoView respects scroll-margin-top (set via --sticky-offset) and
+    // is layout-aware: if images load mid-scroll, it recomputes correctly.
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const ticker = settings.ticker_segments ?? [];
