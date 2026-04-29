@@ -51,7 +51,6 @@
 }
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: var(--sticky-offset, calc(98px + env(safe-area-inset-top, 0px)));
   -webkit-text-size-adjust: 100%;
 }
 body {
