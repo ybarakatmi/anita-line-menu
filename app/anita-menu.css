@@ -637,6 +637,7 @@ body {
   margin: 28px -24px 0;
   padding: 0 24px 8px;
   scroll-snap-type: x mandatory;
+  scroll-padding-left: 24px;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
 }
