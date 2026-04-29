@@ -429,9 +429,27 @@ export function MenuBoard({
       navEl.scrollTo({ left, behavior: "auto" });
     }
 
-    // scrollIntoView respects scroll-margin-top (set via --sticky-offset) and
-    // is layout-aware: if images load mid-scroll, it recomputes correctly.
-    target.scrollIntoView({ behavior: "smooth", block: "start" });
+    // Compute absolute target and scroll smoothly. Using window.scrollTo with
+    // an absolute Y is more deterministic than scrollIntoView when the page
+    // contains lazy-loaded images that may shift layout during scroll.
+    const initialTargetY =
+      target.getBoundingClientRect().top + window.scrollY - stickyOffset;
+    window.scrollTo({ top: Math.max(0, initialTargetY), behavior: "smooth" });
+
+    // After the scroll has settled, run a corrective adjustment — handles
+    // images that lazy-loaded mid-flight and shifted the section position.
+    let attempts = 0;
+    const correct = () => {
+      attempts++;
+      const rect = target.getBoundingClientRect();
+      const desiredTop = stickyOffset; // section's top should be just below sticky stack
+      const drift = rect.top - desiredTop;
+      if (Math.abs(drift) > 4) {
+        window.scrollTo({ top: window.scrollY + drift, behavior: "smooth" });
+      }
+      if (attempts < 3) setTimeout(correct, 350);
+    };
+    setTimeout(correct, 600);
   };
 
   const ticker = settings.ticker_segments ?? [];
