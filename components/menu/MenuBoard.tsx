@@ -320,6 +320,7 @@ export function MenuBoard({
   const [navActive, setNavActive] = useState("seasonal");
   const [gelatoFilter, setGelatoFilter] = useState<GelatoFilter>("all");
   const [activeBestSeller, setActiveBestSeller] = useState(0);
+  const [contactStatus, setContactStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
   const bestSellerSwiperRef = useRef<SwiperType | null>(null);
   const gelatoCarousel = useCarouselTrack();
   const sorbetCarousel = useCarouselTrack();
@@ -393,7 +394,13 @@ export function MenuBoard({
 
   const navTo = (id: string, btn?: HTMLElement | null) => {
     setNavActive(id);
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const target = document.getElementById(id);
+    if (target) {
+      // Offset for sticky topbar (~80px) + sticky nav (~52px) + a little breathing room
+      const stickyOffset = 80 + 52 + 8;
+      const top = target.getBoundingClientRect().top + window.scrollY - stickyOffset;
+      window.scrollTo({ top, behavior: "smooth" });
+    }
     if (btn) {
       btn.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
     }
@@ -847,8 +854,27 @@ export function MenuBoard({
             <span className="footer-sub-head">CONTACT US</span>
             <form
               className="gform_wrapper gform-theme--no-framework footer-contact-form"
-              onSubmit={(e) => {
+              onSubmit={async (e) => {
                 e.preventDefault();
+                if (contactStatus === "sending" || contactStatus === "success") return;
+                setContactStatus("sending");
+                const fd = new FormData(e.currentTarget);
+                try {
+                  const supabase = createClient();
+                  const { error } = await supabase.from("contact_submissions").insert({
+                    name: fd.get("name") as string,
+                    email: fd.get("email") as string,
+                    subject: (fd.get("subject") as string) || null,
+                    phone: (fd.get("phone") as string) || null,
+                    country: (fd.get("country") as string) || null,
+                    message: (fd.get("message") as string) || null,
+                  });
+                  if (error) throw error;
+                  setContactStatus("success");
+                  (e.target as HTMLFormElement).reset();
+                } catch {
+                  setContactStatus("error");
+                }
               }}
             >
               <div className="gform-body">
@@ -882,9 +908,19 @@ export function MenuBoard({
                   </span>
                 </label>
               </div>
+              {contactStatus === "success" && (
+                <p className="footer-form-success">Thank you! Your message has been sent.</p>
+              )}
+              {contactStatus === "error" && (
+                <p className="footer-form-error">Something went wrong. Please try again.</p>
+              )}
               <div className="gform-footer">
-                <button type="submit" className="footer-send-btn">
-                  SEND
+                <button
+                  type="submit"
+                  className="footer-send-btn"
+                  disabled={contactStatus === "sending" || contactStatus === "success"}
+                >
+                  {contactStatus === "sending" ? "SENDING…" : contactStatus === "success" ? "SENT ✓" : "SEND"}
                 </button>
               </div>
             </form>

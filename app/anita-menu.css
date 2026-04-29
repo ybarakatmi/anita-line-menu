@@ -1359,6 +1359,27 @@ body {
   text-transform: uppercase;
   font-family: var(--sans);
   cursor: pointer;
+  transition: opacity 0.2s;
+}
+.footer-send-btn:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+.footer-form-success {
+  margin: 12px 0 4px;
+  font-size: 13px;
+  font-family: var(--sans);
+  color: #3a6640;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+.footer-form-error {
+  margin: 12px 0 4px;
+  font-size: 13px;
+  font-family: var(--sans);
+  color: #b04040;
+  text-align: center;
+  letter-spacing: 0.5px;
 }
 @media (max-width: 480px) {
   .footer-form-grid {
