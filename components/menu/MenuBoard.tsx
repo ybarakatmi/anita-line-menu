@@ -584,16 +584,6 @@ export function MenuBoard({
             Limited batches · Rotating often · Ask what&apos;s scooping today
           </p>
         </div>
-        <div className="seasonal-drop-strip" aria-hidden="true">
-          <span className="seasonal-drop-strip-inner">
-            <span className="seasonal-drop-dot" />
-            Fresh on the board
-            <span className="seasonal-drop-sep">✦</span>
-            Made for the season
-            <span className="seasonal-drop-sep">✦</span>
-            While supplies last
-          </span>
-        </div>
         <div className="spec-grid">
           {(bySection.get("seasonal") ?? []).map((item, index) => {
             // Prefer admin-uploaded image; otherwise fall back to the catalog photo

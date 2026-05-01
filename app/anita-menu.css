@@ -787,40 +787,6 @@ body {
   color: rgba(31, 65, 54, 0.72);
 }
 
-.seasonal-drop-strip {
-  position: relative;
-  z-index: 1;
-  margin: 18px 16px 0;
-  padding: 10px 14px;
-  border: 1px solid rgba(31, 65, 54, 0.12);
-  background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(6px);
-}
-.seasonal-drop-strip-inner {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 8px 14px;
-  font-family: var(--sans);
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--olive);
-}
-.seasonal-drop-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--olive);
-  opacity: 0.85;
-}
-.seasonal-drop-sep {
-  opacity: 0.45;
-  font-weight: 400;
-}
-
 #seasonal .spec-grid {
   position: relative;
   z-index: 1;
