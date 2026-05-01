@@ -12,6 +12,11 @@ import "swiper/css/pagination";
 import { Navigation, Pagination } from "swiper/modules";
 import type { Swiper as SwiperType } from "swiper/types";
 
+/** Fallback URLs; MP4 hotlinks may be blocked by the origin CDN when embedded from Vercel — set URLs in Admin → Settings. */
+const DEFAULT_HERO_VIDEO_URL = "https://www.anita-gelato.com/wp-content/uploads/2024/06/hero.mp4";
+const DEFAULT_HERO_POSTER_URL = "https://www.anita-gelato.com/wp-content/uploads/2024/07/OPEN-001.png";
+const DEFAULT_SEPARATOR_VIDEO_URL = "https://www.anita-gelato.com/wp-content/uploads/2024/06/separator.mp4";
+
 const SECTION_ORDER: MenuSection[] = [
   "seasonal",
   "bestsellers",
@@ -333,7 +338,7 @@ export function MenuBoard({
   mode: MenuDataMode;
 }) {
   const [items, setItems] = useState(() => sortItems(initialItems));
-  const [settings] = useState(initialSettings);
+  const [settings, setSettings] = useState(initialSettings);
   const [navActive, setNavActive] = useState("seasonal");
   const [gelatoFilter, setGelatoFilter] = useState<GelatoFilter>("all");
   const [activeBestSeller, setActiveBestSeller] = useState(0);
@@ -347,6 +352,21 @@ export function MenuBoard({
   useEffect(() => {
     setItems(sortItems(initialItems));
   }, [initialItems]);
+
+  useEffect(() => {
+    setSettings(initialSettings);
+  }, [initialSettings]);
+
+  const heroVideoSrc = settings.hero_video_url?.trim() || DEFAULT_HERO_VIDEO_URL;
+  const heroPosterSrc = settings.hero_video_poster_url?.trim() || DEFAULT_HERO_POSTER_URL;
+  const separatorVideoSrc = settings.separator_video_url?.trim() || DEFAULT_SEPARATOR_VIDEO_URL;
+
+  const heroVideoRef = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const el = heroVideoRef.current;
+    if (!el) return;
+    void el.play().catch(() => {});
+  }, [heroVideoSrc]);
 
   useFadeSections(items.length);
   useStickyOffset();
@@ -475,15 +495,17 @@ export function MenuBoard({
       <section className="hero" id="top">
         <div className="hero-sky">
           <video
+            ref={heroVideoRef}
+            key={heroVideoSrc}
             className="hero-video"
             autoPlay
             muted
             loop
             playsInline
-            preload="none"
-            poster="https://www.anita-gelato.com/wp-content/uploads/2024/07/OPEN-001.png"
+            preload="metadata"
+            poster={heroPosterSrc}
           >
-            <source src="https://www.anita-gelato.com/wp-content/uploads/2024/06/hero.mp4" type="video/mp4" />
+            <source src={heroVideoSrc} type="video/mp4" />
           </video>
           <div className="hero-overlay" />
         </div>
@@ -860,15 +882,16 @@ export function MenuBoard({
 
       <section className="separator-video-section fade-in" aria-label="Decorative video separator">
         <video
+          key={separatorVideoSrc}
           className="separator-video"
           autoPlay
           muted
           loop
           playsInline
-          preload="none"
+          preload="metadata"
           aria-hidden
         >
-          <source src="https://www.anita-gelato.com/wp-content/uploads/2024/06/separator.mp4" type="video/mp4" />
+          <source src={separatorVideoSrc} type="video/mp4" />
         </video>
       </section>
 

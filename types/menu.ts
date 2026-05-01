@@ -34,6 +34,10 @@ export type SiteSettingsRow = {
   ticker_segments: string[];
   seasonal_tagline: string | null;
   hero_eyebrow: string | null;
+  /** MP4 URL allowed for cross-origin playback (e.g. Supabase Storage public URL). */
+  hero_video_url: string | null;
+  hero_video_poster_url: string | null;
+  separator_video_url: string | null;
   updated_at?: string | null;
 };
 
