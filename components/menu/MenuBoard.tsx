@@ -713,7 +713,7 @@ export function MenuBoard({
                     alt={item.name}
                     width={336}
                     height={280}
-                    className="h-full w-full object-contain object-center"
+                    className="h-full w-full object-cover object-center"
                     sizes="(max-width: 768px) 46vw, 168px"
                   />
                 </div>
@@ -748,7 +748,7 @@ export function MenuBoard({
                     alt={item.name}
                     width={320}
                     height={240}
-                    className="h-full w-full object-contain object-center"
+                    className="h-full w-full object-cover object-center"
                     sizes="(max-width: 768px) 44vw, 160px"
                   />
                 </div>
