@@ -13,9 +13,9 @@ export const FALLBACK_SITE_SETTINGS: SiteSettingsRow = {
   ],
   seasonal_tagline: "Spring 2026 Arrivals",
   hero_eyebrow: "Tarzana · Los Angeles",
-  hero_video_url: "/videos/hero.mp4",
-  hero_video_poster_url: "/videos/hero-poster.jpg",
-  separator_video_url: "/videos/separator.mp4",
+  hero_video_url: null,
+  hero_video_poster_url: null,
+  separator_video_url: null,
 };
 
 function gelatoTags(name: string, desc: string): string[] {
