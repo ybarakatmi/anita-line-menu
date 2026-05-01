@@ -109,7 +109,7 @@ export function SiteMediaSettingsForm({ initial }: Props) {
         <input
           value={heroVideoUrl}
           onChange={(e) => setHeroVideoUrl(e.target.value)}
-          placeholder="https://….supabase.co/storage/v1/object/public/…/hero.mp4"
+          placeholder="Leave blank for built-in /videos/hero.mp4 (brand art), or paste your MP4 URL"
           className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 font-mono text-sm text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
         />
       </label>

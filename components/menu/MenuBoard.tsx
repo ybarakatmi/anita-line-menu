@@ -12,10 +12,12 @@ import "swiper/css/pagination";
 import { Navigation, Pagination } from "swiper/modules";
 import type { Swiper as SwiperType } from "swiper/types";
 
-/** Original Anita hero assets; MP4 may not play when embedded from some hosts — override in Admin → Settings. */
-const DEFAULT_HERO_VIDEO_URL = "https://www.anita-gelato.com/wp-content/uploads/2024/06/hero.mp4";
-const DEFAULT_HERO_POSTER_URL = "https://www.anita-gelato.com/wp-content/uploads/2024/07/OPEN-001.png";
-/** Same-origin — anita-gelato.com MP4 returns 403 when embedded from Vercel. */
+/**
+ * Same-origin MP4s encoded from the same OPEN-001 storefront art as anita-gelato.com
+ * (their direct MP4 URLs return 403 when embedded from Vercel). Override in Admin → Settings.
+ */
+const DEFAULT_HERO_VIDEO_URL = "/videos/hero.mp4";
+const DEFAULT_HERO_POSTER_URL = "/videos/hero-poster.jpg";
 const DEFAULT_SEPARATOR_VIDEO_URL = "/videos/separator.mp4";
 const DEFAULT_SEPARATOR_POSTER_URL = "/videos/separator-poster.jpg";
 
@@ -368,7 +370,13 @@ export function MenuBoard({
   const separatorVideoSrc = settings.separator_video_url?.trim() || DEFAULT_SEPARATOR_VIDEO_URL;
   const separatorPosterSrc = DEFAULT_SEPARATOR_POSTER_URL;
 
+  const heroVideoRef = useRef<HTMLVideoElement>(null);
   const separatorVideoRef = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const el = heroVideoRef.current;
+    if (!el) return;
+    void el.play().catch(() => {});
+  }, [heroVideoSrc]);
   useEffect(() => {
     const el = separatorVideoRef.current;
     if (!el) return;
@@ -504,13 +512,14 @@ export function MenuBoard({
       <section className="hero" id="top">
         <div className="hero-sky">
           <video
+            ref={heroVideoRef}
             key={heroVideoSrc}
             className="hero-video"
             autoPlay
             muted
             loop
             playsInline
-            preload="none"
+            preload="metadata"
             poster={heroPosterSrc}
           >
             <source src={heroVideoSrc} type="video/mp4" />
