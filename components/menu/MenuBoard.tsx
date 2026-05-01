@@ -700,7 +700,20 @@ export function MenuBoard({
         <div className="coffee-list">
           {(bySection.get("coffee") ?? []).map((item) => (
             <div key={item.id} className="coffee-card">
-              <div className="coffee-card-ico">{item.emoji ?? "☕"}</div>
+              {item.image_url ? (
+                <div className="coffee-card-photo">
+                  <Image
+                    src={item.image_url}
+                    alt={item.name}
+                    width={336}
+                    height={280}
+                    className="h-full w-full object-contain object-center"
+                    sizes="(max-width: 768px) 46vw, 168px"
+                  />
+                </div>
+              ) : (
+                <div className="coffee-card-ico">{item.emoji ?? "☕"}</div>
+              )}
               <div className="coffee-card-name">{item.name}</div>
               <div className="coffee-card-desc">{item.description}</div>
               <div className="coffee-card-price">{item.price_display}</div>
