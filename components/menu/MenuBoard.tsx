@@ -341,6 +341,12 @@ export function MenuBoard({
   const gelatoCarousel = useCarouselTrack();
   const sorbetCarousel = useCarouselTrack();
 
+  // After admin saves, Next.js refreshes RSC props but useState keeps the first snapshot.
+  // Re-sync so new images (e.g. coffee uploads) show without a hard reload.
+  useEffect(() => {
+    setItems(sortItems(initialItems));
+  }, [initialItems]);
+
   useFadeSections(items.length);
   useStickyOffset();
 
