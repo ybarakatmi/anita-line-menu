@@ -17,6 +17,10 @@ const DEFAULT_HERO_VIDEO_URL = "https://www.anita-gelato.com/wp-content/uploads/
 const DEFAULT_HERO_POSTER_URL = "https://www.anita-gelato.com/wp-content/uploads/2024/07/OPEN-001.png";
 const DEFAULT_SEPARATOR_VIDEO_URL = "https://www.anita-gelato.com/wp-content/uploads/2024/06/separator.mp4";
 
+const DEFAULT_HERO_SECONDARY_LABEL = "Visit Tarzana";
+const DEFAULT_HERO_SECONDARY_HREF =
+  "https://www.google.com/maps/search/?api=1&query=Anita+Gelato+Tarzana+CA";
+
 const SECTION_ORDER: MenuSection[] = [
   "seasonal",
   "bestsellers",
@@ -360,6 +364,8 @@ export function MenuBoard({
   const heroVideoSrc = settings.hero_video_url?.trim() || DEFAULT_HERO_VIDEO_URL;
   const heroPosterSrc = settings.hero_video_poster_url?.trim() || DEFAULT_HERO_POSTER_URL;
   const separatorVideoSrc = settings.separator_video_url?.trim() || DEFAULT_SEPARATOR_VIDEO_URL;
+  const heroSecondaryLabel = settings.hero_secondary_label?.trim() || DEFAULT_HERO_SECONDARY_LABEL;
+  const heroSecondaryHref = settings.hero_secondary_href?.trim() || DEFAULT_HERO_SECONDARY_HREF;
 
   useFadeSections(items.length);
   useStickyOffset();
@@ -532,11 +538,11 @@ export function MenuBoard({
             </a>
             <a
               className="hero-btn hero-btn-secondary"
-              href="https://www.anita-gelato.com/our-locations/"
+              href={heroSecondaryHref}
               target="_blank"
               rel="nofollow noreferrer"
             >
-              OUR STORES
+              {heroSecondaryLabel}
             </a>
           </div>
         </div>

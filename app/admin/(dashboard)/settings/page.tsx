@@ -16,13 +16,20 @@ export default async function AdminSettingsPage() {
 
   const { data: settingsRow, error: settingsError } = await supabase
     .from("site_settings")
-    .select("hero_eyebrow, hero_video_url, hero_video_poster_url, separator_video_url")
+    .select(
+      "hero_eyebrow, hero_secondary_label, hero_secondary_href, hero_video_url, hero_video_poster_url, separator_video_url"
+    )
     .eq("id", 1)
     .maybeSingle();
 
   const settings = settingsRow as Pick<
     SiteSettingsRow,
-    "hero_eyebrow" | "hero_video_url" | "hero_video_poster_url" | "separator_video_url"
+    | "hero_eyebrow"
+    | "hero_secondary_label"
+    | "hero_secondary_href"
+    | "hero_video_url"
+    | "hero_video_poster_url"
+    | "separator_video_url"
   > | null;
 
   return (

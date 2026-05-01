@@ -38,6 +38,9 @@ export type SiteSettingsRow = {
   hero_video_url: string | null;
   hero_video_poster_url: string | null;
   separator_video_url: string | null;
+  /** Hero outline button (right): label + link — null uses Tarzana defaults in MenuBoard. */
+  hero_secondary_label: string | null;
+  hero_secondary_href: string | null;
   updated_at?: string | null;
 };
 

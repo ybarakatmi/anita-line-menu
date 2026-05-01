@@ -10,6 +10,8 @@ function trimOrNull(v: string | null | undefined) {
 
 export async function saveSiteMediaSettingsAction(input: {
   hero_eyebrow: string | null;
+  hero_secondary_label: string | null;
+  hero_secondary_href: string | null;
   hero_video_url: string | null;
   hero_video_poster_url: string | null;
   separator_video_url: string | null;
@@ -24,6 +26,8 @@ export async function saveSiteMediaSettingsAction(input: {
     .from("site_settings")
     .update({
       hero_eyebrow: trimOrNull(input.hero_eyebrow),
+      hero_secondary_label: trimOrNull(input.hero_secondary_label),
+      hero_secondary_href: trimOrNull(input.hero_secondary_href),
       hero_video_url: trimOrNull(input.hero_video_url),
       hero_video_poster_url: trimOrNull(input.hero_video_poster_url),
       separator_video_url: trimOrNull(input.separator_video_url),

@@ -16,6 +16,8 @@ export const FALLBACK_SITE_SETTINGS: SiteSettingsRow = {
   hero_video_url: null,
   hero_video_poster_url: null,
   separator_video_url: null,
+  hero_secondary_label: null,
+  hero_secondary_href: null,
 };
 
 function gelatoTags(name: string, desc: string): string[] {
