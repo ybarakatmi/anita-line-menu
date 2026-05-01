@@ -1,5 +1,5 @@
 import { AdminBreadcrumbs } from "@/components/admin/AdminBreadcrumbs";
-import { formatAdminSyncTime } from "@/lib/format-admin-sync";
+import { ContactSubmissionsBoard } from "@/components/admin/ContactSubmissionsBoard";
 import { createClient } from "@/lib/supabase/server";
 import type { ContactSubmissionRow } from "@/types/contact-submission";
 import { redirect } from "next/navigation";
@@ -55,43 +55,7 @@ export default async function ContactSubmissionsPage() {
         </div>
       )}
 
-      {!error && submissions.length > 0 && (
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          <div className="border-b border-slate-100 px-5 py-4">
-            <p className="text-sm text-slate-600">
-              Showing <span className="font-semibold text-slate-900">{submissions.length}</span>
-              {submissions.length >= 500 ? " (most recent 500)" : ""}
-            </p>
-          </div>
-          <ul className="divide-y divide-slate-100">
-            {submissions.map((s) => (
-              <li key={s.id} className="px-5 py-5">
-                <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <p className="text-base font-semibold text-slate-900">{s.name}</p>
-                  <time className="text-xs text-slate-500 tabular-nums" dateTime={s.created_at}>
-                    {formatAdminSyncTime(s.created_at) ?? s.created_at}
-                  </time>
-                </div>
-                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm">
-                  <a href={`mailto:${encodeURIComponent(s.email)}`} className="font-medium text-slate-700 underline-offset-2 hover:underline">
-                    {s.email}
-                  </a>
-                  {s.phone && (
-                    <a href={`tel:${s.phone.replace(/\s+/g, "")}`} className="text-slate-600 hover:text-slate-900">
-                      {s.phone}
-                    </a>
-                  )}
-                  {s.country && <span className="text-slate-600">{s.country}</span>}
-                </div>
-                {s.subject && <p className="mt-3 text-sm font-medium text-slate-800">Subject: {s.subject}</p>}
-                {s.message && (
-                  <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-slate-600">{s.message}</p>
-                )}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      {!error && submissions.length > 0 && <ContactSubmissionsBoard submissions={submissions} />}
     </div>
   );
 }
