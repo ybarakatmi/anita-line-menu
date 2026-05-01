@@ -82,6 +82,16 @@ export function AdminAppShell({ children, liveCounts, totalCounts, access }: Pro
         );
       })}
 
+      <p className="mt-6 px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Inquiries</p>
+      <Link
+        href="/admin/contact-submissions"
+        className={`rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+          linkActive("/admin/contact-submissions") ? "bg-slate-900 text-white" : "text-slate-700 hover:bg-slate-100"
+        }`}
+      >
+        Contact submissions
+      </Link>
+
       <p className="mt-6 px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Configuration</p>
       <Link
         href="/admin/settings"

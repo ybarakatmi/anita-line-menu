@@ -41,6 +41,7 @@ export function MenuItemForm({
   const [isActive, setIsActive] = useState(initial?.is_active ?? true);
   const [sortOrder, setSortOrder] = useState(initial?.sort_order ?? 0);
   const [imageUrl, setImageUrl] = useState(initial?.image_url ?? "");
+  const [promoLabel, setPromoLabel] = useState(initial?.promo_label ?? "");
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -86,7 +87,7 @@ export function MenuItemForm({
         is_vegan: isVegan,
         is_active: isActive,
         sort_order: sortOrder,
-        promo_label: initial?.promo_label ?? null,
+        promo_label: promoLabel.trim() ? promoLabel.trim() : null,
       });
 
       setSuccess("Saved successfully.");
@@ -210,6 +211,18 @@ export function MenuItemForm({
           className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200 read-only:bg-slate-50 read-only:opacity-90"
         />
       </label>
+      {(section === "seasonal" || section === "gelato" || section === "sorbet") && (
+        <label className="block text-sm font-medium text-slate-700">
+          Promo line (optional — shown under description on seasonal cards)
+          <input
+            readOnly={readOnly}
+            value={promoLabel}
+            onChange={(e) => setPromoLabel(e.target.value)}
+            placeholder="Limited batch · Tarzana exclusive"
+            className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200 read-only:bg-slate-50 read-only:opacity-90"
+          />
+        </label>
+      )}
       <label className="block text-sm font-medium text-slate-700">
         Tags (gelato filters, comma-separated)
         <input

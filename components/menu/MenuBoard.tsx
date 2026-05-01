@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import type { MenuDataMode, MenuItemRow, MenuSection, SiteSettingsRow } from "@/types/menu";
+import type { CSSProperties } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
@@ -269,6 +270,22 @@ function useFadeSections(deps: unknown) {
   }, [deps]);
 }
 
+/** Keeps --sticky-offset CSS variable in sync with the combined height of
+ *  .topbar + .nav so scroll-margin-top on sections always matches exactly. */
+function useStickyOffset() {
+  useEffect(() => {
+    function update() {
+      const topbar = document.querySelector<HTMLElement>(".topbar");
+      const nav = document.querySelector<HTMLElement>(".nav");
+      const h = (topbar?.offsetHeight ?? 0) + (nav?.offsetHeight ?? 0) + 8;
+      document.documentElement.style.setProperty("--sticky-offset", `${h}px`);
+    }
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+}
+
 type GelatoFilter = "all" | "new" | "choc" | "nut" | "fruit";
 
 function useCarouselTrack() {
@@ -320,11 +337,19 @@ export function MenuBoard({
   const [navActive, setNavActive] = useState("seasonal");
   const [gelatoFilter, setGelatoFilter] = useState<GelatoFilter>("all");
   const [activeBestSeller, setActiveBestSeller] = useState(0);
+  const [contactStatus, setContactStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
   const bestSellerSwiperRef = useRef<SwiperType | null>(null);
   const gelatoCarousel = useCarouselTrack();
   const sorbetCarousel = useCarouselTrack();
 
+  // After admin saves, Next.js refreshes RSC props but useState keeps the first snapshot.
+  // Re-sync so new images (e.g. coffee uploads) show without a hard reload.
+  useEffect(() => {
+    setItems(sortItems(initialItems));
+  }, [initialItems]);
+
   useFadeSections(items.length);
+  useStickyOffset();
 
   const reload = useCallback(async () => {
     if (mode !== "live") return;
@@ -393,10 +418,45 @@ export function MenuBoard({
 
   const navTo = (id: string, btn?: HTMLElement | null) => {
     setNavActive(id);
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-    if (btn) {
-      btn.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+    const target = document.getElementById(id);
+    if (!target) return;
+
+    // Re-measure sticky stack right now — handles iOS URL bar shrink/expand
+    const topbar = document.querySelector<HTMLElement>(".topbar");
+    const nav = document.querySelector<HTMLElement>(".nav");
+    const stickyOffset = (topbar?.offsetHeight ?? 0) + (nav?.offsetHeight ?? 0) + 8;
+    document.documentElement.style.setProperty("--sticky-offset", `${stickyOffset}px`);
+
+    // Instantly center the nav button horizontally on the .nav container only —
+    // this avoids the smooth-scroll-cancellation race with the page scroll below.
+    if (btn && nav) {
+      const navEl = nav as HTMLElement;
+      const left =
+        btn.offsetLeft - navEl.clientWidth / 2 + btn.offsetWidth / 2;
+      navEl.scrollTo({ left, behavior: "auto" });
     }
+
+    // Compute absolute target and scroll smoothly. Using window.scrollTo with
+    // an absolute Y is more deterministic than scrollIntoView when the page
+    // contains lazy-loaded images that may shift layout during scroll.
+    const initialTargetY =
+      target.getBoundingClientRect().top + window.scrollY - stickyOffset;
+    window.scrollTo({ top: Math.max(0, initialTargetY), behavior: "smooth" });
+
+    // After the scroll has settled, run a corrective adjustment — handles
+    // images that lazy-loaded mid-flight and shifted the section position.
+    let attempts = 0;
+    const correct = () => {
+      attempts++;
+      const rect = target.getBoundingClientRect();
+      const desiredTop = stickyOffset; // section's top should be just below sticky stack
+      const drift = rect.top - desiredTop;
+      if (Math.abs(drift) > 4) {
+        window.scrollTo({ top: window.scrollY + drift, behavior: "smooth" });
+      }
+      if (attempts < 3) setTimeout(correct, 350);
+    };
+    setTimeout(correct, 600);
   };
 
   const ticker = settings.ticker_segments ?? [];
@@ -511,7 +571,7 @@ export function MenuBoard({
         </div>
       </div>
 
-      <section className="menu-section fade-in" id="seasonal">
+      <section className="menu-section seasonal-feature fade-in" id="seasonal">
         <div className="sec-head">
           <span className="sec-the">Right Now</span>
           <div className="sec-big">
@@ -520,37 +580,74 @@ export function MenuBoard({
             Seasonal
           </div>
           <div className="sec-tag">✦ &nbsp; {settings.seasonal_tagline ?? "Spring 2026 Arrivals"}</div>
+          <p className="seasonal-eyebrow-sub">
+            Limited batches · Rotating often · Ask what&apos;s scooping today
+          </p>
         </div>
         <div className="spec-grid">
-          {(bySection.get("seasonal") ?? []).map((item) => (
-            <div key={item.id} className="spec-card">
-              <div className="spec-img">
-                {item.image_url ? (
-                  <Image
-                    src={item.image_url}
-                    alt={item.name}
-                    width={380}
-                    height={256}
-                    className="h-full w-full object-cover"
-                    sizes="(max-width: 768px) 52vw, 190px"
-                  />
-                ) : (
-                  <div className="spec-img-emoji">🍦</div>
-                )}
-                {item.badge && (
-                  <div
-                    className={`spec-badge${item.badge === "New" ? " new" : " limited"}`}
-                  >
-                    {item.badge}
+          {(bySection.get("seasonal") ?? []).map((item, index) => {
+            // Prefer admin-uploaded image; otherwise fall back to the catalog photo
+            // matched by flavor name (same logic powering the gelato carousel).
+            const seasonalImage = item.image_url ?? getFlavorImageUrl(item);
+            const showNewRibbon = item.is_new;
+            const badgeLower = (item.badge ?? "").toLowerCase();
+            const seasonalRibbonLabel = badgeLower.includes("limited") ? "Limited" : "Seasonal";
+            const showPillBadge =
+              item.badge &&
+              !(showNewRibbon && item.badge === "New") &&
+              !(badgeLower.includes("season") || badgeLower.includes("limited"));
+            const cardClass = [
+              "spec-card",
+              item.is_new ? "spec-card--spotlight" : "",
+            ]
+              .filter(Boolean)
+              .join(" ");
+
+            return (
+              <div
+                key={item.id}
+                className={cardClass}
+                style={{ "--seasonal-stagger": String(index) } as CSSProperties}
+              >
+                {showNewRibbon && (
+                  <div className="spec-ribbon spec-ribbon--new" aria-hidden="true">
+                    <span>New</span>
                   </div>
                 )}
+                <div className="spec-ribbon spec-ribbon--seasonal" aria-hidden="true">
+                  <span>{seasonalRibbonLabel}</span>
+                </div>
+                <div className="spec-img">
+                  {seasonalImage ? (
+                    <Image
+                      src={seasonalImage}
+                      alt={item.name}
+                      width={380}
+                      height={256}
+                      className="h-full w-full object-cover"
+                      sizes="(max-width: 768px) 52vw, 190px"
+                    />
+                  ) : (
+                    <div className="spec-img-emoji">🍦</div>
+                  )}
+                  {showPillBadge && (
+                    <div
+                      className={`spec-badge${item.badge === "New" ? " new spec-badge--pulse" : " limited"}`}
+                    >
+                      {item.badge}
+                    </div>
+                  )}
+                </div>
+                <div className="spec-body">
+                  <div className="spec-name">{item.name}</div>
+                  <div className="spec-desc">{item.description}</div>
+                  {item.promo_label?.trim() ? (
+                    <p className="spec-promo">{item.promo_label.trim()}</p>
+                  ) : null}
+                </div>
               </div>
-              <div className="spec-body">
-                <div className="spec-name">{item.name}</div>
-                <div className="spec-desc">{item.description}</div>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
@@ -642,7 +739,20 @@ export function MenuBoard({
         <div className="coffee-list">
           {(bySection.get("coffee") ?? []).map((item) => (
             <div key={item.id} className="coffee-card">
-              <div className="coffee-card-ico">{item.emoji ?? "☕"}</div>
+              {item.image_url ? (
+                <div className="coffee-card-photo">
+                  <Image
+                    src={item.image_url}
+                    alt={item.name}
+                    width={336}
+                    height={280}
+                    className="h-full w-full object-cover object-center"
+                    sizes="(max-width: 768px) 46vw, 168px"
+                  />
+                </div>
+              ) : (
+                <div className="coffee-card-ico">{item.emoji ?? "☕"}</div>
+              )}
               <div className="coffee-card-name">{item.name}</div>
               <div className="coffee-card-desc">{item.description}</div>
               <div className="coffee-card-price">{item.price_display}</div>
@@ -664,7 +774,20 @@ export function MenuBoard({
         <div className="drinks-grid">
           {(bySection.get("drinks") ?? []).map((item) => (
             <div key={item.id} className="drink-card">
-              <div className="drink-ico">{item.emoji ?? "🥤"}</div>
+              {item.image_url ? (
+                <div className="drink-card-photo">
+                  <Image
+                    src={item.image_url}
+                    alt={item.name}
+                    width={320}
+                    height={240}
+                    className="h-full w-full object-cover object-center"
+                    sizes="(max-width: 768px) 44vw, 160px"
+                  />
+                </div>
+              ) : (
+                <div className="drink-ico">{item.emoji ?? "🥤"}</div>
+              )}
               <div className="drink-name">{item.name}</div>
               <div className="drink-desc">{item.description}</div>
               <div className="drink-price">{item.price_display}</div>
@@ -847,8 +970,27 @@ export function MenuBoard({
             <span className="footer-sub-head">CONTACT US</span>
             <form
               className="gform_wrapper gform-theme--no-framework footer-contact-form"
-              onSubmit={(e) => {
+              onSubmit={async (e) => {
                 e.preventDefault();
+                if (contactStatus === "sending" || contactStatus === "success") return;
+                setContactStatus("sending");
+                const fd = new FormData(e.currentTarget);
+                try {
+                  const supabase = createClient();
+                  const { error } = await supabase.from("contact_submissions").insert({
+                    name: fd.get("name") as string,
+                    email: fd.get("email") as string,
+                    subject: (fd.get("subject") as string) || null,
+                    phone: (fd.get("phone") as string) || null,
+                    country: (fd.get("country") as string) || null,
+                    message: (fd.get("message") as string) || null,
+                  });
+                  if (error) throw error;
+                  setContactStatus("success");
+                  (e.target as HTMLFormElement).reset();
+                } catch {
+                  setContactStatus("error");
+                }
               }}
             >
               <div className="gform-body">
@@ -882,9 +1024,19 @@ export function MenuBoard({
                   </span>
                 </label>
               </div>
+              {contactStatus === "success" && (
+                <p className="footer-form-success">Thank you! Your message has been sent.</p>
+              )}
+              {contactStatus === "error" && (
+                <p className="footer-form-error">Something went wrong. Please try again.</p>
+              )}
               <div className="gform-footer">
-                <button type="submit" className="footer-send-btn">
-                  SEND
+                <button
+                  type="submit"
+                  className="footer-send-btn"
+                  disabled={contactStatus === "sending" || contactStatus === "success"}
+                >
+                  {contactStatus === "sending" ? "SENDING…" : contactStatus === "success" ? "SENT ✓" : "SEND"}
                 </button>
               </div>
             </form>
