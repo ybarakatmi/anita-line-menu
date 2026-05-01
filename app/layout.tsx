@@ -20,12 +20,21 @@ const sans = Josefin_Sans({
 export const metadata: Metadata = {
   title: "Anita Gelato — Tarzana Menu",
   description: "Browse seasonal flavors, gelato, sorbets, coffee, and more.",
+  appleWebApp: {
+    capable: true,
+    title: "Anita Menu",
+    statusBarStyle: "default",
+  },
+  formatDetection: {
+    telephone: false,
+  },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#5C502D",
+  themeColor: "#faf7f2",
   width: "device-width",
   initialScale: 1,
+  maximumScale: 1,
   viewportFit: "cover",
 };
 

@@ -2,3 +2,25 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Native-ish mobile: no page-level horizontal pan; keyboard users still get focus rings */
+html {
+  overflow-x: clip;
+}
+body {
+  overflow-x: clip;
+}
+@media (max-width: 768px) {
+  button:focus,
+  a:focus,
+  input:focus,
+  textarea:focus,
+  select:focus {
+    outline: none;
+  }
+  button:focus-visible,
+  a:focus-visible {
+    outline: 2px solid rgba(31, 65, 54, 0.35);
+    outline-offset: 2px;
+  }
+}
