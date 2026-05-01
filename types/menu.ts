@@ -22,6 +22,8 @@ export type MenuItemRow = {
   sort_order: number;
   is_active: boolean;
   promo_label: string | null;
+  /** New & Seasonal section only: corner ribbon text; null uses auto Seasonal/Limited from badge. */
+  seasonal_ribbon_label: string | null;
   /** Present when loaded from Supabase */
   created_at?: string;
   updated_at?: string;

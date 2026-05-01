@@ -42,6 +42,7 @@ export function MenuItemForm({
   const [sortOrder, setSortOrder] = useState(initial?.sort_order ?? 0);
   const [imageUrl, setImageUrl] = useState(initial?.image_url ?? "");
   const [promoLabel, setPromoLabel] = useState(initial?.promo_label ?? "");
+  const [seasonalRibbonLabel, setSeasonalRibbonLabel] = useState(initial?.seasonal_ribbon_label ?? "");
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -88,6 +89,10 @@ export function MenuItemForm({
         is_active: isActive,
         sort_order: sortOrder,
         promo_label: promoLabel.trim() ? promoLabel.trim() : null,
+        seasonal_ribbon_label:
+          section === "seasonal" && seasonalRibbonLabel.trim()
+            ? seasonalRibbonLabel.trim().slice(0, 28)
+            : null,
       });
 
       setSuccess("Saved successfully.");
@@ -202,15 +207,31 @@ export function MenuItemForm({
         />
       </label>
       <label className="block text-sm font-medium text-slate-700">
-        Badge (seasonal strip)
+        Badge (internal / filters — not shown on seasonal photo cards)
         <input
           readOnly={readOnly}
           value={badge}
           onChange={(e) => setBadge(e.target.value)}
-          placeholder="New"
+          placeholder="Seasonal, Limited…"
           className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200 read-only:bg-slate-50 read-only:opacity-90"
         />
       </label>
+      {section === "seasonal" && (
+        <label className="block text-sm font-medium text-slate-700">
+          Seasonal corner ribbon
+          <input
+            readOnly={readOnly}
+            value={seasonalRibbonLabel}
+            onChange={(e) => setSeasonalRibbonLabel(e.target.value)}
+            placeholder="Leave blank for auto (Limited if badge mentions limited, else Seasonal)"
+            maxLength={28}
+            className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200 read-only:bg-slate-50 read-only:opacity-90"
+          />
+          <span className="mt-1 block text-xs text-slate-500">
+            Short label on the pink diagonal ribbon (max 28 characters). Clear the field to use automatic Seasonal/Limited from the badge field.
+          </span>
+        </label>
+      )}
       {(section === "seasonal" || section === "gelato" || section === "sorbet") && (
         <label className="block text-sm font-medium text-slate-700">
           Promo line (optional — shown under description on seasonal cards)

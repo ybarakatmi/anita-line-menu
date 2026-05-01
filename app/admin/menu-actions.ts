@@ -65,6 +65,7 @@ export async function saveMenuItemAction(input: {
   is_active: boolean;
   sort_order: number;
   promo_label: string | null;
+  seasonal_ribbon_label: string | null;
 }) {
   const supabase = await requireMenuEditorClient();
   const tags = parseTags(input.tagsRaw);
@@ -84,6 +85,7 @@ export async function saveMenuItemAction(input: {
     is_active: input.is_active,
     sort_order: input.sort_order,
     promo_label: input.promo_label,
+    seasonal_ribbon_label: input.seasonal_ribbon_label,
   };
 
   if (!input.id) {

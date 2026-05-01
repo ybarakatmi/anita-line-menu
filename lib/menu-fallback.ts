@@ -40,13 +40,14 @@ export const FALLBACK_MENU_ITEMS: MenuItemRow[] = [
     emoji: null,
     image_url: null,
     tags: [],
-    badge: "New",
-    is_new: true,
+    badge: "Seasonal",
+    is_new: false,
     is_fave: false,
     is_vegan: false,
     sort_order: 0,
     is_active: true,
     promo_label: null,
+    seasonal_ribbon_label: null,
   },
   {
     id: id("seasonal", 1),
@@ -57,13 +58,14 @@ export const FALLBACK_MENU_ITEMS: MenuItemRow[] = [
     emoji: null,
     image_url: null,
     tags: [],
-    badge: "New",
-    is_new: true,
+    badge: "Seasonal",
+    is_new: false,
     is_fave: false,
     is_vegan: false,
     sort_order: 1,
     is_active: true,
     promo_label: null,
+    seasonal_ribbon_label: null,
   },
   {
     id: id("seasonal", 2),
@@ -74,13 +76,14 @@ export const FALLBACK_MENU_ITEMS: MenuItemRow[] = [
     emoji: null,
     image_url: null,
     tags: [],
-    badge: "Fan Fave",
+    badge: "Seasonal",
     is_new: false,
     is_fave: true,
     is_vegan: false,
     sort_order: 2,
     is_active: true,
     promo_label: null,
+    seasonal_ribbon_label: null,
   },
   {
     id: id("seasonal", 3),
@@ -98,6 +101,7 @@ export const FALLBACK_MENU_ITEMS: MenuItemRow[] = [
     sort_order: 3,
     is_active: true,
     promo_label: null,
+    seasonal_ribbon_label: null,
   },
   {
     id: id("seasonal", 4),
@@ -115,6 +119,7 @@ export const FALLBACK_MENU_ITEMS: MenuItemRow[] = [
     sort_order: 4,
     is_active: true,
     promo_label: null,
+    seasonal_ribbon_label: null,
   },
   ...[
     ["Pistachio", "100% pure Sicilian pistachio paste. No artificial color ever."],
@@ -138,6 +143,7 @@ export const FALLBACK_MENU_ITEMS: MenuItemRow[] = [
     sort_order: i,
     is_active: true,
     promo_label: null,
+    seasonal_ribbon_label: null,
   })),
   ...[
     {
@@ -306,6 +312,7 @@ export const FALLBACK_MENU_ITEMS: MenuItemRow[] = [
     sort_order: i,
     is_active: true,
     promo_label: null,
+    seasonal_ribbon_label: null,
   })),
   ...[
     { n: "VEGAN — Strawberry", d: "Fresh strawberry sorbet. Dairy-free.", new: false },
@@ -357,6 +364,7 @@ export const FALLBACK_MENU_ITEMS: MenuItemRow[] = [
     sort_order: i,
     is_active: true,
     promo_label: null,
+    seasonal_ribbon_label: null,
   })),
   ...[
     ["☕", "Espresso", "Pure Italian single or double shot. Intense, smooth, no bitterness.", "$3.50"],
@@ -383,6 +391,7 @@ export const FALLBACK_MENU_ITEMS: MenuItemRow[] = [
     sort_order: i,
     is_active: true,
     promo_label: null,
+    seasonal_ribbon_label: null,
   })),
   ...[
     ["🫧", "Italian Sparkling Water", "San Pellegrino — the perfect palate cleanser.", "$3.00"],
@@ -405,5 +414,6 @@ export const FALLBACK_MENU_ITEMS: MenuItemRow[] = [
     sort_order: i,
     is_active: true,
     promo_label: null,
+    seasonal_ribbon_label: null,
   })),
 ];

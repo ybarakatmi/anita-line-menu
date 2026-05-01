@@ -589,33 +589,22 @@ export function MenuBoard({
             // Prefer admin-uploaded image; otherwise fall back to the catalog photo
             // matched by flavor name (same logic powering the gelato carousel).
             const seasonalImage = item.image_url ?? getFlavorImageUrl(item);
-            const showNewRibbon = item.is_new;
             const badgeLower = (item.badge ?? "").toLowerCase();
-            const seasonalRibbonLabel = badgeLower.includes("limited") ? "Limited" : "Seasonal";
-            const showPillBadge =
-              item.badge &&
-              !(showNewRibbon && item.badge === "New") &&
-              !(badgeLower.includes("season") || badgeLower.includes("limited"));
-            const cardClass = [
-              "spec-card",
-              item.is_new ? "spec-card--spotlight" : "",
-            ]
-              .filter(Boolean)
-              .join(" ");
+            const autoRibbon = badgeLower.includes("limited") ? "Limited" : "Seasonal";
+            const ribbonOverride = item.seasonal_ribbon_label?.trim();
+            const seasonalRibbonLabel = ribbonOverride
+              ? ribbonOverride.slice(0, 28)
+              : autoRibbon;
+            const ribbonSpanLong = seasonalRibbonLabel.length > 12;
 
             return (
               <div
                 key={item.id}
-                className={cardClass}
+                className="spec-card"
                 style={{ "--seasonal-stagger": String(index) } as CSSProperties}
               >
-                {showNewRibbon && (
-                  <div className="spec-ribbon spec-ribbon--new" aria-hidden="true">
-                    <span>New</span>
-                  </div>
-                )}
                 <div className="spec-ribbon spec-ribbon--seasonal" aria-hidden="true">
-                  <span>{seasonalRibbonLabel}</span>
+                  <span className={ribbonSpanLong ? "spec-ribbon-text--long" : undefined}>{seasonalRibbonLabel}</span>
                 </div>
                 <div className="spec-img">
                   {seasonalImage ? (
@@ -629,13 +618,6 @@ export function MenuBoard({
                     />
                   ) : (
                     <div className="spec-img-emoji">🍦</div>
-                  )}
-                  {showPillBadge && (
-                    <div
-                      className={`spec-badge${item.badge === "New" ? " new spec-badge--pulse" : " limited"}`}
-                    >
-                      {item.badge}
-                    </div>
                   )}
                 </div>
                 <div className="spec-body">
