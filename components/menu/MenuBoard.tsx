@@ -589,19 +589,15 @@ export function MenuBoard({
             // Prefer admin-uploaded image; otherwise fall back to the catalog photo
             // matched by flavor name (same logic powering the gelato carousel).
             const seasonalImage = item.image_url ?? getFlavorImageUrl(item);
-            const isHero = index === 0;
             const showNewRibbon = item.is_new;
             const badgeLower = (item.badge ?? "").toLowerCase();
-            const showSeasonalRibbon =
-              !showNewRibbon && (badgeLower.includes("season") || badgeLower.includes("limited"));
             const seasonalRibbonLabel = badgeLower.includes("limited") ? "Limited" : "Seasonal";
             const showPillBadge =
               item.badge &&
               !(showNewRibbon && item.badge === "New") &&
-              !(showSeasonalRibbon && (badgeLower.includes("season") || badgeLower.includes("limited")));
+              !(badgeLower.includes("season") || badgeLower.includes("limited"));
             const cardClass = [
               "spec-card",
-              isHero ? "spec-card--hero" : "",
               item.is_new ? "spec-card--spotlight" : "",
             ]
               .filter(Boolean)
@@ -618,11 +614,9 @@ export function MenuBoard({
                     <span>New</span>
                   </div>
                 )}
-                {showSeasonalRibbon && (
-                  <div className="spec-ribbon spec-ribbon--seasonal" aria-hidden="true">
-                    <span>{seasonalRibbonLabel}</span>
-                  </div>
-                )}
+                <div className="spec-ribbon spec-ribbon--seasonal" aria-hidden="true">
+                  <span>{seasonalRibbonLabel}</span>
+                </div>
                 <div className="spec-img">
                   {seasonalImage ? (
                     <Image
