@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import type { MenuDataMode, MenuItemRow, MenuSection, SiteSettingsRow } from "@/types/menu";
+import type { CSSProperties } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
@@ -570,7 +571,7 @@ export function MenuBoard({
         </div>
       </div>
 
-      <section className="menu-section fade-in" id="seasonal">
+      <section className="menu-section seasonal-feature fade-in" id="seasonal">
         <div className="sec-head">
           <span className="sec-the">Right Now</span>
           <div className="sec-big">
@@ -579,14 +580,59 @@ export function MenuBoard({
             Seasonal
           </div>
           <div className="sec-tag">✦ &nbsp; {settings.seasonal_tagline ?? "Spring 2026 Arrivals"}</div>
+          <p className="seasonal-eyebrow-sub">
+            Limited batches · Rotating often · Ask what&apos;s scooping today
+          </p>
+        </div>
+        <div className="seasonal-drop-strip" aria-hidden="true">
+          <span className="seasonal-drop-strip-inner">
+            <span className="seasonal-drop-dot" />
+            Fresh on the board
+            <span className="seasonal-drop-sep">✦</span>
+            Made for the season
+            <span className="seasonal-drop-sep">✦</span>
+            While supplies last
+          </span>
         </div>
         <div className="spec-grid">
-          {(bySection.get("seasonal") ?? []).map((item) => {
+          {(bySection.get("seasonal") ?? []).map((item, index) => {
             // Prefer admin-uploaded image; otherwise fall back to the catalog photo
             // matched by flavor name (same logic powering the gelato carousel).
             const seasonalImage = item.image_url ?? getFlavorImageUrl(item);
+            const isHero = index === 0;
+            const showNewRibbon = item.is_new;
+            const badgeLower = (item.badge ?? "").toLowerCase();
+            const showSeasonalRibbon =
+              !showNewRibbon && (badgeLower.includes("season") || badgeLower.includes("limited"));
+            const seasonalRibbonLabel = badgeLower.includes("limited") ? "Limited" : "Seasonal";
+            const showPillBadge =
+              item.badge &&
+              !(showNewRibbon && item.badge === "New") &&
+              !(showSeasonalRibbon && (badgeLower.includes("season") || badgeLower.includes("limited")));
+            const cardClass = [
+              "spec-card",
+              isHero ? "spec-card--hero" : "",
+              item.is_new ? "spec-card--spotlight" : "",
+            ]
+              .filter(Boolean)
+              .join(" ");
+
             return (
-              <div key={item.id} className="spec-card">
+              <div
+                key={item.id}
+                className={cardClass}
+                style={{ "--seasonal-stagger": String(index) } as CSSProperties}
+              >
+                {showNewRibbon && (
+                  <div className="spec-ribbon spec-ribbon--new" aria-hidden="true">
+                    <span>New</span>
+                  </div>
+                )}
+                {showSeasonalRibbon && (
+                  <div className="spec-ribbon spec-ribbon--seasonal" aria-hidden="true">
+                    <span>{seasonalRibbonLabel}</span>
+                  </div>
+                )}
                 <div className="spec-img">
                   {seasonalImage ? (
                     <Image
@@ -600,9 +646,9 @@ export function MenuBoard({
                   ) : (
                     <div className="spec-img-emoji">🍦</div>
                   )}
-                  {item.badge && (
+                  {showPillBadge && (
                     <div
-                      className={`spec-badge${item.badge === "New" ? " new" : " limited"}`}
+                      className={`spec-badge${item.badge === "New" ? " new spec-badge--pulse" : " limited"}`}
                     >
                       {item.badge}
                     </div>
@@ -611,6 +657,9 @@ export function MenuBoard({
                 <div className="spec-body">
                   <div className="spec-name">{item.name}</div>
                   <div className="spec-desc">{item.description}</div>
+                  {item.promo_label?.trim() ? (
+                    <p className="spec-promo">{item.promo_label.trim()}</p>
+                  ) : null}
                 </div>
               </div>
             );
