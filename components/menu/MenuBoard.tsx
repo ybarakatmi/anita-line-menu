@@ -13,13 +13,10 @@ import { Navigation, Pagination } from "swiper/modules";
 import type { Swiper as SwiperType } from "swiper/types";
 
 /**
- * Same-origin MP4s encoded from the same OPEN-001 storefront art as anita-gelato.com
- * (their direct MP4 URLs return 403 when embedded from Vercel). Override in Admin → Settings.
+ * Brand still art (same file as anita-gelato.com hero poster). Their MP4s 403 on Vercel — we show this
+ * crisply until Admin → Settings provides a working hero_video_url / separator_video_url.
  */
-const DEFAULT_HERO_VIDEO_URL = "/videos/hero.mp4";
-const DEFAULT_HERO_POSTER_URL = "/videos/hero-poster.jpg";
-const DEFAULT_SEPARATOR_VIDEO_URL = "/videos/separator.mp4";
-const DEFAULT_SEPARATOR_POSTER_URL = "/videos/separator-poster.jpg";
+const BRAND_HERO_STILL_URL = "https://www.anita-gelato.com/wp-content/uploads/2024/07/OPEN-001.png";
 
 const DEFAULT_HERO_SECONDARY_LABEL = "Visit Tarzana";
 const DEFAULT_HERO_SECONDARY_HREF =
@@ -365,23 +362,27 @@ export function MenuBoard({
     setSettings(initialSettings);
   }, [initialSettings]);
 
-  const heroVideoSrc = settings.hero_video_url?.trim() || DEFAULT_HERO_VIDEO_URL;
-  const heroPosterSrc = settings.hero_video_poster_url?.trim() || DEFAULT_HERO_POSTER_URL;
-  const separatorVideoSrc = settings.separator_video_url?.trim() || DEFAULT_SEPARATOR_VIDEO_URL;
-  const separatorPosterSrc = DEFAULT_SEPARATOR_POSTER_URL;
+  const customHeroVideo = Boolean(settings.hero_video_url?.trim());
+  const customSeparatorVideo = Boolean(settings.separator_video_url?.trim());
+  const heroVideoSrc = settings.hero_video_url?.trim() ?? "";
+  const heroStillSrc = settings.hero_video_poster_url?.trim() || BRAND_HERO_STILL_URL;
+  const separatorVideoSrc = settings.separator_video_url?.trim() ?? "";
+  const separatorStillSrc = BRAND_HERO_STILL_URL;
 
   const heroVideoRef = useRef<HTMLVideoElement>(null);
   const separatorVideoRef = useRef<HTMLVideoElement>(null);
   useEffect(() => {
+    if (!customHeroVideo) return;
     const el = heroVideoRef.current;
     if (!el) return;
     void el.play().catch(() => {});
-  }, [heroVideoSrc]);
+  }, [customHeroVideo, heroVideoSrc]);
   useEffect(() => {
+    if (!customSeparatorVideo) return;
     const el = separatorVideoRef.current;
     if (!el) return;
     void el.play().catch(() => {});
-  }, [separatorVideoSrc]);
+  }, [customSeparatorVideo, separatorVideoSrc]);
   const heroSecondaryLabel = settings.hero_secondary_label?.trim() || DEFAULT_HERO_SECONDARY_LABEL;
   const heroSecondaryHref = settings.hero_secondary_href?.trim() || DEFAULT_HERO_SECONDARY_HREF;
 
@@ -511,19 +512,30 @@ export function MenuBoard({
 
       <section className="hero" id="top">
         <div className="hero-sky">
-          <video
-            ref={heroVideoRef}
-            key={heroVideoSrc}
-            className="hero-video"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            poster={heroPosterSrc}
-          >
-            <source src={heroVideoSrc} type="video/mp4" />
-          </video>
+          {customHeroVideo ? (
+            <video
+              ref={heroVideoRef}
+              key={heroVideoSrc}
+              className="hero-video"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              poster={heroStillSrc}
+            >
+              <source src={heroVideoSrc} type="video/mp4" />
+            </video>
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element -- byte-accurate CDN still (matches anita-gelato.com)
+            <img
+              src={heroStillSrc}
+              alt=""
+              className="hero-video hero-bg-still"
+              decoding="async"
+              fetchPriority="high"
+            />
+          )}
           <div className="hero-overlay" />
         </div>
         <a
@@ -897,21 +909,33 @@ export function MenuBoard({
         </div>
       </section>
 
-      <section className="separator-video-section fade-in" aria-label="Decorative video separator">
-        <video
-          ref={separatorVideoRef}
-          key={separatorVideoSrc}
-          className="separator-video"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          poster={separatorPosterSrc}
-          aria-hidden
-        >
-          <source src={separatorVideoSrc} type="video/mp4" />
-        </video>
+      <section className="separator-video-section fade-in" aria-label="Decorative strip">
+        {customSeparatorVideo ? (
+          <video
+            ref={separatorVideoRef}
+            key={separatorVideoSrc}
+            className="separator-video"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            poster={separatorStillSrc}
+            aria-hidden
+          >
+            <source src={separatorVideoSrc} type="video/mp4" />
+          </video>
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={separatorStillSrc}
+            alt=""
+            className="separator-video separator-strip-still"
+            decoding="async"
+            loading="lazy"
+            aria-hidden
+          />
+        )}
       </section>
 
       <section className="follow-section fade-in" id="follow">

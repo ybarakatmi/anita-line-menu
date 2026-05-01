@@ -107,6 +107,12 @@ body {
   height: 100%;
   object-fit: cover;
 }
+/* Crisp brand still (matches anita-gelato.com poster) until a custom MP4 is set */
+.hero-bg-still {
+  object-fit: cover;
+  object-position: center 38%;
+  image-rendering: auto;
+}
 .hero-overlay {
   position: absolute;
   inset: 0;
@@ -1368,6 +1374,10 @@ body {
   height: 100%;
   object-fit: cover;
   display: block;
+}
+.separator-strip-still {
+  object-fit: cover;
+  object-position: center 62%;
 }
 
 .follow-section {

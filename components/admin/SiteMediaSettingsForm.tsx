@@ -58,13 +58,12 @@ export function SiteMediaSettingsForm({ initial }: Props) {
       className="max-w-2xl space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8"
     >
       <div>
-        <h2 className="text-sm font-semibold text-slate-900">Homepage video &amp; hero</h2>
+        <h2 className="text-sm font-semibold text-slate-900">Homepage hero &amp; strip</h2>
         <p className="mt-2 text-sm leading-relaxed text-slate-600">
-          Videos linked directly from some websites return{" "}
-          <span className="font-medium text-slate-800">403 Forbidden</span> when played from Vercel, so you may only see
-          the poster image. Upload MP4s to{" "}
-          <span className="font-medium text-slate-800">Supabase Storage</span> (public bucket) or another host that
-          allows embedding, then paste the HTTPS URLs here.
+          By default the public menu uses the same sharp storefront still as anita-gelato.com (no blur). When you have
+          original MP4s, upload them to{" "}
+          <span className="font-medium text-slate-800">Supabase Storage</span> and paste the URLs below — then motion
+          replaces the stills.
         </p>
       </div>
 
@@ -105,31 +104,31 @@ export function SiteMediaSettingsForm({ initial }: Props) {
       </label>
 
       <label className="block text-sm font-medium text-slate-700">
-        Hero background video (MP4 URL)
+        Hero background video (optional MP4)
         <input
           value={heroVideoUrl}
           onChange={(e) => setHeroVideoUrl(e.target.value)}
-          placeholder="Leave blank for built-in /videos/hero.mp4 (brand art), or paste your MP4 URL"
+          placeholder="Leave blank for sharp still only; or paste Supabase/public MP4 URL"
           className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 font-mono text-sm text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
         />
       </label>
 
       <label className="block text-sm font-medium text-slate-700">
-        Hero poster image (shown until video plays — optional)
+        Hero still image (optional — overrides default anita-gelato.com art)
         <input
           value={heroPosterUrl}
           onChange={(e) => setHeroPosterUrl(e.target.value)}
-          placeholder="https://…"
+          placeholder="https://… (PNG/JPG; also used as video poster if you add MP4)"
           className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 font-mono text-sm text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
         />
       </label>
 
       <label className="block text-sm font-medium text-slate-700">
-        Separator strip video (MP4 URL)
+        Separator strip video (optional MP4)
         <input
           value={separatorVideoUrl}
           onChange={(e) => setSeparatorVideoUrl(e.target.value)}
-          placeholder="Leave blank for built-in /videos/separator.mp4, or paste your MP4 URL"
+          placeholder="Leave blank for sharp still crop; or paste MP4 URL"
           className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 font-mono text-sm text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
         />
       </label>
