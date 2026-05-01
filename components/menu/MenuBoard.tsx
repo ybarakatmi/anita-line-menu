@@ -15,7 +15,9 @@ import type { Swiper as SwiperType } from "swiper/types";
 /** Original Anita hero assets; MP4 may not play when embedded from some hosts — override in Admin → Settings. */
 const DEFAULT_HERO_VIDEO_URL = "https://www.anita-gelato.com/wp-content/uploads/2024/06/hero.mp4";
 const DEFAULT_HERO_POSTER_URL = "https://www.anita-gelato.com/wp-content/uploads/2024/07/OPEN-001.png";
-const DEFAULT_SEPARATOR_VIDEO_URL = "https://www.anita-gelato.com/wp-content/uploads/2024/06/separator.mp4";
+/** Same-origin — anita-gelato.com MP4 returns 403 when embedded from Vercel. */
+const DEFAULT_SEPARATOR_VIDEO_URL = "/videos/separator.mp4";
+const DEFAULT_SEPARATOR_POSTER_URL = "/videos/separator-poster.jpg";
 
 const DEFAULT_HERO_SECONDARY_LABEL = "Visit Tarzana";
 const DEFAULT_HERO_SECONDARY_HREF =
@@ -364,6 +366,14 @@ export function MenuBoard({
   const heroVideoSrc = settings.hero_video_url?.trim() || DEFAULT_HERO_VIDEO_URL;
   const heroPosterSrc = settings.hero_video_poster_url?.trim() || DEFAULT_HERO_POSTER_URL;
   const separatorVideoSrc = settings.separator_video_url?.trim() || DEFAULT_SEPARATOR_VIDEO_URL;
+  const separatorPosterSrc = DEFAULT_SEPARATOR_POSTER_URL;
+
+  const separatorVideoRef = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const el = separatorVideoRef.current;
+    if (!el) return;
+    void el.play().catch(() => {});
+  }, [separatorVideoSrc]);
   const heroSecondaryLabel = settings.hero_secondary_label?.trim() || DEFAULT_HERO_SECONDARY_LABEL;
   const heroSecondaryHref = settings.hero_secondary_href?.trim() || DEFAULT_HERO_SECONDARY_HREF;
 
@@ -880,13 +890,15 @@ export function MenuBoard({
 
       <section className="separator-video-section fade-in" aria-label="Decorative video separator">
         <video
+          ref={separatorVideoRef}
           key={separatorVideoSrc}
           className="separator-video"
           autoPlay
           muted
           loop
           playsInline
-          preload="none"
+          preload="metadata"
+          poster={separatorPosterSrc}
           aria-hidden
         >
           <source src={separatorVideoSrc} type="video/mp4" />
