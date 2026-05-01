@@ -12,10 +12,10 @@ import "swiper/css/pagination";
 import { Navigation, Pagination } from "swiper/modules";
 import type { Swiper as SwiperType } from "swiper/types";
 
-/** Fallback URLs; MP4 hotlinks may be blocked by the origin CDN when embedded from Vercel — set URLs in Admin → Settings. */
-const DEFAULT_HERO_VIDEO_URL = "https://www.anita-gelato.com/wp-content/uploads/2024/06/hero.mp4";
-const DEFAULT_HERO_POSTER_URL = "https://www.anita-gelato.com/wp-content/uploads/2024/07/OPEN-001.png";
-const DEFAULT_SEPARATOR_VIDEO_URL = "https://www.anita-gelato.com/wp-content/uploads/2024/06/separator.mp4";
+/** Served from /public/videos — avoids CDN blocks on third-party MP4 hotlinks. Override in Admin → Settings if needed. */
+const DEFAULT_HERO_VIDEO_URL = "/videos/hero.mp4";
+const DEFAULT_HERO_POSTER_URL = "/videos/hero-poster.jpg";
+const DEFAULT_SEPARATOR_VIDEO_URL = "/videos/separator.mp4";
 
 const SECTION_ORDER: MenuSection[] = [
   "seasonal",

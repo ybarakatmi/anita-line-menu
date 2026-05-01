@@ -51,11 +51,8 @@ export function SiteMediaSettingsForm({ initial }: Props) {
       <div>
         <h2 className="text-sm font-semibold text-slate-900">Homepage video &amp; hero</h2>
         <p className="mt-2 text-sm leading-relaxed text-slate-600">
-          Videos linked directly from some websites return{" "}
-          <span className="font-medium text-slate-800">403 Forbidden</span> when played from Vercel, so you only see the
-          poster image. Upload MP4s to{" "}
-          <span className="font-medium text-slate-800">Supabase Storage</span> (public bucket) or another host that
-          allows embedding, then paste the HTTPS URLs here.
+          By default the menu ships with MP4s under <span className="font-mono text-xs">/videos/</span> on this site (no
+          third-party blocks). To override, paste full HTTPS URLs (e.g. Supabase Storage public links).
         </p>
       </div>
 
