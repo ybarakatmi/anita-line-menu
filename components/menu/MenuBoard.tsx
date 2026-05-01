@@ -575,35 +575,40 @@ export function MenuBoard({
           <div className="sec-tag">✦ &nbsp; {settings.seasonal_tagline ?? "Spring 2026 Arrivals"}</div>
         </div>
         <div className="spec-grid">
-          {(bySection.get("seasonal") ?? []).map((item) => (
-            <div key={item.id} className="spec-card">
-              <div className="spec-img">
-                {item.image_url ? (
-                  <Image
-                    src={item.image_url}
-                    alt={item.name}
-                    width={380}
-                    height={256}
-                    className="h-full w-full object-cover"
-                    sizes="(max-width: 768px) 52vw, 190px"
-                  />
-                ) : (
-                  <div className="spec-img-emoji">🍦</div>
-                )}
-                {item.badge && (
-                  <div
-                    className={`spec-badge${item.badge === "New" ? " new" : " limited"}`}
-                  >
-                    {item.badge}
-                  </div>
-                )}
+          {(bySection.get("seasonal") ?? []).map((item) => {
+            // Prefer admin-uploaded image; otherwise fall back to the catalog photo
+            // matched by flavor name (same logic powering the gelato carousel).
+            const seasonalImage = item.image_url ?? getFlavorImageUrl(item);
+            return (
+              <div key={item.id} className="spec-card">
+                <div className="spec-img">
+                  {seasonalImage ? (
+                    <Image
+                      src={seasonalImage}
+                      alt={item.name}
+                      width={380}
+                      height={256}
+                      className="h-full w-full object-cover"
+                      sizes="(max-width: 768px) 52vw, 190px"
+                    />
+                  ) : (
+                    <div className="spec-img-emoji">🍦</div>
+                  )}
+                  {item.badge && (
+                    <div
+                      className={`spec-badge${item.badge === "New" ? " new" : " limited"}`}
+                    >
+                      {item.badge}
+                    </div>
+                  )}
+                </div>
+                <div className="spec-body">
+                  <div className="spec-name">{item.name}</div>
+                  <div className="spec-desc">{item.description}</div>
+                </div>
               </div>
-              <div className="spec-body">
-                <div className="spec-name">{item.name}</div>
-                <div className="spec-desc">{item.description}</div>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
