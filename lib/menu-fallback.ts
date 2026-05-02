@@ -376,9 +376,11 @@ export const FALLBACK_MENU_ITEMS: MenuItemRow[] = [
     seasonal_ribbon_label: null,
   })),
   ...[
-    ["🥐", "Butter Croissant", "Flaky layers, baked fresh.", "$4.50"],
+    ["🥐", "Butter Croissant", "Flaky layers, baked fresh each morning.", "$4.50"],
     ["🍫", "Pain au Chocolat", "Classic chocolate-filled viennoiserie.", "$5.00"],
     ["🫐", "Berry Danish", "Seasonal fruit and cream cheese.", "$5.50"],
+    ["🧁", "Cinnamon Morning Bun", "Soft bun with cinnamon swirl and light glaze.", "$5.25"],
+    ["🥖", "Ham & Cheese Croissant", "Savory croissant with ham and Swiss.", "$6.50"],
   ].map(([emoji, name, desc, price], i) => ({
     id: id("pastries", i),
     section: "pastries" as const,
@@ -389,7 +391,7 @@ export const FALLBACK_MENU_ITEMS: MenuItemRow[] = [
     image_url: null,
     tags: [],
     badge: null,
-    is_new: i === 0,
+    is_new: i === 0 || i === 3,
     is_fave: false,
     is_vegan: false,
     sort_order: i,
