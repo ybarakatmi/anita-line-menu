@@ -18,10 +18,10 @@ export const FALLBACK_SITE_SETTINGS: SiteSettingsRow = {
   separator_video_url: null,
   hero_secondary_label: null,
   hero_secondary_href: null,
-  pastry_sec_the: "Fresh each morning",
-  pastry_sec_big_line1: "Pastries",
-  pastry_sec_big_line2: "& More",
-  pastry_sec_tag: "Croissants · Danishes · Daily specials",
+  pastry_sec_the: "Just in",
+  pastry_sec_big_line1: "New",
+  pastry_sec_big_line2: "Products",
+  pastry_sec_tag: "Pastries · Baked goods · Rotating picks",
 };
 
 function gelatoTags(name: string, desc: string): string[] {

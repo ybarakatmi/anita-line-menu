@@ -15,7 +15,7 @@ alter table public.menu_items add constraint menu_items_section_check check (
 );
 
 alter table public.site_settings
-  add column if not exists pastry_sec_the text default 'Fresh each morning',
-  add column if not exists pastry_sec_big_line1 text default 'Pastries',
-  add column if not exists pastry_sec_big_line2 text default '& More',
-  add column if not exists pastry_sec_tag text default 'Croissants · Danishes · Daily specials';
+  add column if not exists pastry_sec_the text default 'Just in',
+  add column if not exists pastry_sec_big_line1 text default 'New',
+  add column if not exists pastry_sec_big_line2 text default 'Products',
+  add column if not exists pastry_sec_tag text default 'Pastries · Baked goods · Rotating picks';

@@ -146,10 +146,10 @@ export function SiteMediaSettingsForm({ initial }: Props) {
       </label>
 
       <div className="border-t border-slate-100 pt-6">
-        <h3 className="text-sm font-semibold text-slate-900">Pastries section (public headings)</h3>
+        <h3 className="text-sm font-semibold text-slate-900">New products section (public headings)</h3>
         <p className="mt-2 text-sm leading-relaxed text-slate-600">
-          Copy appears above the pastry carousel (after Coffee). Add or edit items under{" "}
-          <span className="font-medium text-slate-800">Menu sections → Pastries</span>.
+          Headings above the product carousel (after Coffee). Manage items under{" "}
+          <span className="font-medium text-slate-800">Menu sections → New products</span>.
         </p>
       </div>
 
@@ -158,7 +158,7 @@ export function SiteMediaSettingsForm({ initial }: Props) {
         <input
           value={pastrySecThe}
           onChange={(e) => setPastrySecThe(e.target.value)}
-          placeholder="Fresh each morning"
+          placeholder="Just in"
           className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
         />
       </label>
@@ -168,7 +168,7 @@ export function SiteMediaSettingsForm({ initial }: Props) {
         <input
           value={pastryBig1}
           onChange={(e) => setPastryBig1(e.target.value)}
-          placeholder="Pastries"
+          placeholder="New"
           className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
         />
       </label>
@@ -178,7 +178,7 @@ export function SiteMediaSettingsForm({ initial }: Props) {
         <input
           value={pastryBig2}
           onChange={(e) => setPastryBig2(e.target.value)}
-          placeholder="& More"
+          placeholder="Products"
           className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
         />
       </label>
@@ -188,7 +188,7 @@ export function SiteMediaSettingsForm({ initial }: Props) {
         <input
           value={pastryTag}
           onChange={(e) => setPastryTag(e.target.value)}
-          placeholder="Croissants · Danishes · Daily specials"
+          placeholder="Pastries · Baked goods · Rotating picks"
           className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
         />
       </label>

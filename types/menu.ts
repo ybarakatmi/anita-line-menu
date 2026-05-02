@@ -42,7 +42,7 @@ export type SiteSettingsRow = {
   /** Hero outline button (right): label + link — null uses Tarzana defaults in MenuBoard. */
   hero_secondary_label: string | null;
   hero_secondary_href: string | null;
-  /** Public “Pastries” block headings (after Coffee). */
+  /** Public “New products” carousel headings (after Coffee; DB section id remains `pastries`). */
   pastry_sec_the: string | null;
   pastry_sec_big_line1: string | null;
   pastry_sec_big_line2: string | null;

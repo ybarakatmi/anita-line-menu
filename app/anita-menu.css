@@ -1030,22 +1030,22 @@ body {
   object-fit: cover;
 }
 
-/* Pastries — same card rhythm as coffee, warmer bake-shop backdrop */
-.pastry-section {
-  background: linear-gradient(180deg, #ebe4dc 0%, #e2d8cf 100%);
+/* New products — carousel matches gelato row; accent differs slightly */
+.new-products-section .sec-the {
+  color: #000000;
 }
-.pastry-section .sec-the {
-  color: rgba(61, 53, 32, 0.72);
+.new-products-section .sec-big {
+  color: #c4786a;
 }
-.pastry-section .sec-big {
-  color: #7a4a3a;
+.new-products-section .sec-tag {
+  background: #c4786a;
+  color: #ffffff;
 }
-.pastry-section .sec-tag {
-  background: #7a4a3a;
-  color: #fffaf6;
+.new-products-section .car-dot {
+  background: rgba(196, 120, 106, 0.35);
 }
-.pastry-card-photo {
-  background: #f0e6dc;
+.new-products-section .car-dot.active {
+  background: #c4786a;
 }
 .coffee-card-name {
   font-family: var(--serif);

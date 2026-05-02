@@ -36,7 +36,7 @@ const NAV: { id: string; label: string }[] = [
   { id: "seasonal", label: "New & Seasonal" },
   { id: "bestsellers", label: "Best Sellers" },
   { id: "coffee", label: "Coffee" },
-  { id: "pastries", label: "Pastries" },
+  { id: "pastries", label: "New products" },
   { id: "drinks", label: "Drinks" },
   { id: "gelato", label: "Cream Gelato" },
   { id: "sorbet", label: "Sorbets" },
@@ -352,6 +352,7 @@ export function MenuBoard({
   const [contactStatus, setContactStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
   const bestSellerSwiperRef = useRef<SwiperType | null>(null);
   const gelatoCarousel = useCarouselTrack();
+  const newProductsCarousel = useCarouselTrack();
   const sorbetCarousel = useCarouselTrack();
 
   // After admin saves, Next.js refreshes RSC props but useState keeps the first snapshot.
@@ -451,10 +452,16 @@ export function MenuBoard({
   }, [gelatoItems, gelatoFilter]);
 
   const displayGelatos = gelatoFiltered.length ? gelatoFiltered : gelatoItems;
+  const newProductsItems = bySection.get("pastries") ?? [];
   useEffect(() => {
     gelatoCarousel.trackRef.current?.scrollTo({ left: 0 });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- reset carousel on filter / data change
   }, [gelatoFilter, displayGelatos.map((g) => g.id).join("|")]);
+
+  useEffect(() => {
+    newProductsCarousel.trackRef.current?.scrollTo({ left: 0 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [newProductsItems.map((g) => g.id).join("|")]);
 
   const navTo = (id: string, btn?: HTMLElement | null) => {
     setNavActive(id);
@@ -796,37 +803,30 @@ export function MenuBoard({
         </div>
       </section>
 
-      <section className="coffee-section pastry-section fade-in" id="pastries">
+      <section className="menu-section sage-bg fade-in new-products-section" id="pastries">
         <div className="sec-head">
-          <span className="sec-the">{settings.pastry_sec_the ?? "Fresh each morning"}</span>
+          <span className="sec-the">{settings.pastry_sec_the ?? "Just in"}</span>
           <div className="sec-big">
-            {(settings.pastry_sec_big_line1 ?? "Pastries").trim()}
+            {(settings.pastry_sec_big_line1 ?? "New").trim()}
             <br />
-            {(settings.pastry_sec_big_line2 ?? "& More").trim()}
+            {(settings.pastry_sec_big_line2 ?? "Products").trim()}
           </div>
-          <div className="sec-tag">✦ &nbsp; {settings.pastry_sec_tag ?? "Croissants · Danishes · Daily specials"}</div>
+          <div className="sec-tag">✦ &nbsp; {settings.pastry_sec_tag ?? "Pastries · Baked goods · Rotating picks"}</div>
         </div>
-        <div className="coffee-list">
-          {(bySection.get("pastries") ?? []).map((item) => (
-            <div key={item.id} className="coffee-card">
-              {item.image_url ? (
-                <div className="coffee-card-photo pastry-card-photo">
-                  <Image
-                    src={item.image_url}
-                    alt={item.name}
-                    width={336}
-                    height={280}
-                    className="h-full w-full object-cover object-center"
-                    sizes="(max-width: 768px) 46vw, 168px"
-                  />
-                </div>
-              ) : (
-                <div className="coffee-card-ico">{item.emoji ?? "🥐"}</div>
-              )}
-              <div className="coffee-card-name">{item.name}</div>
-              <div className="coffee-card-desc">{item.description}</div>
-              <div className="coffee-card-price">{item.price_display}</div>
-            </div>
+        <div className="car-track" id="newProductsTrack" ref={newProductsCarousel.trackRef}>
+          {newProductsItems.map((item) => (
+            <FlavorCard key={item.id} item={item} />
+          ))}
+        </div>
+        <div className="car-dots">
+          {Array.from({ length: Math.max(1, Math.ceil(newProductsItems.length / 2)) }).map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              className={`car-dot${newProductsCarousel.page === i ? " active" : ""}`}
+              aria-label={`New products page ${i + 1}`}
+              onClick={() => newProductsCarousel.jump(i)}
+            />
           ))}
         </div>
       </section>
@@ -1165,7 +1165,7 @@ function FlavorCard({ item }: { item: MenuItemRow }) {
             sizes="(max-width: 768px) 46vw, 178px"
           />
         ) : (
-          <div className="flav-emoji">🍦</div>
+          <div className="flav-emoji">{item.emoji ?? "🍦"}</div>
         )}
         {badge && <div className={`flav-badge ${badge}`}>{badgeLabel}</div>}
       </div>

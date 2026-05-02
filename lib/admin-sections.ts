@@ -35,8 +35,8 @@ export const ADMIN_MENU_SECTIONS: AdminSectionMeta[] = [
   },
   {
     id: "pastries",
-    label: "Pastries",
-    description: "Morning pastries and baked specials — appears after Coffee on the public menu.",
+    label: "New products",
+    description: "Pastries and rotating specials — carousel after Coffee; public title is “New products”.",
   },
   {
     id: "drinks",
