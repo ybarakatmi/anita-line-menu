@@ -1016,7 +1016,7 @@ export function MenuBoard({
           </a>
           <a
             className="social-link"
-            href="https://www.tiktok.com/@anita_gelato"
+            href="https://www.tiktok.com/@anitagelatola"
             target="_blank"
             rel="nofollow noreferrer"
             aria-label="TikTok"
