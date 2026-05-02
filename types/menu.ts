@@ -4,6 +4,7 @@ export type MenuSection =
   | "gelato"
   | "sorbet"
   | "coffee"
+  | "pastries"
   | "drinks";
 
 export type MenuItemRow = {
@@ -41,6 +42,11 @@ export type SiteSettingsRow = {
   /** Hero outline button (right): label + link — null uses Tarzana defaults in MenuBoard. */
   hero_secondary_label: string | null;
   hero_secondary_href: string | null;
+  /** Public “Pastries” block headings (after Coffee). */
+  pastry_sec_the: string | null;
+  pastry_sec_big_line1: string | null;
+  pastry_sec_big_line2: string | null;
+  pastry_sec_tag: string | null;
   updated_at?: string | null;
 };
 

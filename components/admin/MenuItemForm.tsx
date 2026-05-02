@@ -197,7 +197,7 @@ export function MenuItemForm({
         />
       </label>
       <label className="block text-sm font-medium text-slate-700">
-        Emoji (coffee / drinks)
+        Emoji (coffee / drinks / pastries)
         <input
           readOnly={readOnly}
           value={emoji}

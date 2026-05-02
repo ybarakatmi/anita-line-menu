@@ -15,6 +15,10 @@ export async function saveSiteMediaSettingsAction(input: {
   hero_video_url: string | null;
   hero_video_poster_url: string | null;
   separator_video_url: string | null;
+  pastry_sec_the: string | null;
+  pastry_sec_big_line1: string | null;
+  pastry_sec_big_line2: string | null;
+  pastry_sec_tag: string | null;
 }) {
   const supabase = await createClient();
   const {
@@ -31,6 +35,10 @@ export async function saveSiteMediaSettingsAction(input: {
       hero_video_url: trimOrNull(input.hero_video_url),
       hero_video_poster_url: trimOrNull(input.hero_video_poster_url),
       separator_video_url: trimOrNull(input.separator_video_url),
+      pastry_sec_the: trimOrNull(input.pastry_sec_the),
+      pastry_sec_big_line1: trimOrNull(input.pastry_sec_big_line1),
+      pastry_sec_big_line2: trimOrNull(input.pastry_sec_big_line2),
+      pastry_sec_tag: trimOrNull(input.pastry_sec_tag),
       updated_at: new Date().toISOString(),
     })
     .eq("id", 1);

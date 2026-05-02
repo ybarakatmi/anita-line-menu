@@ -12,6 +12,7 @@ const SECTION_ORDER: MenuSection[] = [
   "seasonal",
   "bestsellers",
   "coffee",
+  "pastries",
   "drinks",
   "gelato",
   "sorbet",

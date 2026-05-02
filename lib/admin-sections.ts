@@ -34,6 +34,11 @@ export const ADMIN_MENU_SECTIONS: AdminSectionMeta[] = [
     description: "Espresso bar items; emoji displays on the public menu cards.",
   },
   {
+    id: "pastries",
+    label: "Pastries",
+    description: "Morning pastries and baked specials — appears after Coffee on the public menu.",
+  },
+  {
     id: "drinks",
     label: "Drinks",
     description: "Beverages and add-ons in the drinks section.",

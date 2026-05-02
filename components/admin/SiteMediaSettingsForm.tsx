@@ -14,6 +14,10 @@ type Props = {
     | "hero_video_url"
     | "hero_video_poster_url"
     | "separator_video_url"
+    | "pastry_sec_the"
+    | "pastry_sec_big_line1"
+    | "pastry_sec_big_line2"
+    | "pastry_sec_tag"
   >;
 };
 
@@ -25,6 +29,10 @@ export function SiteMediaSettingsForm({ initial }: Props) {
   const [heroVideoUrl, setHeroVideoUrl] = useState(initial.hero_video_url ?? "");
   const [heroPosterUrl, setHeroPosterUrl] = useState(initial.hero_video_poster_url ?? "");
   const [separatorVideoUrl, setSeparatorVideoUrl] = useState(initial.separator_video_url ?? "");
+  const [pastrySecThe, setPastrySecThe] = useState(initial.pastry_sec_the ?? "");
+  const [pastryBig1, setPastryBig1] = useState(initial.pastry_sec_big_line1 ?? "");
+  const [pastryBig2, setPastryBig2] = useState(initial.pastry_sec_big_line2 ?? "");
+  const [pastryTag, setPastryTag] = useState(initial.pastry_sec_tag ?? "");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -42,8 +50,12 @@ export function SiteMediaSettingsForm({ initial }: Props) {
         hero_video_url: heroVideoUrl,
         hero_video_poster_url: heroPosterUrl,
         separator_video_url: separatorVideoUrl,
+        pastry_sec_the: pastrySecThe,
+        pastry_sec_big_line1: pastryBig1,
+        pastry_sec_big_line2: pastryBig2,
+        pastry_sec_tag: pastryTag,
       });
-      setSuccess("Saved. The public menu will use these URLs on the next load.");
+      setSuccess("Saved. The public menu will refresh with these settings.");
       router.refresh();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Save failed.");
@@ -133,6 +145,54 @@ export function SiteMediaSettingsForm({ initial }: Props) {
         />
       </label>
 
+      <div className="border-t border-slate-100 pt-6">
+        <h3 className="text-sm font-semibold text-slate-900">Pastries section (public headings)</h3>
+        <p className="mt-2 text-sm leading-relaxed text-slate-600">
+          Copy appears above the pastry carousel (after Coffee). Add or edit items under{" "}
+          <span className="font-medium text-slate-800">Menu sections → Pastries</span>.
+        </p>
+      </div>
+
+      <label className="block text-sm font-medium text-slate-700">
+        Eyebrow (italic line)
+        <input
+          value={pastrySecThe}
+          onChange={(e) => setPastrySecThe(e.target.value)}
+          placeholder="Fresh each morning"
+          className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+        />
+      </label>
+
+      <label className="block text-sm font-medium text-slate-700">
+        Title — line 1
+        <input
+          value={pastryBig1}
+          onChange={(e) => setPastryBig1(e.target.value)}
+          placeholder="Pastries"
+          className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+        />
+      </label>
+
+      <label className="block text-sm font-medium text-slate-700">
+        Title — line 2
+        <input
+          value={pastryBig2}
+          onChange={(e) => setPastryBig2(e.target.value)}
+          placeholder="& More"
+          className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+        />
+      </label>
+
+      <label className="block text-sm font-medium text-slate-700">
+        Tag pill (after ✦)
+        <input
+          value={pastryTag}
+          onChange={(e) => setPastryTag(e.target.value)}
+          placeholder="Croissants · Danishes · Daily specials"
+          className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+        />
+      </label>
+
       {success && <p className="text-sm text-emerald-800">{success}</p>}
       {error && <p className="text-sm text-red-700">{error}</p>}
 
@@ -141,7 +201,7 @@ export function SiteMediaSettingsForm({ initial }: Props) {
         disabled={loading}
         className="rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
       >
-        {loading ? "Saving…" : "Save media URLs"}
+        {loading ? "Saving…" : "Save settings"}
       </button>
     </form>
   );

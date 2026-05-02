@@ -1029,6 +1029,24 @@ body {
   height: 100%;
   object-fit: cover;
 }
+
+/* Pastries — same card rhythm as coffee, warmer bake-shop backdrop */
+.pastry-section {
+  background: linear-gradient(180deg, #ebe4dc 0%, #e2d8cf 100%);
+}
+.pastry-section .sec-the {
+  color: rgba(61, 53, 32, 0.72);
+}
+.pastry-section .sec-big {
+  color: #7a4a3a;
+}
+.pastry-section .sec-tag {
+  background: #7a4a3a;
+  color: #fffaf6;
+}
+.pastry-card-photo {
+  background: #f0e6dc;
+}
 .coffee-card-name {
   font-family: var(--serif);
   font-size: 17px;

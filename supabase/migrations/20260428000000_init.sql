@@ -27,6 +27,7 @@ create table if not exists public.menu_items (
       'gelato',
       'sorbet',
       'coffee',
+      'pastries',
       'drinks'
     )
   ),

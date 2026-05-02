@@ -50,6 +50,7 @@ export default async function AdminOverviewPage({
     gelato: { total: 0, active: 0 },
     sorbet: { total: 0, active: 0 },
     coffee: { total: 0, active: 0 },
+    pastries: { total: 0, active: 0 },
     drinks: { total: 0, active: 0 },
   };
 

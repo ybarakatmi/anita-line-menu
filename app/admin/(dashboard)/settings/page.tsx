@@ -17,7 +17,7 @@ export default async function AdminSettingsPage() {
   const { data: settingsRow, error: settingsError } = await supabase
     .from("site_settings")
     .select(
-      "hero_eyebrow, hero_secondary_label, hero_secondary_href, hero_video_url, hero_video_poster_url, separator_video_url"
+      "hero_eyebrow, hero_secondary_label, hero_secondary_href, hero_video_url, hero_video_poster_url, separator_video_url, pastry_sec_the, pastry_sec_big_line1, pastry_sec_big_line2, pastry_sec_tag"
     )
     .eq("id", 1)
     .maybeSingle();
@@ -30,6 +30,10 @@ export default async function AdminSettingsPage() {
     | "hero_video_url"
     | "hero_video_poster_url"
     | "separator_video_url"
+    | "pastry_sec_the"
+    | "pastry_sec_big_line1"
+    | "pastry_sec_big_line2"
+    | "pastry_sec_tag"
   > | null;
 
   return (
