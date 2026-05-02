@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
+import { withDefaultNewProductsIfEmpty } from "@/lib/menu-fallback";
 import type { MenuDataMode, MenuItemRow, MenuSection, SiteSettingsRow } from "@/types/menu";
 import type { CSSProperties } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -266,6 +267,10 @@ function sortItems(items: MenuItemRow[]) {
   );
 }
 
+function sortItemsWithNewProductsDefaults(items: MenuItemRow[]) {
+  return sortItems(withDefaultNewProductsIfEmpty(items));
+}
+
 function useFadeSections(deps: unknown) {
   useEffect(() => {
     const els = document.querySelectorAll(".fade-in");
@@ -344,7 +349,7 @@ export function MenuBoard({
   initialSettings: SiteSettingsRow;
   mode: MenuDataMode;
 }) {
-  const [items, setItems] = useState(() => sortItems(initialItems));
+  const [items, setItems] = useState(() => sortItemsWithNewProductsDefaults(initialItems));
   const [settings, setSettings] = useState(initialSettings);
   const [navActive, setNavActive] = useState("seasonal");
   const [gelatoFilter, setGelatoFilter] = useState<GelatoFilter>("all");
@@ -358,7 +363,7 @@ export function MenuBoard({
   // After admin saves, Next.js refreshes RSC props but useState keeps the first snapshot.
   // Re-sync so new images (e.g. coffee uploads) show without a hard reload.
   useEffect(() => {
-    setItems(sortItems(initialItems));
+    setItems(sortItemsWithNewProductsDefaults(initialItems));
   }, [initialItems]);
 
   useEffect(() => {
@@ -402,7 +407,7 @@ export function MenuBoard({
         .eq("is_active", true)
         .order("sort_order", { ascending: true });
       if (error) throw error;
-      if (data?.length) setItems(sortItems(data as MenuItemRow[]));
+      if (data?.length) setItems(sortItemsWithNewProductsDefaults(data as MenuItemRow[]));
     } catch {
       /* keep current */
     }

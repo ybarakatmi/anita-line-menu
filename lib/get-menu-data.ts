@@ -1,5 +1,9 @@
 import type { MenuDataMode, MenuItemRow, MenuSection, SiteSettingsRow } from "@/types/menu";
-import { FALLBACK_MENU_ITEMS, FALLBACK_SITE_SETTINGS } from "@/lib/menu-fallback";
+import {
+  FALLBACK_MENU_ITEMS,
+  FALLBACK_SITE_SETTINGS,
+  withDefaultNewProductsIfEmpty,
+} from "@/lib/menu-fallback";
 import { createClient } from "@/lib/supabase/server";
 
 export type MenuPayload = {
@@ -64,8 +68,9 @@ export async function getMenuData(): Promise<MenuPayload> {
         ? (settingsRes.data as SiteSettingsRow)
         : FALLBACK_SITE_SETTINGS;
 
+    const merged = withDefaultNewProductsIfEmpty(itemsRes.data as MenuItemRow[]);
     return {
-      items: sortMenuItems(itemsRes.data as MenuItemRow[]),
+      items: sortMenuItems(merged),
       settings,
       mode: "live",
     };

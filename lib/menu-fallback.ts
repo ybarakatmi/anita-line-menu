@@ -24,6 +24,38 @@ export const FALLBACK_SITE_SETTINGS: SiteSettingsRow = {
   pastry_sec_tag: "Pastries · Baked goods · Rotating picks",
 };
 
+/** Shown when Supabase has no `pastries` rows yet (until owner adds real items). */
+export const DEFAULT_NEW_PRODUCT_ITEMS: MenuItemRow[] = [
+  ["🥐", "Butter Croissant", "Flaky layers, baked fresh each morning.", "$4.50"],
+  ["🍫", "Pain au Chocolat", "Classic chocolate-filled viennoiserie.", "$5.00"],
+  ["🫐", "Berry Danish", "Seasonal fruit and cream cheese.", "$5.50"],
+  ["🧁", "Cinnamon Morning Bun", "Soft bun with cinnamon swirl and light glaze.", "$5.25"],
+  ["🥖", "Ham & Cheese Croissant", "Savory croissant with ham and Swiss.", "$6.50"],
+].map(([emoji, name, desc, price], i) => ({
+  id: id("pastries", i),
+  section: "pastries" as const,
+  name: name as string,
+  description: desc as string,
+  price_display: price as string,
+  emoji: emoji as string,
+  image_url: null,
+  tags: [],
+  badge: null,
+  is_new: i === 0 || i === 3,
+  is_fave: false,
+  is_vegan: false,
+  sort_order: i,
+  is_active: true,
+  promo_label: null,
+  seasonal_ribbon_label: null,
+}));
+
+/** Append sample New products when DB section is empty (IDs are synthetic — replace via admin). */
+export function withDefaultNewProductsIfEmpty(items: MenuItemRow[]): MenuItemRow[] {
+  if (items.some((r) => r.section === "pastries")) return items;
+  return [...items, ...DEFAULT_NEW_PRODUCT_ITEMS];
+}
+
 function gelatoTags(name: string, desc: string): string[] {
   const t = `${name} ${desc}`.toLowerCase();
   const tags: string[] = [];
@@ -375,30 +407,7 @@ export const FALLBACK_MENU_ITEMS: MenuItemRow[] = [
     promo_label: null,
     seasonal_ribbon_label: null,
   })),
-  ...[
-    ["🥐", "Butter Croissant", "Flaky layers, baked fresh each morning.", "$4.50"],
-    ["🍫", "Pain au Chocolat", "Classic chocolate-filled viennoiserie.", "$5.00"],
-    ["🫐", "Berry Danish", "Seasonal fruit and cream cheese.", "$5.50"],
-    ["🧁", "Cinnamon Morning Bun", "Soft bun with cinnamon swirl and light glaze.", "$5.25"],
-    ["🥖", "Ham & Cheese Croissant", "Savory croissant with ham and Swiss.", "$6.50"],
-  ].map(([emoji, name, desc, price], i) => ({
-    id: id("pastries", i),
-    section: "pastries" as const,
-    name: name as string,
-    description: desc as string,
-    price_display: price as string,
-    emoji: emoji as string,
-    image_url: null,
-    tags: [],
-    badge: null,
-    is_new: i === 0 || i === 3,
-    is_fave: false,
-    is_vegan: false,
-    sort_order: i,
-    is_active: true,
-    promo_label: null,
-    seasonal_ribbon_label: null,
-  })),
+  ...DEFAULT_NEW_PRODUCT_ITEMS,
   ...[
     ["☕", "Espresso", "Pure Italian single or double shot. Intense, smooth, no bitterness.", "$3.50"],
     ["☕", "Cappuccino", "Espresso with perfectly steamed microfoam. The Italian classic.", "$5.00"],
