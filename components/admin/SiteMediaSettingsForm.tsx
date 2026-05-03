@@ -76,7 +76,7 @@ export function SiteMediaSettingsForm({ initial }: Props) {
           <span className="font-medium">menu-images</span>), set the bucket/object to{" "}
           <span className="font-medium">public</span>, then paste the <span className="font-medium">public URL</span>{" "}
           below. The site plays it <span className="font-medium">muted + inline + loop</span> for autoplay on{" "}
-          <span className="font-medium">iOS Safari, Chrome, and Android</span>.           Leave blank to use the official{" "}
+          <span className="font-medium">iOS Safari, Chrome, and Android</span>. Leave blank to use the official{" "}
           <span className="font-medium">anita-gelato.com hero.mp4</span> loop by default (same as the main site). Paste a
           Supabase URL here to override (recommended if the CDN ever blocks your domain).
         </p>
