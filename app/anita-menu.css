@@ -1430,6 +1430,9 @@ body {
   object-position: center center;
   display: block;
 }
+.separator-video-section .separator-video.separator-strip-video {
+  object-position: center 58%;
+}
 .separator-strip-fallback {
   background: linear-gradient(90deg, var(--blush-lt) 0%, var(--cream-dk) 50%, var(--blush-lt) 100%);
 }

@@ -21,16 +21,18 @@ export const HERO_STORAGE_OBJECT_PATH = "hero.mp4";
 export const BUNDLED_HERO_VIDEO_PATH = "/hero.mp4";
 
 /**
- * Hero / separator: DB wins, then env. Hero falls back to bundled `/hero.mp4` so production always has a playable file.
+ * Hero / separator: DB wins, then env, then same bundled `/hero.mp4` (one file; replace in `public/` and redeploy).
  */
 export function mergeSiteMediaFromEnv(settings: SiteSettingsRow): SiteSettingsRow {
   const heroEnv = process.env.NEXT_PUBLIC_HERO_VIDEO_URL?.trim();
   const sepEnv = process.env.NEXT_PUBLIC_SEPARATOR_VIDEO_URL?.trim();
   const rawHero = settings.hero_video_url?.trim() ?? "";
   const dbHero = rawHero && !isBlockedAnitaMp4Hotlink(rawHero) ? rawHero : "";
+  const rawSep = settings.separator_video_url?.trim() ?? "";
+  const dbSep = rawSep && !isBlockedAnitaMp4Hotlink(rawSep) ? rawSep : "";
   return {
     ...settings,
     hero_video_url: dbHero || heroEnv || BUNDLED_HERO_VIDEO_PATH,
-    separator_video_url: settings.separator_video_url?.trim() || sepEnv || null,
+    separator_video_url: dbSep || sepEnv || BUNDLED_HERO_VIDEO_PATH,
   };
 }

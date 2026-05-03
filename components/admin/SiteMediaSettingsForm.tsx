@@ -79,7 +79,9 @@ export function SiteMediaSettingsForm({ initial }: Props) {
           is <span className="font-medium">muted + inline + loop</span> for iOS Safari and Chrome. Do not hotlink{" "}
           <span className="font-medium">anita-gelato.com</span> MP4s — browsers block them on other domains. Optional:{" "}
           <span className="font-mono text-xs">npm run upload-hero -- /path/to/hero.mp4</span> uploads to{" "}
-          <span className="font-medium">menu-images/hero.mp4</span> if you use a Storage URL instead.
+          <span className="font-medium">menu-images/hero.mp4</span> if you use a Storage URL instead. The decorative
+          strip above the footer also defaults to the same <span className="font-medium">/hero.mp4</span> loop unless you
+          set a separate separator URL below.
         </p>
       </div>
 
@@ -147,7 +149,7 @@ export function SiteMediaSettingsForm({ initial }: Props) {
         <input
           value={separatorVideoUrl}
           onChange={(e) => setSeparatorVideoUrl(e.target.value)}
-          placeholder="Leave blank for gradient strip; or paste MP4 URL"
+          placeholder="Leave blank for bundled /hero.mp4; or paste a different MP4 URL"
           className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 font-mono text-sm text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
         />
       </label>

@@ -1018,7 +1018,7 @@ export function MenuBoard({
             videoRef={separatorVideoRef}
             src={separatorVideoSrc}
             poster={separatorPosterSrc}
-            className="separator-video"
+            className="separator-video separator-strip-video"
             preload="metadata"
           />
         ) : (
