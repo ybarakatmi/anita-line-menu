@@ -221,6 +221,11 @@ const FLAVOR_IMAGE_BY_NAME: Record<string, string> = {
   "dark chocolate": "https://www.anita-gelato.com/wp-content/uploads/2024/08/Dark-Chocolate_-683x1024.jpg",
 };
 
+/** Local product shots for New products (pastries) when `image_url` is unset — same-origin, on-brand framing. */
+const PASTRY_IMAGE_BY_NAME: Record<string, string> = {
+  "butter croissant": "/images/pastries/butter-croissant.png",
+};
+
 function normalizeFlavorName(name: string) {
   return name
     .toLowerCase()
@@ -239,6 +244,12 @@ function flavorTokens(value: string) {
 function getFlavorImageUrl(item: MenuItemRow) {
   const explicit = item.image_url?.trim();
   if (explicit) return explicit;
+
+  if (item.section === "pastries") {
+    const pastryKey = normalizeFlavorName(item.name);
+    const pastryImg = PASTRY_IMAGE_BY_NAME[pastryKey];
+    if (pastryImg) return pastryImg;
+  }
 
   const normalized = normalizeFlavorName(item.name);
   const direct = FLAVOR_IMAGE_BY_NAME[normalized];
