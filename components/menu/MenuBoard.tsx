@@ -23,6 +23,50 @@ const DEFAULT_HERO_SECONDARY_LABEL = "Visit Tarzana";
 const DEFAULT_HERO_SECONDARY_HREF =
   "https://www.google.com/maps/search/?api=1&query=Anita+Gelato+Tarzana+CA";
 
+/** Sharp full-bleed still: Next Image when URL is allowed, else plain img (unknown CDNs). */
+function CrispBackgroundStill({
+  src,
+  className,
+  priority,
+}: {
+  src: string;
+  className: string;
+  priority?: boolean;
+}) {
+  const trimmed = src.trim();
+  const useNext =
+    trimmed.startsWith("/") ||
+    trimmed.includes("anita-gelato.com") ||
+    trimmed.includes("supabase.co");
+
+  if (!useNext) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element -- arbitrary admin URL
+      <img
+        src={trimmed}
+        alt=""
+        className={className}
+        decoding="async"
+        fetchPriority={priority ? "high" : "auto"}
+        loading={priority ? "eager" : "lazy"}
+        aria-hidden
+      />
+    );
+  }
+  return (
+    <Image
+      src={trimmed}
+      alt=""
+      fill
+      priority={priority}
+      sizes="430px"
+      quality={100}
+      className={className}
+      aria-hidden
+    />
+  );
+}
+
 const SECTION_ORDER: MenuSection[] = [
   "seasonal",
   "bestsellers",
@@ -547,14 +591,7 @@ export function MenuBoard({
               <source src={heroVideoSrc} type="video/mp4" />
             </video>
           ) : (
-            // eslint-disable-next-line @next/next/no-img-element -- byte-accurate CDN still (matches anita-gelato.com)
-            <img
-              src={heroStillSrc}
-              alt=""
-              className="hero-video hero-bg-still"
-              decoding="async"
-              fetchPriority="high"
-            />
+            <CrispBackgroundStill src={heroStillSrc} className="hero-video hero-bg-still" priority />
           )}
           <div className="hero-overlay" />
         </div>
@@ -1004,15 +1041,7 @@ export function MenuBoard({
             <source src={separatorVideoSrc} type="video/mp4" />
           </video>
         ) : (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={separatorStillSrc}
-            alt=""
-            className="separator-video separator-strip-still"
-            decoding="async"
-            loading="lazy"
-            aria-hidden
-          />
+          <CrispBackgroundStill src={separatorStillSrc} className="separator-video separator-strip-still" />
         )}
       </section>
 

@@ -102,6 +102,14 @@ body {
   overflow: hidden;
   z-index: 0;
 }
+/* Full-bleed hero: video or still */
+.hero-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  display: block;
+}
 .hero-image {
   width: 100%;
   height: 100%;
@@ -113,6 +121,8 @@ body {
   object-fit: cover;
   object-position: center 38%;
   image-rendering: auto;
+  backface-visibility: hidden;
+  transform: translateZ(0);
 }
 .hero-overlay {
   position: absolute;
@@ -1400,23 +1410,24 @@ body {
   border-radius: 4px;
 }
 
-.separator-banner-section {
+.separator-video-section {
   position: relative;
   height: clamp(110px, 24vw, 180px);
   overflow: hidden;
   border-top: 1px solid rgba(237, 224, 204, 0.55);
   border-bottom: 1px solid rgba(237, 224, 204, 0.55);
 }
-.separator-banner-image {
+.separator-video {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center center;
   display: block;
 }
 .separator-strip-still {
   object-fit: cover;
   object-position: center 62%;
+  backface-visibility: hidden;
+  transform: translateZ(0);
 }
 
 .follow-section {

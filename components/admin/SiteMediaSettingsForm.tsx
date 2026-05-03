@@ -72,10 +72,14 @@ export function SiteMediaSettingsForm({ initial }: Props) {
       <div>
         <h2 className="text-sm font-semibold text-slate-900">Homepage hero &amp; strip</h2>
         <p className="mt-2 text-sm leading-relaxed text-slate-600">
-          By default the public menu uses the same sharp storefront still as anita-gelato.com (no blur). When you have
-          original MP4s, upload them to{" "}
-          <span className="font-medium text-slate-800">Supabase Storage</span> and paste the URLs below — then motion
-          replaces the stills.
+          Same layout as the Elementor hero (gift card, scroll, title) — background is a{" "}
+          <span className="font-medium text-slate-800">still</span> by default so it stays sharp on mobile (web video is
+          heavily compressed). For a still that matches <span className="font-medium">one exact frame</span> of{" "}
+          <code className="rounded bg-slate-100 px-1 py-0.5 text-xs">hero.mp4</code>, export that frame from the{" "}
+          <span className="font-medium">master</span> (e.g. 1200–2000px wide PNG/JPEG), upload to Supabase{" "}
+          <span className="font-medium">menu-images</span>, and paste the public URL into{" "}
+          <span className="font-medium">Hero still image</span> — leave <span className="font-medium">Hero MP4</span>{" "}
+          blank. Optional MP4 below replaces the still when you want motion.
         </p>
       </div>
 
@@ -126,13 +130,17 @@ export function SiteMediaSettingsForm({ initial }: Props) {
       </label>
 
       <label className="block text-sm font-medium text-slate-700">
-        Hero still image (optional — overrides default anita-gelato.com art)
+        Hero still image (optional — high-res frame; overrides default OPEN-001 art)
         <input
           value={heroPosterUrl}
           onChange={(e) => setHeroPosterUrl(e.target.value)}
-          placeholder="https://… (PNG/JPG; also used as video poster if you add MP4)"
+          placeholder="https://…xxx.supabase.co/storage/v1/object/public/menu-images/hero.jpg"
           className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 font-mono text-sm text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
         />
+        <span className="mt-1 block text-xs text-slate-500">
+          A poster exported from the same source as the brand video will look as clear as the video frame — the
+          website MP4 alone is too small to freeze into a crisp full-screen image.
+        </span>
       </label>
 
       <label className="block text-sm font-medium text-slate-700">
