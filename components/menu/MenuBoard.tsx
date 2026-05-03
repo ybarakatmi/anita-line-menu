@@ -329,13 +329,15 @@ function sortItemsWithNewProductsDefaults(items: MenuItemRow[]) {
 function useFadeSections(deps: unknown) {
   useEffect(() => {
     const els = document.querySelectorAll(".fade-in");
+    // Use threshold 0: with a high ratio (e.g. 0.12), very tall sections can stay
+    // below the threshold forever (visible area / element height), so they never fade in.
     const obs = new IntersectionObserver(
       (entries) => {
         entries.forEach((e) => {
           if (e.isIntersecting) e.target.classList.add("visible");
         });
       },
-      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+      { threshold: 0, rootMargin: "0px 0px -24px 0px" }
     );
     els.forEach((el) => obs.observe(el));
     return () => obs.disconnect();
