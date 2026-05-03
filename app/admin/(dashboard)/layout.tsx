@@ -29,6 +29,7 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
     coffee: 0,
     pastries: 0,
     drinks: 0,
+    yogurt: 0,
   };
   const totalCounts: Record<MenuSection, number> = {
     seasonal: 0,
@@ -38,6 +39,7 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
     coffee: 0,
     pastries: 0,
     drinks: 0,
+    yogurt: 0,
   };
 
   for (const row of liveRows ?? []) {

@@ -19,6 +19,8 @@ values
   ('pastries', 'Cinnamon Morning Bun', 'Soft bun with cinnamon swirl and light glaze.', '$5.25', '🧁', null, '{}', null, true, false, false, 3, true),
   ('pastries', 'Ham & Cheese Croissant', 'Savory croissant with ham and Swiss.', '$6.50', '🥖', null, '{}', null, false, false, false, 4, true),
   ('drinks', 'Italian Sparkling Water', 'San Pellegrino — the perfect palate cleanser.', '$3.00', '🫧', null, '{}', null, false, false, false, 0, true),
+  ('yogurt', 'Plain Tart', 'Classic tart frozen yogurt — bright, tangy, and refreshing.', 'from $5', null, null, '{}', null, false, false, false, 0, true),
+  ('yogurt', 'Vanilla Soft Serve', 'Creamy Madagascar vanilla soft serve.', 'from $5', null, null, '{}', null, false, false, false, 1, true),
   ('gelato', 'Belgian Chocolate', 'Deep, rich Belgian dark chocolate.', 'from $7', null, null, array['choc']::text[], null, false, false, false, 0, true),
   ('gelato', 'Pavlova & Mixed Berries', 'Meringue cream with a fresh mixed berry compote.', 'from $7', null, null, array['new','fruit']::text[], null, true, false, false, 1, true),
   ('sorbet', 'VEGAN — Strawberry', 'Fresh strawberry sorbet. Dairy-free.', 'from $7', null, null, array['fruit']::text[], null, false, false, true, 0, true);

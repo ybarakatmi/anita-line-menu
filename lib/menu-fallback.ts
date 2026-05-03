@@ -458,4 +458,33 @@ export const FALLBACK_MENU_ITEMS: MenuItemRow[] = [
     promo_label: null,
     seasonal_ribbon_label: null,
   })),
+  ...[
+    {
+      n: "Plain Tart",
+      d: "Classic tart frozen yogurt — bright, tangy, and refreshing.",
+      p: "from $5",
+    },
+    {
+      n: "Vanilla Soft Serve",
+      d: "Creamy Madagascar vanilla soft serve.",
+      p: "from $5",
+    },
+  ].map((row, i) => ({
+    id: id("yogurt", i),
+    section: "yogurt" as const,
+    name: row.n,
+    description: row.d,
+    price_display: row.p,
+    emoji: null,
+    image_url: null,
+    tags: [],
+    badge: null,
+    is_new: false,
+    is_fave: false,
+    is_vegan: false,
+    sort_order: i,
+    is_active: true,
+    promo_label: null,
+    seasonal_ribbon_label: null,
+  })),
 ];

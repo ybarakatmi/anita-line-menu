@@ -52,6 +52,7 @@ export default async function AdminOverviewPage({
     coffee: { total: 0, active: 0 },
     pastries: { total: 0, active: 0 },
     drinks: { total: 0, active: 0 },
+    yogurt: { total: 0, active: 0 },
   };
 
   for (const r of items) {

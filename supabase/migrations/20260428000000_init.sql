@@ -28,7 +28,8 @@ create table if not exists public.menu_items (
       'sorbet',
       'coffee',
       'pastries',
-      'drinks'
+      'drinks',
+      'yogurt'
     )
   ),
   name text not null,

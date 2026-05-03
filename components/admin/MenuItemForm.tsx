@@ -183,26 +183,36 @@ export function MenuItemForm({
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={3}
+          placeholder={
+            section === "yogurt"
+              ? "Tasting notes, toppings, or dairy info — shown under the name on the public menu."
+              : undefined
+          }
           className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200 read-only:bg-slate-50 read-only:opacity-90"
         />
       </label>
       <label className="block text-sm font-medium text-slate-700">
-        Price display
+        {section === "yogurt" ? "Price & size options" : "Price display"}
         <input
           readOnly={readOnly}
           value={priceDisplay}
           onChange={(e) => setPriceDisplay(e.target.value)}
-          placeholder="from $7"
+          placeholder={section === "yogurt" ? "e.g. Small $4 · Medium $5 · Large $6" : "from $7"}
           className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200 read-only:bg-slate-50 read-only:opacity-90"
         />
+        {section === "yogurt" && (
+          <span className="mt-1.5 block text-xs font-normal text-slate-500">
+            One line is fine; guests see this under the flavor name. Use middots or commas between sizes.
+          </span>
+        )}
       </label>
       <label className="block text-sm font-medium text-slate-700">
-        Emoji (coffee / drinks / pastries)
+        Emoji (coffee / drinks / pastries / yogurt)
         <input
           readOnly={readOnly}
           value={emoji}
           onChange={(e) => setEmoji(e.target.value)}
-          placeholder="☕"
+          placeholder={section === "yogurt" ? "🍦" : "☕"}
           className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200 read-only:bg-slate-50 read-only:opacity-90"
         />
       </label>
@@ -245,12 +255,12 @@ export function MenuItemForm({
         </label>
       )}
       <label className="block text-sm font-medium text-slate-700">
-        Tags (gelato filters, comma-separated)
+        {section === "yogurt" ? "Tags (optional, internal notes)" : "Tags (gelato filters, comma-separated)"}
         <input
           readOnly={readOnly}
           value={tagsRaw}
           onChange={(e) => setTagsRaw(e.target.value)}
-          placeholder="new, choc, nut, fruit"
+          placeholder={section === "yogurt" ? "e.g. tart, vegan" : "new, choc, nut, fruit"}
           className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200 read-only:bg-slate-50 read-only:opacity-90"
         />
       </label>

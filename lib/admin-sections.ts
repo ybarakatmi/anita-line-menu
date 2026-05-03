@@ -43,6 +43,11 @@ export const ADMIN_MENU_SECTIONS: AdminSectionMeta[] = [
     label: "Drinks",
     description: "Beverages and add-ons in the drinks section.",
   },
+  {
+    id: "yogurt",
+    label: "Yogurt",
+    description: "Frozen yogurt flavors — photo, copy, price, and size lines on the public menu.",
+  },
 ];
 
 export function isMenuSection(value: string): value is MenuSection {

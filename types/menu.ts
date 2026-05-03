@@ -5,7 +5,8 @@ export type MenuSection =
   | "sorbet"
   | "coffee"
   | "pastries"
-  | "drinks";
+  | "drinks"
+  | "yogurt";
 
 export type MenuItemRow = {
   id: string;

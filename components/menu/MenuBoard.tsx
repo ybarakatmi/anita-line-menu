@@ -29,6 +29,7 @@ const SECTION_ORDER: MenuSection[] = [
   "coffee",
   "pastries",
   "drinks",
+  "yogurt",
   "gelato",
   "sorbet",
 ];
@@ -39,6 +40,7 @@ const NAV: { id: string; label: string }[] = [
   { id: "coffee", label: "Coffee" },
   { id: "pastries", label: "New products" },
   { id: "drinks", label: "Drinks" },
+  { id: "yogurt", label: "Yogurt" },
   { id: "gelato", label: "Cream Gelato" },
   { id: "sorbet", label: "Sorbets" },
 ];
@@ -185,6 +187,9 @@ function flavorTokens(value: string) {
 }
 
 function getFlavorImageUrl(item: MenuItemRow) {
+  const explicit = item.image_url?.trim();
+  if (explicit) return explicit;
+
   const normalized = normalizeFlavorName(item.name);
   const direct = FLAVOR_IMAGE_BY_NAME[normalized];
   if (direct) return direct;
@@ -359,6 +364,7 @@ export function MenuBoard({
   const gelatoCarousel = useCarouselTrack();
   const newProductsCarousel = useCarouselTrack();
   const sorbetCarousel = useCarouselTrack();
+  const yogurtCarousel = useCarouselTrack();
 
   // After admin saves, Next.js refreshes RSC props but useState keeps the first snapshot.
   // Re-sync so new images (e.g. coffee uploads) show without a hard reload.
@@ -867,6 +873,36 @@ export function MenuBoard({
               <div className="drink-desc">{item.description}</div>
               <div className="drink-price">{item.price_display}</div>
             </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="menu-section yogurt-section fade-in" id="yogurt">
+        <div className="sec-head">
+          <span className="sec-the">Swirled Fresh</span>
+          <div className="sec-big">
+            Frozen
+            <br />
+            Yogurt
+          </div>
+          <div className="sec-tag">✦ &nbsp; Tart &amp; soft serve</div>
+        </div>
+        <div className="car-track" id="yogurtTrack" ref={yogurtCarousel.trackRef}>
+          {(bySection.get("yogurt") ?? []).map((item) => (
+            <FlavorCard key={item.id} item={item} />
+          ))}
+        </div>
+        <div className="car-dots">
+          {Array.from({
+            length: Math.max(1, Math.ceil((bySection.get("yogurt") ?? []).length / 2)),
+          }).map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              className={`car-dot${yogurtCarousel.page === i ? " active" : ""}`}
+              aria-label={`Yogurt page ${i + 1}`}
+              onClick={() => yogurtCarousel.jump(i)}
+            />
           ))}
         </div>
       </section>
