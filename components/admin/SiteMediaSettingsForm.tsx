@@ -72,14 +72,14 @@ export function SiteMediaSettingsForm({ initial }: Props) {
       <div>
         <h2 className="text-sm font-semibold text-slate-900">Homepage hero &amp; strip</h2>
         <p className="mt-2 text-sm leading-relaxed text-slate-600">
-          Same layout as the Elementor hero (gift card, scroll, title) — background is a{" "}
-          <span className="font-medium text-slate-800">still</span> by default so it stays sharp on mobile (web video is
-          heavily compressed). For a still that matches <span className="font-medium">one exact frame</span> of{" "}
-          <code className="rounded bg-slate-100 px-1 py-0.5 text-xs">hero.mp4</code>, export that frame from the{" "}
-          <span className="font-medium">master</span> (e.g. 1200–2000px wide PNG/JPEG), upload to Supabase{" "}
-          <span className="font-medium">menu-images</span>, and paste the public URL into{" "}
-          <span className="font-medium">Hero still image</span> — leave <span className="font-medium">Hero MP4</span>{" "}
-          blank. Optional MP4 below replaces the still when you want motion.
+          Upload <span className="font-medium">H.264 MP4</span> (muted track or silent) to Supabase Storage (e.g.{" "}
+          <span className="font-medium">menu-images</span>), set the bucket/object to{" "}
+          <span className="font-medium">public</span>, then paste the <span className="font-medium">public URL</span>{" "}
+          below. The site plays it <span className="font-medium">muted + inline + loop</span> for autoplay on{" "}
+          <span className="font-medium">iOS Safari, Chrome, and Android</span>. Leave blank for a sharp still (
+          <code className="rounded bg-slate-100 px-1 py-0.5 text-xs">/hero-still.avif</code>) or set{" "}
+          <code className="rounded bg-slate-100 px-1 py-0.5 text-xs">NEXT_PUBLIC_HERO_VIDEO_URL</code> in Vercel env for
+          a default without touching the DB.
         </p>
       </div>
 

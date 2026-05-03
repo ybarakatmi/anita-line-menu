@@ -68,6 +68,62 @@ function CrispBackgroundStill({
   );
 }
 
+/**
+ * Muted inline MP4 for iOS Safari + Chrome autoplay policy (playsinline + muted required).
+ */
+function InlineBackgroundVideo({
+  videoRef,
+  src,
+  poster,
+  className,
+  preload,
+}: {
+  videoRef: React.RefObject<HTMLVideoElement | null>;
+  src: string;
+  poster: string;
+  className: string;
+  preload?: "none" | "metadata" | "auto";
+}) {
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el) return;
+    el.setAttribute("playsinline", "");
+    el.setAttribute("webkit-playsinline", "true");
+    el.muted = true;
+    el.defaultMuted = true;
+    const play = () => void el.play().catch(() => {});
+    play();
+    el.addEventListener("loadeddata", play, { once: true });
+    const onVis = () => {
+      if (document.visibilityState === "visible") play();
+    };
+    document.addEventListener("visibilitychange", onVis);
+    return () => {
+      document.removeEventListener("visibilitychange", onVis);
+      el.removeEventListener("loadeddata", play);
+    };
+  }, [src, videoRef]);
+
+  return (
+    <video
+      ref={videoRef}
+      key={src}
+      className={className}
+      autoPlay
+      muted
+      playsInline
+      loop
+      preload={preload ?? "metadata"}
+      poster={poster}
+      disablePictureInPicture
+      controls={false}
+      aria-hidden
+    >
+      <source src={src} type="video/mp4" />
+    </video>
+  );
+}
+
 const SECTION_ORDER: MenuSection[] = [
   "seasonal",
   "bestsellers",
@@ -430,18 +486,6 @@ export function MenuBoard({
 
   const heroVideoRef = useRef<HTMLVideoElement>(null);
   const separatorVideoRef = useRef<HTMLVideoElement>(null);
-  useEffect(() => {
-    if (!customHeroVideo) return;
-    const el = heroVideoRef.current;
-    if (!el) return;
-    void el.play().catch(() => {});
-  }, [customHeroVideo, heroVideoSrc]);
-  useEffect(() => {
-    if (!customSeparatorVideo) return;
-    const el = separatorVideoRef.current;
-    if (!el) return;
-    void el.play().catch(() => {});
-  }, [customSeparatorVideo, separatorVideoSrc]);
   const heroSecondaryLabel = settings.hero_secondary_label?.trim() || DEFAULT_HERO_SECONDARY_LABEL;
   const heroSecondaryHref = settings.hero_secondary_href?.trim() || DEFAULT_HERO_SECONDARY_HREF;
 
@@ -578,19 +622,13 @@ export function MenuBoard({
       <section className="hero" id="top">
         <div className="hero-sky">
           {customHeroVideo ? (
-            <video
-              ref={heroVideoRef}
-              key={heroVideoSrc}
-              className="hero-video"
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="metadata"
+            <InlineBackgroundVideo
+              videoRef={heroVideoRef}
+              src={heroVideoSrc}
               poster={heroStillSrc}
-            >
-              <source src={heroVideoSrc} type="video/mp4" />
-            </video>
+              className="hero-video"
+              preload="auto"
+            />
           ) : (
             <CrispBackgroundStill src={heroStillSrc} className="hero-video hero-bg-still" priority />
           )}
@@ -1027,20 +1065,13 @@ export function MenuBoard({
 
       <section className="separator-video-section fade-in" aria-label="Decorative strip">
         {customSeparatorVideo ? (
-          <video
-            ref={separatorVideoRef}
-            key={separatorVideoSrc}
-            className="separator-video"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            poster={separatorStillSrc}
-            aria-hidden
-          >
-            <source src={separatorVideoSrc} type="video/mp4" />
-          </video>
+            <InlineBackgroundVideo
+              videoRef={separatorVideoRef}
+              src={separatorVideoSrc}
+              poster={separatorStillSrc}
+              className="separator-video"
+              preload="metadata"
+            />
         ) : (
           <CrispBackgroundStill src={separatorStillSrc} className="separator-video separator-strip-still" />
         )}

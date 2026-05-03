@@ -4,6 +4,7 @@ import {
   FALLBACK_SITE_SETTINGS,
   withDefaultNewProductsIfEmpty,
 } from "@/lib/menu-fallback";
+import { mergeSiteMediaFromEnv } from "@/lib/merge-site-media-env";
 import { createClient } from "@/lib/supabase/server";
 
 export type MenuPayload = {
@@ -38,7 +39,7 @@ export async function getMenuData(): Promise<MenuPayload> {
   ) {
     return {
       items: FALLBACK_MENU_ITEMS,
-      settings: FALLBACK_SITE_SETTINGS,
+      settings: mergeSiteMediaFromEnv(FALLBACK_SITE_SETTINGS),
       mode: "fallback",
     };
   }
@@ -59,15 +60,16 @@ export async function getMenuData(): Promise<MenuPayload> {
     if (!itemsRes.data?.length) {
       return {
         items: FALLBACK_MENU_ITEMS,
-        settings: FALLBACK_SITE_SETTINGS,
+        settings: mergeSiteMediaFromEnv(FALLBACK_SITE_SETTINGS),
         mode: "fallback",
       };
     }
 
-    const settings: SiteSettingsRow =
+    const baseSettings: SiteSettingsRow =
       settingsRes.data && !settingsRes.error
         ? (settingsRes.data as SiteSettingsRow)
         : FALLBACK_SITE_SETTINGS;
+    const settings = mergeSiteMediaFromEnv(baseSettings);
 
     const merged = withDefaultNewProductsIfEmpty(itemsRes.data as MenuItemRow[]);
     return {
@@ -78,7 +80,7 @@ export async function getMenuData(): Promise<MenuPayload> {
   } catch {
     return {
       items: FALLBACK_MENU_ITEMS,
-      settings: FALLBACK_SITE_SETTINGS,
+      settings: mergeSiteMediaFromEnv(FALLBACK_SITE_SETTINGS),
       mode: "fallback",
     };
   }
