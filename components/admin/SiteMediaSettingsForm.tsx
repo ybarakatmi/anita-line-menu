@@ -139,7 +139,9 @@ export function SiteMediaSettingsForm({ initial }: Props) {
         />
         <span className="mt-1 block text-xs text-slate-500">
           A poster exported from the same source as the brand video will look as clear as the video frame — the
-          website MP4 alone is too small to freeze into a crisp full-screen image.
+          website MP4 alone is too small to freeze into a crisp full-screen image. Leave this blank to use the
+          bundled <code className="rounded bg-slate-100 px-1 py-0.5 text-xs">/hero-still.avif</code> (same art as
+          OPEN‑001, served from your domain).
         </span>
       </label>
 

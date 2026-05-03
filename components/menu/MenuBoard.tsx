@@ -14,10 +14,11 @@ import { Navigation, Pagination } from "swiper/modules";
 import type { Swiper as SwiperType } from "swiper/types";
 
 /**
- * Brand still art (same file as anita-gelato.com hero poster). Their MP4s 403 on Vercel — we show this
- * crisply until Admin → Settings provides a working hero_video_url / separator_video_url.
+ * Default hero / separator still: bundled frame (same art as anita-gelato.com OPEN-001). Served from
+ * `/public` so it is sharp and never hotlink‑blocked (their hero.mp4 returns 403 off‑domain). Replace
+ * by uploading a higher‑res frame and setting Admin → Settings → Hero still image.
  */
-const BRAND_HERO_STILL_URL = "https://www.anita-gelato.com/wp-content/uploads/2024/07/OPEN-001.png";
+const BRAND_HERO_STILL_URL = "/hero-still.avif";
 
 const DEFAULT_HERO_SECONDARY_LABEL = "Visit Tarzana";
 const DEFAULT_HERO_SECONDARY_HREF =
@@ -425,7 +426,7 @@ export function MenuBoard({
   const heroVideoSrc = settings.hero_video_url?.trim() ?? "";
   const heroStillSrc = settings.hero_video_poster_url?.trim() || BRAND_HERO_STILL_URL;
   const separatorVideoSrc = settings.separator_video_url?.trim() ?? "";
-  const separatorStillSrc = BRAND_HERO_STILL_URL;
+  const separatorStillSrc = heroStillSrc;
 
   const heroVideoRef = useRef<HTMLVideoElement>(null);
   const separatorVideoRef = useRef<HTMLVideoElement>(null);
