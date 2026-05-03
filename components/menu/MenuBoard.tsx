@@ -224,6 +224,7 @@ const FLAVOR_IMAGE_BY_NAME: Record<string, string> = {
 /** Local product shots for New products (pastries) when `image_url` is unset — same-origin, on-brand framing. */
 const PASTRY_IMAGE_BY_NAME: Record<string, string> = {
   "butter croissant": "/images/pastries/butter-croissant.png",
+  "pain au chocolat": "/images/pastries/pain-au-chocolat.png",
 };
 
 function normalizeFlavorName(name: string) {
