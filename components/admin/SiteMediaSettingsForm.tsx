@@ -76,9 +76,11 @@ export function SiteMediaSettingsForm({ initial }: Props) {
           <span className="font-medium">menu-images</span>), set the bucket/object to{" "}
           <span className="font-medium">public</span>, then paste the <span className="font-medium">public URL</span>{" "}
           below. The site plays it <span className="font-medium">muted + inline + loop</span> for autoplay on{" "}
-          <span className="font-medium">iOS Safari, Chrome, and Android</span>. Leave blank to use the official{" "}
-          <span className="font-medium">anita-gelato.com hero.mp4</span> loop by default (same as the main site). Paste a
-          Supabase URL here to override (recommended if the CDN ever blocks your domain).
+          <span className="font-medium">iOS Safari, Chrome, and Android</span>. Leave the hero URL blank to use the
+          conventional public object <span className="font-medium">menu-images/hero.mp4</span> on this project (upload
+          once from your machine: <span className="font-mono text-xs">npm run upload-hero -- /path/to/hero.mp4</span> with{" "}
+          <span className="font-mono text-xs">SUPABASE_SERVICE_ROLE_KEY</span> in <span className="font-mono text-xs">.env.local</span>
+          ). Hotlinking the main-site MP4 does not work on other domains. Paste a full URL here to override.
         </p>
       </div>
 

@@ -15,8 +15,8 @@ import type { Swiper as SwiperType } from "swiper/types";
 
 /**
  * Default hero / separator still: bundled frame (same art as anita-gelato.com OPEN-001). Served from
- * `/public` so it is sharp and never hotlink‑blocked (their hero.mp4 returns 403 off‑domain). Replace
- * by uploading a higher‑res frame and setting Admin → Settings → Hero still image.
+ * `/public` so it is sharp. Hero video should be `menu-images/hero.mp4` on Supabase (see upload script);
+ * hotlinking anita-gelato.com MP4 fails in browsers (CORP / CDN). Replace still via Admin → Settings.
  */
 const BRAND_HERO_STILL_URL = "/hero-still.avif";
 
@@ -77,12 +77,14 @@ function InlineBackgroundVideo({
   poster,
   className,
   preload,
+  onMediaError,
 }: {
   videoRef: React.RefObject<HTMLVideoElement | null>;
   src: string;
   poster: string;
   className: string;
   preload?: "none" | "metadata" | "auto";
+  onMediaError?: () => void;
 }) {
   useEffect(() => {
     const el = videoRef.current;
@@ -118,6 +120,7 @@ function InlineBackgroundVideo({
       disablePictureInPicture
       controls={false}
       aria-hidden
+      onError={() => onMediaError?.()}
     >
       <source src={src} type="video/mp4" />
     </video>
@@ -484,6 +487,11 @@ export function MenuBoard({
   const separatorVideoSrc = settings.separator_video_url?.trim() ?? "";
   const separatorStillSrc = heroStillSrc;
 
+  const [heroVideoFailed, setHeroVideoFailed] = useState(false);
+  useEffect(() => {
+    setHeroVideoFailed(false);
+  }, [heroVideoSrc]);
+
   const heroVideoRef = useRef<HTMLVideoElement>(null);
   const separatorVideoRef = useRef<HTMLVideoElement>(null);
   const heroSecondaryLabel = settings.hero_secondary_label?.trim() || DEFAULT_HERO_SECONDARY_LABEL;
@@ -621,13 +629,14 @@ export function MenuBoard({
 
       <section className="hero" id="top">
         <div className="hero-sky">
-          {customHeroVideo ? (
+          {customHeroVideo && !heroVideoFailed ? (
             <InlineBackgroundVideo
               videoRef={heroVideoRef}
               src={heroVideoSrc}
               poster={heroStillSrc}
               className="hero-video"
               preload="auto"
+              onMediaError={() => setHeroVideoFailed(true)}
             />
           ) : (
             <CrispBackgroundStill src={heroStillSrc} className="hero-video hero-bg-still" priority />
