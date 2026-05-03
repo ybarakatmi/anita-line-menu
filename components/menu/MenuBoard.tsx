@@ -1221,10 +1221,9 @@ function FlavorCard({ item }: { item: MenuItemRow }) {
           <Image
             src={imageUrl}
             alt={item.name}
-            width={360}
-            height={320}
-            className="object-contain"
-            sizes="(max-width: 768px) 46vw, 178px"
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 46vw, 190px"
           />
         ) : (
           <div className="flav-emoji">{item.emoji ?? "🍦"}</div>
