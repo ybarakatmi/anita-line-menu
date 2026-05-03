@@ -227,6 +227,7 @@ const PASTRY_IMAGE_BY_NAME: Record<string, string> = {
   "pain au chocolat": "/images/pastries/pain-au-chocolat.png",
   "berry danish": "/images/pastries/berry-danish.png",
   "cinnamon morning bun": "/images/pastries/cinnamon-morning-bun.png",
+  "ham and cheese croissant": "/images/pastries/ham-cheese-croissant.png",
 };
 
 function normalizeFlavorName(name: string) {
