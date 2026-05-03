@@ -1,30 +1,36 @@
 import type { SiteSettingsRow } from "@/types/menu";
 
-/** Fixed object path in the public `menu-images` bucket (see `scripts/upload-hero-to-supabase.ts`). */
+/** anita-gelato.com MP4s are often CORP-blocked for cross-origin `<video>` — ignore saved hotlinks. */
+function isBlockedAnitaMp4Hotlink(url: string): boolean {
+  try {
+    const u = new URL(url);
+    const host = u.hostname.replace(/^www\./, "");
+    return host === "anita-gelato.com" && /\.mp4(\?|#|$)/i.test(u.pathname + u.search);
+  } catch {
+    return false;
+  }
+}
+
+/** Object path when uploading to Supabase `menu-images` (see `scripts/upload-hero-to-supabase.ts`). */
 export const HERO_STORAGE_OBJECT_PATH = "hero.mp4";
 
 /**
- * Default public URL for the hero loop on this Supabase project (no DB / env needed once the file exists).
- * Storage must allow anonymous read (bucket `menu-images` is public in migrations).
+ * Default hero MP4 served from this app (same origin — avoids CDN CORP blocks on third-party hosts).
+ * Replace `public/hero.mp4` with your loop and redeploy, or set `hero_video_url` in Admin / env.
  */
-export function getDefaultSupabaseHeroVideoUrl(): string | null {
-  const base = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
-  if (!base) return null;
-  return `${base.replace(/\/$/, "")}/storage/v1/object/public/menu-images/${HERO_STORAGE_OBJECT_PATH}`;
-}
+export const BUNDLED_HERO_VIDEO_PATH = "/hero.mp4";
 
 /**
- * Hero / separator video URLs: DB wins, then `NEXT_PUBLIC_HERO_VIDEO_URL`, then the conventional
- * Supabase Storage URL above. Do not hotlink third-party MP4s: many CDNs send `Cross-Origin-Resource-Policy:
- * same-origin`, which blocks playback on other sites (poster still only).
+ * Hero / separator: DB wins, then env. Hero falls back to bundled `/hero.mp4` so production always has a playable file.
  */
 export function mergeSiteMediaFromEnv(settings: SiteSettingsRow): SiteSettingsRow {
   const heroEnv = process.env.NEXT_PUBLIC_HERO_VIDEO_URL?.trim();
   const sepEnv = process.env.NEXT_PUBLIC_SEPARATOR_VIDEO_URL?.trim();
-  const defaultHero = getDefaultSupabaseHeroVideoUrl();
+  const rawHero = settings.hero_video_url?.trim() ?? "";
+  const dbHero = rawHero && !isBlockedAnitaMp4Hotlink(rawHero) ? rawHero : "";
   return {
     ...settings,
-    hero_video_url: settings.hero_video_url?.trim() || heroEnv || defaultHero,
+    hero_video_url: dbHero || heroEnv || BUNDLED_HERO_VIDEO_PATH,
     separator_video_url: settings.separator_video_url?.trim() || sepEnv || null,
   };
 }

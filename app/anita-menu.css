@@ -121,13 +121,9 @@ body {
   object-fit: cover;
   object-position: center center;
 }
-/* Crisp brand still (matches anita-gelato.com poster) until a custom MP4 is set */
-.hero-bg-still {
-  object-fit: cover;
-  object-position: center 38%;
-  image-rendering: auto;
-  backface-visibility: hidden;
-  transform: translateZ(0);
+/* Fallback when no hero video URL (should be rare — default is bundled `/hero.mp4`) */
+.hero-bg-fallback {
+  background: linear-gradient(165deg, #edcec4 0%, var(--cream) 55%, #e8c4c0 100%);
 }
 .hero-overlay {
   position: absolute;
@@ -1434,11 +1430,8 @@ body {
   object-position: center center;
   display: block;
 }
-.separator-strip-still {
-  object-fit: cover;
-  object-position: center 62%;
-  backface-visibility: hidden;
-  transform: translateZ(0);
+.separator-strip-fallback {
+  background: linear-gradient(90deg, var(--blush-lt) 0%, var(--cream-dk) 50%, var(--blush-lt) 100%);
 }
 
 .follow-section {

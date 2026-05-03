@@ -13,60 +13,9 @@ import "swiper/css/pagination";
 import { Navigation, Pagination } from "swiper/modules";
 import type { Swiper as SwiperType } from "swiper/types";
 
-/**
- * Default hero / separator still: bundled frame (same art as anita-gelato.com OPEN-001). Served from
- * `/public` so it is sharp. Hero video should be `menu-images/hero.mp4` on Supabase (see upload script);
- * hotlinking anita-gelato.com MP4 fails in browsers (CORP / CDN). Replace still via Admin → Settings.
- */
-const BRAND_HERO_STILL_URL = "/hero-still.avif";
-
 const DEFAULT_HERO_SECONDARY_LABEL = "Visit Tarzana";
 const DEFAULT_HERO_SECONDARY_HREF =
   "https://www.google.com/maps/search/?api=1&query=Anita+Gelato+Tarzana+CA";
-
-/** Sharp full-bleed still: Next Image when URL is allowed, else plain img (unknown CDNs). */
-function CrispBackgroundStill({
-  src,
-  className,
-  priority,
-}: {
-  src: string;
-  className: string;
-  priority?: boolean;
-}) {
-  const trimmed = src.trim();
-  const useNext =
-    trimmed.startsWith("/") ||
-    trimmed.includes("anita-gelato.com") ||
-    trimmed.includes("supabase.co");
-
-  if (!useNext) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element -- arbitrary admin URL
-      <img
-        src={trimmed}
-        alt=""
-        className={className}
-        decoding="async"
-        fetchPriority={priority ? "high" : "auto"}
-        loading={priority ? "eager" : "lazy"}
-        aria-hidden
-      />
-    );
-  }
-  return (
-    <Image
-      src={trimmed}
-      alt=""
-      fill
-      priority={priority}
-      sizes="430px"
-      quality={100}
-      className={className}
-      aria-hidden
-    />
-  );
-}
 
 /**
  * Muted inline MP4 for iOS Safari + Chrome autoplay policy (playsinline + muted required).
@@ -77,14 +26,12 @@ function InlineBackgroundVideo({
   poster,
   className,
   preload,
-  onMediaError,
 }: {
   videoRef: React.RefObject<HTMLVideoElement | null>;
   src: string;
   poster: string;
   className: string;
   preload?: "none" | "metadata" | "auto";
-  onMediaError?: () => void;
 }) {
   useEffect(() => {
     const el = videoRef.current;
@@ -116,11 +63,10 @@ function InlineBackgroundVideo({
       playsInline
       loop
       preload={preload ?? "metadata"}
-      poster={poster}
+      {...(poster ? { poster } : {})}
       disablePictureInPicture
       controls={false}
       aria-hidden
-      onError={() => onMediaError?.()}
     >
       <source src={src} type="video/mp4" />
     </video>
@@ -483,14 +429,9 @@ export function MenuBoard({
   const customHeroVideo = Boolean(settings.hero_video_url?.trim());
   const customSeparatorVideo = Boolean(settings.separator_video_url?.trim());
   const heroVideoSrc = settings.hero_video_url?.trim() ?? "";
-  const heroStillSrc = settings.hero_video_poster_url?.trim() || BRAND_HERO_STILL_URL;
+  const heroPosterSrc = settings.hero_video_poster_url?.trim() ?? "";
   const separatorVideoSrc = settings.separator_video_url?.trim() ?? "";
-  const separatorStillSrc = heroStillSrc;
-
-  const [heroVideoFailed, setHeroVideoFailed] = useState(false);
-  useEffect(() => {
-    setHeroVideoFailed(false);
-  }, [heroVideoSrc]);
+  const separatorPosterSrc = heroPosterSrc;
 
   const heroVideoRef = useRef<HTMLVideoElement>(null);
   const separatorVideoRef = useRef<HTMLVideoElement>(null);
@@ -629,17 +570,16 @@ export function MenuBoard({
 
       <section className="hero" id="top">
         <div className="hero-sky">
-          {customHeroVideo && !heroVideoFailed ? (
+          {customHeroVideo ? (
             <InlineBackgroundVideo
               videoRef={heroVideoRef}
               src={heroVideoSrc}
-              poster={heroStillSrc}
+              poster={heroPosterSrc}
               className="hero-video"
               preload="auto"
-              onMediaError={() => setHeroVideoFailed(true)}
             />
           ) : (
-            <CrispBackgroundStill src={heroStillSrc} className="hero-video hero-bg-still" priority />
+            <div className="hero-video hero-bg-fallback" aria-hidden />
           )}
           <div className="hero-overlay" />
         </div>
@@ -1074,15 +1014,15 @@ export function MenuBoard({
 
       <section className="separator-video-section fade-in" aria-label="Decorative strip">
         {customSeparatorVideo ? (
-            <InlineBackgroundVideo
-              videoRef={separatorVideoRef}
-              src={separatorVideoSrc}
-              poster={separatorStillSrc}
-              className="separator-video"
-              preload="metadata"
-            />
+          <InlineBackgroundVideo
+            videoRef={separatorVideoRef}
+            src={separatorVideoSrc}
+            poster={separatorPosterSrc}
+            className="separator-video"
+            preload="metadata"
+          />
         ) : (
-          <CrispBackgroundStill src={separatorStillSrc} className="separator-video separator-strip-still" />
+          <div className="separator-video separator-strip-fallback" aria-hidden />
         )}
       </section>
 

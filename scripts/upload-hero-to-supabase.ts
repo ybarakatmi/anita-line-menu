@@ -3,8 +3,7 @@
  *   bucket: menu-images
  *   path:   hero.mp4
  *
- * The public menu loads that URL automatically when DB hero_video_url is empty
- * (see lib/merge-site-media-env.ts).
+ * Paste the resulting public URL in Admin → Settings if you want Storage to override bundled `/hero.mp4`.
  *
  * Usage:
  *   1. Download hero.mp4 from anita-gelato.com in a browser (Save As) — server-side curl is often blocked.
