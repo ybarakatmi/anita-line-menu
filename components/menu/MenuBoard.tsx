@@ -230,6 +230,12 @@ const PASTRY_IMAGE_BY_NAME: Record<string, string> = {
   "ham and cheese croissant": "/images/pastries/ham-cheese-croissant.png",
 };
 
+/** Anita-style yogurt photos (local) when `image_url` is unset — from brand Instagram references. */
+const YOGURT_IMAGE_BY_NAME: Record<string, string> = {
+  "plain tart": "/images/yogurt/plain-tart.png",
+  "vanilla soft serve": "/images/yogurt/vanilla-soft-serve.png",
+};
+
 function normalizeFlavorName(name: string) {
   return name
     .toLowerCase()
@@ -253,6 +259,12 @@ function getFlavorImageUrl(item: MenuItemRow) {
     const pastryKey = normalizeFlavorName(item.name);
     const pastryImg = PASTRY_IMAGE_BY_NAME[pastryKey];
     if (pastryImg) return pastryImg;
+  }
+
+  if (item.section === "yogurt") {
+    const yogurtKey = normalizeFlavorName(item.name);
+    const yogurtImg = YOGURT_IMAGE_BY_NAME[yogurtKey];
+    if (yogurtImg) return yogurtImg;
   }
 
   const normalized = normalizeFlavorName(item.name);
