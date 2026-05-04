@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
-import { withDefaultNewProductsIfEmpty } from "@/lib/menu-fallback";
+import { withMenuSectionDefaults } from "@/lib/menu-fallback";
 import type { MenuDataMode, MenuItemRow, MenuSection, SiteSettingsRow } from "@/types/menu";
 import type { CSSProperties } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -350,7 +350,7 @@ function sortItems(items: MenuItemRow[]) {
 }
 
 function sortItemsWithNewProductsDefaults(items: MenuItemRow[]) {
-  return sortItems(withDefaultNewProductsIfEmpty(items));
+  return sortItems(withMenuSectionDefaults(items));
 }
 
 function useFadeSections(deps: unknown) {

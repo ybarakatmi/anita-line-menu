@@ -2,7 +2,7 @@ import type { MenuDataMode, MenuItemRow, MenuSection, SiteSettingsRow } from "@/
 import {
   FALLBACK_MENU_ITEMS,
   FALLBACK_SITE_SETTINGS,
-  withDefaultNewProductsIfEmpty,
+  withMenuSectionDefaults,
 } from "@/lib/menu-fallback";
 import { mergeSiteMediaFromEnv } from "@/lib/merge-site-media-env";
 import { createClient } from "@/lib/supabase/server";
@@ -71,7 +71,7 @@ export async function getMenuData(): Promise<MenuPayload> {
         : FALLBACK_SITE_SETTINGS;
     const settings = mergeSiteMediaFromEnv(baseSettings);
 
-    const merged = withDefaultNewProductsIfEmpty(itemsRes.data as MenuItemRow[]);
+    const merged = withMenuSectionDefaults(itemsRes.data as MenuItemRow[]);
     return {
       items: sortMenuItems(merged),
       settings,

@@ -56,6 +56,56 @@ export function withDefaultNewProductsIfEmpty(items: MenuItemRow[]): MenuItemRow
   return [...items, ...DEFAULT_NEW_PRODUCT_ITEMS];
 }
 
+/** Default frozen yogurt rows when Supabase has no `yogurt` section yet (matches seed.sql). */
+export const DEFAULT_YOGURT_ITEMS: MenuItemRow[] = [
+  {
+    id: id("yogurt", 0),
+    section: "yogurt" as const,
+    name: "Plain Tart",
+    description: "Classic tart frozen yogurt — bright, tangy, and refreshing.",
+    price_display: "from $5",
+    emoji: null,
+    image_url: null,
+    tags: [],
+    badge: null,
+    is_new: false,
+    is_fave: false,
+    is_vegan: false,
+    sort_order: 0,
+    is_active: true,
+    promo_label: null,
+    seasonal_ribbon_label: null,
+  },
+  {
+    id: id("yogurt", 1),
+    section: "yogurt" as const,
+    name: "Vanilla Soft Serve",
+    description: "Creamy Madagascar vanilla soft serve.",
+    price_display: "from $5",
+    emoji: null,
+    image_url: null,
+    tags: [],
+    badge: null,
+    is_new: false,
+    is_fave: false,
+    is_vegan: false,
+    sort_order: 1,
+    is_active: true,
+    promo_label: null,
+    seasonal_ribbon_label: null,
+  },
+];
+
+export function withDefaultYogurtIfEmpty(items: MenuItemRow[]): MenuItemRow[] {
+  if (items.some((r) => r.section === "yogurt")) return items;
+  return [...items, ...DEFAULT_YOGURT_ITEMS];
+}
+
+/** Pastries + yogurt starter rows when those sections have no DB rows yet. */
+export function withMenuSectionDefaults(items: MenuItemRow[]): MenuItemRow[] {
+  return withDefaultYogurtIfEmpty(withDefaultNewProductsIfEmpty(items));
+}
+
 function gelatoTags(name: string, desc: string): string[] {
   const t = `${name} ${desc}`.toLowerCase();
   const tags: string[] = [];
@@ -458,33 +508,5 @@ export const FALLBACK_MENU_ITEMS: MenuItemRow[] = [
     promo_label: null,
     seasonal_ribbon_label: null,
   })),
-  ...[
-    {
-      n: "Plain Tart",
-      d: "Classic tart frozen yogurt — bright, tangy, and refreshing.",
-      p: "from $5",
-    },
-    {
-      n: "Vanilla Soft Serve",
-      d: "Creamy Madagascar vanilla soft serve.",
-      p: "from $5",
-    },
-  ].map((row, i) => ({
-    id: id("yogurt", i),
-    section: "yogurt" as const,
-    name: row.n,
-    description: row.d,
-    price_display: row.p,
-    emoji: null,
-    image_url: null,
-    tags: [],
-    badge: null,
-    is_new: false,
-    is_fave: false,
-    is_vegan: false,
-    sort_order: i,
-    is_active: true,
-    promo_label: null,
-    seasonal_ribbon_label: null,
-  })),
+  ...DEFAULT_YOGURT_ITEMS,
 ];
