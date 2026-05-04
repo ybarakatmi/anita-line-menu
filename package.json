@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "upload-hero": "tsx scripts/upload-hero-to-supabase.ts"
+    "upload-hero": "tsx scripts/upload-hero-to-supabase.ts",
+    "seed-yogurt": "tsx scripts/seed-yogurt-to-supabase.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.2",
