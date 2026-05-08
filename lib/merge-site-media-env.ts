@@ -26,13 +26,17 @@ export const BUNDLED_HERO_VIDEO_PATH = "/hero.mp4";
 export function mergeSiteMediaFromEnv(settings: SiteSettingsRow): SiteSettingsRow {
   const heroEnv = process.env.NEXT_PUBLIC_HERO_VIDEO_URL?.trim();
   const sepEnv = process.env.NEXT_PUBLIC_SEPARATOR_VIDEO_URL?.trim();
+  const posterEnv = process.env.NEXT_PUBLIC_HERO_VIDEO_POSTER_URL?.trim();
   const rawHero = settings.hero_video_url?.trim() ?? "";
   const dbHero = rawHero && !isBlockedAnitaMp4Hotlink(rawHero) ? rawHero : "";
   const rawSep = settings.separator_video_url?.trim() ?? "";
   const dbSep = rawSep && !isBlockedAnitaMp4Hotlink(rawSep) ? rawSep : "";
+  const rawPoster = settings.hero_video_poster_url?.trim() ?? "";
+  const dbPoster = rawPoster || "";
   return {
     ...settings,
     hero_video_url: dbHero || heroEnv || BUNDLED_HERO_VIDEO_PATH,
+    hero_video_poster_url: posterEnv || dbPoster || null,
     separator_video_url: dbSep || sepEnv || BUNDLED_HERO_VIDEO_PATH,
   };
 }

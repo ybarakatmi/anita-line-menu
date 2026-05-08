@@ -3,7 +3,7 @@
 import { fetchConsoleAccess } from "@/lib/console-access";
 import { createClient } from "@/lib/supabase/server";
 import { isMenuSection, adminSectionHref } from "@/lib/admin-sections";
-import type { MenuItemRow, MenuSection } from "@/types/menu";
+import type { MenuItemRow, MenuPriceTier, MenuSection } from "@/types/menu";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -66,6 +66,8 @@ export async function saveMenuItemAction(input: {
   sort_order: number;
   promo_label: string | null;
   seasonal_ribbon_label: string | null;
+  /** Null = public menu uses automatic tiers for this section. */
+  price_tiers: MenuPriceTier[] | null;
 }) {
   const supabase = await requireMenuEditorClient();
   const tags = parseTags(input.tagsRaw);
@@ -86,6 +88,7 @@ export async function saveMenuItemAction(input: {
     sort_order: input.sort_order,
     promo_label: input.promo_label,
     seasonal_ribbon_label: input.seasonal_ribbon_label,
+    price_tiers: input.price_tiers,
   };
 
   if (!input.id) {

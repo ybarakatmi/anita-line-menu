@@ -8,6 +8,13 @@ export type MenuSection =
   | "drinks"
   | "yogurt";
 
+/** One row in the public “tap for details” pricing list (stored as JSON on `menu_items.price_tiers`). */
+export type MenuPriceTier = {
+  label: string;
+  price: string;
+  hint?: string;
+};
+
 export type MenuItemRow = {
   id: string;
   section: MenuSection;
@@ -26,6 +33,11 @@ export type MenuItemRow = {
   promo_label: string | null;
   /** New & Seasonal section only: corner ribbon text; null uses auto Seasonal/Limited from badge. */
   seasonal_ribbon_label: string | null;
+  /**
+   * Custom pricing tiers for the detail sheet. Null/omitted = app uses section defaults.
+   * Supabase column `price_tiers` (jsonb).
+   */
+  price_tiers?: MenuPriceTier[] | null;
   /** Present when loaded from Supabase */
   created_at?: string;
   updated_at?: string;

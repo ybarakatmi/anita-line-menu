@@ -2,7 +2,14 @@
 
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
+import {
+  CANONICAL_FLAVOR_SLUGS,
+  FLAVOR_IMAGE_SECTIONS,
+  flavorImagePublicPath,
+  flavorImageSlug,
+} from "@/lib/flavor-image";
 import { withMenuSectionDefaults } from "@/lib/menu-fallback";
+import { MenuItemDetailSheet } from "@/components/menu/MenuItemDetailSheet";
 import type { MenuDataMode, MenuItemRow, MenuSection, SiteSettingsRow } from "@/types/menu";
 import type { CSSProperties } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -29,24 +36,30 @@ function InlineBackgroundVideo({
 }: {
   videoRef: React.RefObject<HTMLVideoElement | null>;
   src: string;
-  poster: string;
   className: string;
+  poster?: string | null;
   preload?: "none" | "metadata" | "auto";
 }) {
+  const posterUrl = poster?.trim() || "";
+
   useEffect(() => {
     const el = videoRef.current;
     if (!el) return;
+
     el.setAttribute("playsinline", "");
     el.setAttribute("webkit-playsinline", "true");
     el.muted = true;
     el.defaultMuted = true;
+
     const play = () => void el.play().catch(() => {});
     play();
     el.addEventListener("loadeddata", play, { once: true });
+
     const onVis = () => {
       if (document.visibilityState === "visible") play();
     };
     document.addEventListener("visibilitychange", onVis);
+
     return () => {
       document.removeEventListener("visibilitychange", onVis);
       el.removeEventListener("loadeddata", play);
@@ -63,7 +76,7 @@ function InlineBackgroundVideo({
       playsInline
       loop
       preload={preload ?? "metadata"}
-      {...(poster ? { poster } : {})}
+      {...(posterUrl ? { poster: posterUrl } : {})}
       disablePictureInPicture
       controls={false}
       aria-hidden
@@ -164,6 +177,8 @@ const FLAVOR_IMAGE_BY_NAME: Record<string, string> = {
     "https://www.anita-gelato.com/wp-content/uploads/2024/09/Chocolate-and-Hazelnut-683x1024.jpg",
   "chocolate hazelnut":
     "https://www.anita-gelato.com/wp-content/uploads/2024/09/Chocolate-and-Hazelnut-683x1024.jpg",
+  "chocolate and hazelnut":
+    "https://www.anita-gelato.com/wp-content/uploads/2024/09/Chocolate-and-Hazelnut-683x1024.jpg",
   "macadamia cream":
     "https://www.anita-gelato.com/wp-content/uploads/2024/09/Macadamia-and-Cream-683x1024.jpg",
   "chocolate caramel and almonds":
@@ -218,6 +233,8 @@ const FLAVOR_IMAGE_BY_NAME: Record<string, string> = {
   limoncello: "https://www.anita-gelato.com/wp-content/uploads/2024/08/Limoncello-Fresh-Mint-683x1024.jpg",
   "watermelon fresh mint":
     "https://www.anita-gelato.com/wp-content/uploads/2024/08/Watermelon-Fresh-Mint-683x1024.jpg",
+  "watermelon and fresh mint":
+    "https://www.anita-gelato.com/wp-content/uploads/2024/08/Watermelon-Fresh-Mint-683x1024.jpg",
   "dark chocolate": "https://www.anita-gelato.com/wp-content/uploads/2024/08/Dark-Chocolate_-683x1024.jpg",
 };
 
@@ -239,6 +256,8 @@ const YOGURT_IMAGE_BY_NAME: Record<string, string> = {
 function normalizeFlavorName(name: string) {
   return name
     .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
     .replace(/&/g, " and ")
     .replace(/[^a-z0-9\s]/g, " ")
     .replace(/\s+/g, " ")
@@ -254,6 +273,13 @@ function flavorTokens(value: string) {
 function getFlavorImageUrl(item: MenuItemRow) {
   const explicit = item.image_url?.trim();
   if (explicit) return explicit;
+
+  if (
+    (FLAVOR_IMAGE_SECTIONS as readonly string[]).includes(item.section) &&
+    CANONICAL_FLAVOR_SLUGS.has(flavorImageSlug(item.name))
+  ) {
+    return flavorImagePublicPath(item.name);
+  }
 
   if (item.section === "pastries") {
     const pastryKey = normalizeFlavorName(item.name);
@@ -387,6 +413,44 @@ function useStickyOffset() {
 
 type GelatoFilter = "all" | "new" | "choc" | "nut" | "fruit";
 
+function loosenMenuName(s: string) {
+  return s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+function resolveShowcaseMenuItem(
+  items: MenuItemRow[],
+  showcase: (typeof BEST_SELLER_SHOWCASE)[number]
+): MenuItemRow {
+  const key = loosenMenuName(showcase.name);
+  const exact = items.find((r) => loosenMenuName(r.name) === key);
+  if (exact) return exact;
+  const partial = items.find((r) => {
+    const n = loosenMenuName(r.name);
+    return n.includes(key) || key.includes(n);
+  });
+  if (partial) return partial;
+  const words = showcase.name.split(/\s+/).filter(Boolean);
+  const title = words.map((w) => w.charAt(0) + w.slice(1).toLowerCase()).join(" ");
+  return {
+    id: `showcase-${showcase.name}`,
+    section: "bestsellers",
+    name: title,
+    description: showcase.description,
+    price_display: "from $7",
+    emoji: null,
+    image_url: showcase.image,
+    tags: [],
+    badge: null,
+    is_new: false,
+    is_fave: true,
+    is_vegan: /\bvegan\b/i.test(showcase.name),
+    sort_order: 0,
+    is_active: true,
+    promo_label: null,
+    seasonal_ribbon_label: null,
+  };
+}
+
 function useCarouselTrack() {
   const trackRef = useRef<HTMLDivElement>(null);
   const [page, setPage] = useState(0);
@@ -436,6 +500,7 @@ export function MenuBoard({
   const [navActive, setNavActive] = useState("seasonal");
   const [gelatoFilter, setGelatoFilter] = useState<GelatoFilter>("all");
   const [activeBestSeller, setActiveBestSeller] = useState(0);
+  const [detailItem, setDetailItem] = useState<MenuItemRow | null>(null);
   const [contactStatus, setContactStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
   const bestSellerSwiperRef = useRef<SwiperType | null>(null);
   const gelatoCarousel = useCarouselTrack();
@@ -506,6 +571,10 @@ export function MenuBoard({
       void supabase.removeChannel(channel);
     };
   }, [mode, reload]);
+
+  const openItemDetail = useCallback((item: MenuItemRow) => {
+    setDetailItem(item);
+  }, []);
 
   const bySection = useMemo(() => {
     const m = new Map<MenuSection, MenuItemRow[]>();
@@ -721,10 +790,12 @@ export function MenuBoard({
             const ribbonSpanLong = seasonalRibbonLabel.length > 12;
 
             return (
-              <div
+              <button
                 key={item.id}
-                className="spec-card"
+                type="button"
+                className="spec-card spec-card--btn"
                 style={{ "--seasonal-stagger": String(index) } as CSSProperties}
+                onClick={() => openItemDetail(item)}
               >
                 <div className="spec-ribbon spec-ribbon--seasonal" aria-hidden="true">
                   <span className={ribbonSpanLong ? "spec-ribbon-text--long" : undefined}>{seasonalRibbonLabel}</span>
@@ -733,7 +804,7 @@ export function MenuBoard({
                   {seasonalImage ? (
                     <Image
                       src={seasonalImage}
-                      alt={item.name}
+                      alt=""
                       width={380}
                       height={256}
                       className="h-full w-full object-cover"
@@ -749,8 +820,9 @@ export function MenuBoard({
                   {item.promo_label?.trim() ? (
                     <p className="spec-promo">{item.promo_label.trim()}</p>
                   ) : null}
+                  <span className="spec-tap-hint">Sizes &amp; pricing · tap</span>
                 </div>
-              </div>
+              </button>
             );
           })}
         </div>
@@ -792,7 +864,10 @@ export function MenuBoard({
             <SwiperSlide
               key={item.name}
               className="bestseller-slide"
-              onClick={() => bestSellerSwiperRef.current?.slideTo(idx)}
+              onClick={() => {
+                bestSellerSwiperRef.current?.slideTo(idx);
+                openItemDetail(resolveShowcaseMenuItem(items, BEST_SELLER_SHOWCASE[idx]));
+              }}
             >
               <div className="bestseller-scoop-wrap">
                 <Image
@@ -810,6 +885,16 @@ export function MenuBoard({
         <div className="bestseller-focus">
           <h3 className="bestseller-focus-name">{BEST_SELLER_SHOWCASE[activeBestSeller]?.name}</h3>
           <p className="bestseller-focus-desc">{BEST_SELLER_SHOWCASE[activeBestSeller]?.description}</p>
+          <button
+            type="button"
+            className="bestseller-detail-btn"
+            onClick={() => {
+              const sc = BEST_SELLER_SHOWCASE[activeBestSeller];
+              if (sc) openItemDetail(resolveShowcaseMenuItem(items, sc));
+            }}
+          >
+            Sizes &amp; pricing
+          </button>
           <a
             className="bestseller-focus-btn"
             href="https://www.anita-gelato.com/flavors/"
@@ -843,12 +928,17 @@ export function MenuBoard({
         </div>
         <div className="coffee-list">
           {(bySection.get("coffee") ?? []).map((item) => (
-            <div key={item.id} className="coffee-card">
+            <button
+              key={item.id}
+              type="button"
+              className="coffee-card coffee-card--btn"
+              onClick={() => openItemDetail(item)}
+            >
               {item.image_url ? (
                 <div className="coffee-card-photo">
                   <Image
                     src={item.image_url}
-                    alt={item.name}
+                    alt=""
                     width={336}
                     height={280}
                     className="h-full w-full object-cover object-center"
@@ -861,7 +951,7 @@ export function MenuBoard({
               <div className="coffee-card-name">{item.name}</div>
               <div className="coffee-card-desc">{item.description}</div>
               <div className="coffee-card-price">{item.price_display}</div>
-            </div>
+            </button>
           ))}
         </div>
       </section>
@@ -878,7 +968,7 @@ export function MenuBoard({
         </div>
         <div className="car-track" id="newProductsTrack" ref={newProductsCarousel.trackRef}>
           {newProductsItems.map((item) => (
-            <FlavorCard key={item.id} item={item} />
+            <FlavorCard key={item.id} item={item} onOpenDetail={openItemDetail} />
           ))}
         </div>
         <div className="car-dots">
@@ -906,12 +996,17 @@ export function MenuBoard({
         </div>
         <div className="drinks-grid">
           {(bySection.get("drinks") ?? []).map((item) => (
-            <div key={item.id} className="drink-card">
+            <button
+              key={item.id}
+              type="button"
+              className="drink-card drink-card--btn"
+              onClick={() => openItemDetail(item)}
+            >
               {item.image_url ? (
                 <div className="drink-card-photo">
                   <Image
                     src={item.image_url}
-                    alt={item.name}
+                    alt=""
                     width={320}
                     height={240}
                     className="h-full w-full object-cover object-center"
@@ -924,7 +1019,7 @@ export function MenuBoard({
               <div className="drink-name">{item.name}</div>
               <div className="drink-desc">{item.description}</div>
               <div className="drink-price">{item.price_display}</div>
-            </div>
+            </button>
           ))}
         </div>
       </section>
@@ -941,7 +1036,7 @@ export function MenuBoard({
         </div>
         <div className="car-track" id="yogurtTrack" ref={yogurtCarousel.trackRef}>
           {(bySection.get("yogurt") ?? []).map((item) => (
-            <FlavorCard key={item.id} item={item} />
+            <FlavorCard key={item.id} item={item} onOpenDetail={openItemDetail} />
           ))}
         </div>
         <div className="car-dots">
@@ -991,7 +1086,7 @@ export function MenuBoard({
         </div>
         <div className="car-track" id="gelatoTrack" ref={gelatoCarousel.trackRef}>
           {displayGelatos.map((item) => (
-            <FlavorCard key={item.id} item={item} />
+            <FlavorCard key={item.id} item={item} onOpenDetail={openItemDetail} />
           ))}
         </div>
         <div className="car-dots">
@@ -1021,7 +1116,7 @@ export function MenuBoard({
         </div>
         <div className="car-track" id="sorbetTrack" ref={sorbetCarousel.trackRef}>
           {(bySection.get("sorbet") ?? []).map((item) => (
-            <FlavorCard key={item.id} item={item} />
+            <FlavorCard key={item.id} item={item} onOpenDetail={openItemDetail} />
           ))}
         </div>
         <div className="car-dots">
@@ -1215,11 +1310,25 @@ export function MenuBoard({
         <div className="footer-plaid" />
         <div className="footer-copy">© {new Date().getFullYear()} Anita Gelato · Tarzana</div>
       </footer>
+
+      {detailItem ? (
+        <MenuItemDetailSheet
+          item={detailItem}
+          imageSrc={getFlavorImageUrl(detailItem) ?? null}
+          onClose={() => setDetailItem(null)}
+        />
+      ) : null}
     </div>
   );
 }
 
-function FlavorCard({ item }: { item: MenuItemRow }) {
+function FlavorCard({
+  item,
+  onOpenDetail,
+}: {
+  item: MenuItemRow;
+  onOpenDetail: (item: MenuItemRow) => void;
+}) {
   const badge = item.is_new
     ? "new"
     : item.is_fave
@@ -1231,12 +1340,17 @@ function FlavorCard({ item }: { item: MenuItemRow }) {
   const imageUrl = getFlavorImageUrl(item);
 
   return (
-    <div className="flav-card">
+    <button
+      type="button"
+      className="flav-card flav-card--btn"
+      onClick={() => onOpenDetail(item)}
+      aria-label={`${item.name}. Open details and pricing.`}
+    >
       <div className="flav-img">
         {imageUrl ? (
           <Image
             src={imageUrl}
-            alt={item.name}
+            alt=""
             fill
             className="object-cover"
             sizes="(max-width: 768px) 46vw, 190px"
@@ -1251,6 +1365,6 @@ function FlavorCard({ item }: { item: MenuItemRow }) {
         <div className="flav-desc">{item.description}</div>
         {item.price_display && <div className="flav-price">{item.price_display}</div>}
       </div>
-    </div>
+    </button>
   );
 }
