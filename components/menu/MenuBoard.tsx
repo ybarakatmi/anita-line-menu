@@ -613,42 +613,31 @@ export function MenuBoard({
     const target = document.getElementById(id);
     if (!target) return;
 
-    // Re-measure sticky stack right now — handles iOS URL bar shrink/expand
+    // Re-measure sticky stack so --sticky-offset matches scroll-margin-top on sections
     const topbar = document.querySelector<HTMLElement>(".topbar");
     const nav = document.querySelector<HTMLElement>(".nav");
     const stickyOffset = (topbar?.offsetHeight ?? 0) + (nav?.offsetHeight ?? 0) + 8;
     document.documentElement.style.setProperty("--sticky-offset", `${stickyOffset}px`);
 
-    // Instantly center the nav button horizontally on the .nav container only —
-    // this avoids the smooth-scroll-cancellation race with the page scroll below.
     if (btn && nav) {
       const navEl = nav as HTMLElement;
-      const left =
-        btn.offsetLeft - navEl.clientWidth / 2 + btn.offsetWidth / 2;
+      const left = btn.offsetLeft - navEl.clientWidth / 2 + btn.offsetWidth / 2;
       navEl.scrollTo({ left, behavior: "auto" });
     }
 
-    // Compute absolute target and scroll smoothly. Using window.scrollTo with
-    // an absolute Y is more deterministic than scrollIntoView when the page
-    // contains lazy-loaded images that may shift layout during scroll.
-    const initialTargetY =
-      target.getBoundingClientRect().top + window.scrollY - stickyOffset;
-    window.scrollTo({ top: Math.max(0, initialTargetY), behavior: "smooth" });
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const behavior: ScrollBehavior = prefersReduced ? "auto" : "smooth";
 
-    // After the scroll has settled, run a corrective adjustment — handles
-    // images that lazy-loaded mid-flight and shifted the section position.
-    let attempts = 0;
-    const correct = () => {
-      attempts++;
-      const rect = target.getBoundingClientRect();
-      const desiredTop = stickyOffset; // section's top should be just below sticky stack
-      const drift = rect.top - desiredTop;
-      if (Math.abs(drift) > 4) {
-        window.scrollTo({ top: window.scrollY + drift, behavior: "smooth" });
+    // One scroll only: CSS scroll-margin-top (--sticky-offset) on .menu-section / .coffee-section
+    // lines the section up under the sticky topbar + nav. Avoid stacking multiple smooth
+    // window.scrollTo calls (previous "correct" loop), which caused visible jitter.
+    requestAnimationFrame(() => {
+      if (id === "top") {
+        window.scrollTo({ top: 0, behavior });
+        return;
       }
-      if (attempts < 3) setTimeout(correct, 350);
-    };
-    setTimeout(correct, 600);
+      target.scrollIntoView({ behavior, block: "start" });
+    });
   };
 
   const ticker = settings.ticker_segments ?? [];
