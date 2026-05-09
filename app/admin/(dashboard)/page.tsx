@@ -82,10 +82,6 @@ export default async function AdminOverviewPage({
       </div>
       <div className="flex flex-col gap-1">
         <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Overview</h1>
-        <p className="max-w-2xl text-sm text-slate-600">
-          Manage each public menu block independently. Changes save to Supabase and appear on the customer-facing
-          page for this location.
-        </p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">

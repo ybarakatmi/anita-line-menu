@@ -3,9 +3,13 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
+const MAX_MEDIA_URL_LEN = 4096;
+
 function trimOrNull(v: string | null | undefined) {
-  const t = v?.trim();
-  return t ? t : null;
+  if (v == null) return null;
+  const t = typeof v === "string" ? v.trim() : String(v).trim();
+  if (!t) return null;
+  return t.length > MAX_MEDIA_URL_LEN ? t.slice(0, MAX_MEDIA_URL_LEN) : t;
 }
 
 export async function saveSiteMediaSettingsAction(input: {
@@ -26,7 +30,7 @@ export async function saveSiteMediaSettingsAction(input: {
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Sign in required.");
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("site_settings")
     .update({
       hero_eyebrow: trimOrNull(input.hero_eyebrow),
@@ -41,9 +45,23 @@ export async function saveSiteMediaSettingsAction(input: {
       pastry_sec_tag: trimOrNull(input.pastry_sec_tag),
       updated_at: new Date().toISOString(),
     })
-    .eq("id", 1);
+    .eq("id", 1)
+    .select("id");
 
-  if (error) throw new Error(error.message);
+  if (error) {
+    const msg = error.message || "Update failed";
+    if (/permission denied|row-level security|RLS/i.test(msg)) {
+      throw new Error(
+        "Supabase blocked this update (row-level security). Sign in as a workspace owner, or apply the site_settings policy your project expects."
+      );
+    }
+    throw new Error(msg);
+  }
+  if (!data?.length) {
+    throw new Error(
+      "No row was updated. Check that public.site_settings has id = 1, and that your account is allowed to update it."
+    );
+  }
   revalidatePath("/", "layout");
   revalidatePath("/admin/settings", "page");
   return { ok: true as const };

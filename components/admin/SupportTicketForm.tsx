@@ -33,13 +33,10 @@ export function SupportTicketForm() {
   }
 
   return (
-    <section className="max-w-2xl space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
-      <header className="space-y-1">
-        <h2 className="text-sm font-semibold text-slate-900">Submit a ticket</h2>
-        <p className="text-sm text-slate-600">
-          Found a bug or need help with the menu console? Send a note and we'll follow up by email.
-        </p>
-      </header>
+    <section
+      aria-label="Support ticket"
+      className="max-w-2xl space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8"
+    >
       <form onSubmit={onSubmit} className="space-y-3">
         <div className="space-y-1">
           <label className="text-xs font-medium uppercase tracking-wide text-slate-500" htmlFor="ticket-subject">

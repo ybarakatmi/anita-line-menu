@@ -960,9 +960,9 @@ export function MenuBoard({
         <div className="sec-head">
           <span className="sec-the">{settings.pastry_sec_the ?? "Just in"}</span>
           <div className="sec-big">
-            {(settings.pastry_sec_big_line1 ?? "New").trim()}
+            {String(settings.pastry_sec_big_line1 ?? "New").trim()}
             <br />
-            {(settings.pastry_sec_big_line2 ?? "Products").trim()}
+            {String(settings.pastry_sec_big_line2 ?? "Products").trim()}
           </div>
           <div className="sec-tag">✦ &nbsp; {settings.pastry_sec_tag ?? "Pastries · Baked goods · Rotating picks"}</div>
         </div>

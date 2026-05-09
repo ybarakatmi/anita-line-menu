@@ -45,7 +45,6 @@ export function LoginForm() {
       <div className="mb-8 text-center">
         <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Anita</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-900">Menu console</h1>
-        <p className="mt-2 text-sm text-slate-600">Authorized operators only. Activity is tied to your Supabase account.</p>
       </div>
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
         <label className="block text-sm font-medium text-slate-700">
