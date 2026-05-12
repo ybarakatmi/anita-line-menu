@@ -667,7 +667,10 @@ export function MenuBoard({
 
       <section className="hero" id="top">
         <div className="hero-sky">
-          {customHeroVideo ? (
+          {heroBgImageSrc ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={heroBgImageSrc} alt="" className="hero-video" aria-hidden />
+          ) : customHeroVideo ? (
             <InlineBackgroundVideo
               videoRef={heroVideoRef}
               src={heroVideoSrc}
@@ -675,9 +678,6 @@ export function MenuBoard({
               className="hero-video"
               preload={heroVideoSrc.startsWith("/") ? "metadata" : "auto"}
             />
-          ) : heroBgImageSrc ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={heroBgImageSrc} alt="" className="hero-video" aria-hidden />
           ) : (
             <div className="hero-video hero-bg-fallback" aria-hidden />
           )}
