@@ -698,19 +698,23 @@ export function MenuBoard({
         <div className="hero-content">
           <div className="h-eyebrow">{settings.hero_eyebrow ?? "Tarzana · Los Angeles"}</div>
           <div className="h-brand">
-            LA MAMMA
+            {settings.hero_brand_line1?.trim() || "LA MAMMA"}
             <br />
-            DEL GELATO
+            {settings.hero_brand_line2?.trim() || "DEL GELATO"}
           </div>
-          <div className="h-it">Anita Gelato</div>
+          <div className="h-it">{settings.hero_subtitle?.trim() || "Anita Gelato"}</div>
           <div className="h-tags">
-            <span className="h-tag">Gelato</span>
-            <span className="h-tag">Yogurt</span>
-            <span className="h-tag">Coffee</span>
+            {[
+              settings.hero_tag1?.trim() || "Gelato",
+              settings.hero_tag2?.trim() || "Yogurt",
+              settings.hero_tag3?.trim() || "Coffee",
+            ].map((tag) => (
+              <span key={tag} className="h-tag">{tag}</span>
+            ))}
           </div>
           <div className="hero-actions">
             <a className="hero-btn hero-btn-primary" href="#bestsellers">
-              VIEW FLAVORS
+              {settings.hero_primary_label?.trim() || "VIEW FLAVORS"}
             </a>
             <a
               className="hero-btn hero-btn-secondary"

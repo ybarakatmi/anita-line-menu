@@ -61,6 +61,17 @@ export type SiteSettingsRow = {
   /** Static background image shown when no video is set. Owner-managed via admin Hero section. */
   hero_bg_image_url: string | null;
   separator_video_url: string | null;
+  /** Hero main brand name — two display lines (e.g. "LA MAMMA" / "DEL GELATO"). */
+  hero_brand_line1: string | null;
+  hero_brand_line2: string | null;
+  /** Italic subtitle below brand name (e.g. "Anita Gelato"). */
+  hero_subtitle: string | null;
+  /** Three pill tags shown under the subtitle. */
+  hero_tag1: string | null;
+  hero_tag2: string | null;
+  hero_tag3: string | null;
+  /** Primary CTA button (left). */
+  hero_primary_label: string | null;
   /** Hero outline button (right): label + link — null uses Tarzana defaults in MenuBoard. */
   hero_secondary_label: string | null;
   hero_secondary_href: string | null;

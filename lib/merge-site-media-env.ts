@@ -39,5 +39,13 @@ export function mergeSiteMediaFromEnv(settings: SiteSettingsRow): SiteSettingsRo
     hero_video_poster_url: posterEnv || dbPoster || null,
     hero_bg_image_url: settings.hero_bg_image_url?.trim() || null,
     separator_video_url: dbSep || sepEnv || BUNDLED_HERO_VIDEO_PATH,
+    // hero copy fields pass through as-is (no env overrides needed)
+    hero_brand_line1: settings.hero_brand_line1 ?? null,
+    hero_brand_line2: settings.hero_brand_line2 ?? null,
+    hero_subtitle: settings.hero_subtitle ?? null,
+    hero_tag1: settings.hero_tag1 ?? null,
+    hero_tag2: settings.hero_tag2 ?? null,
+    hero_tag3: settings.hero_tag3 ?? null,
+    hero_primary_label: settings.hero_primary_label ?? null,
   };
 }

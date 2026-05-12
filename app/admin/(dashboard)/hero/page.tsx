@@ -1,6 +1,5 @@
 import { AdminBreadcrumbs } from "@/components/admin/AdminBreadcrumbs";
 import { createClient } from "@/lib/supabase/server";
-import type { SiteSettingsRow } from "@/types/menu";
 import { redirect } from "next/navigation";
 import { HeroEditor } from "./HeroEditor";
 
@@ -13,18 +12,13 @@ export default async function AdminHeroPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/admin/login");
 
-  const { data: settingsRow } = await supabase
+  const { data: row } = await supabase
     .from("site_settings")
     .select(
-      "hero_bg_image_url, hero_eyebrow, hero_secondary_label, hero_secondary_href"
+      "hero_bg_image_url, hero_eyebrow, hero_brand_line1, hero_brand_line2, hero_subtitle, hero_tag1, hero_tag2, hero_tag3, hero_primary_label, hero_secondary_label, hero_secondary_href"
     )
     .eq("id", 1)
     .maybeSingle();
-
-  const settings = settingsRow as Pick<
-    SiteSettingsRow,
-    "hero_bg_image_url" | "hero_eyebrow" | "hero_secondary_label" | "hero_secondary_href"
-  > | null;
 
   return (
     <div className="space-y-6">
@@ -37,16 +31,23 @@ export default async function AdminHeroPage() {
         </p>
         <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Hero section</h1>
         <p className="text-sm text-slate-500">
-          Control the full-bleed background image and headline copy shown at the top of the public
-          menu.
+          Control the background image and every piece of text on the hero at the top of the public menu.
+          Leave any field blank to keep the built-in default.
         </p>
       </div>
 
       <HeroEditor
-        currentBgImageUrl={settings?.hero_bg_image_url ?? null}
-        currentEyebrow={settings?.hero_eyebrow ?? null}
-        currentSecondaryLabel={settings?.hero_secondary_label ?? null}
-        currentSecondaryHref={settings?.hero_secondary_href ?? null}
+        currentBgImageUrl={row?.hero_bg_image_url ?? null}
+        currentEyebrow={row?.hero_eyebrow ?? null}
+        currentBrandLine1={row?.hero_brand_line1 ?? null}
+        currentBrandLine2={row?.hero_brand_line2 ?? null}
+        currentSubtitle={row?.hero_subtitle ?? null}
+        currentTag1={row?.hero_tag1 ?? null}
+        currentTag2={row?.hero_tag2 ?? null}
+        currentTag3={row?.hero_tag3 ?? null}
+        currentPrimaryLabel={row?.hero_primary_label ?? null}
+        currentSecondaryLabel={row?.hero_secondary_label ?? null}
+        currentSecondaryHref={row?.hero_secondary_href ?? null}
       />
     </div>
   );
