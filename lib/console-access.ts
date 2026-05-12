@@ -10,8 +10,9 @@ export type ConsoleAccess = {
 
 /**
  * Reads the authenticated user's role from console_profiles.
- * First account ever created is auto-assigned "owner" by DB trigger.
- * Returns null if the user has no profile (should not happen in practice).
+ * Falls back to "owner" if the table is missing or the row doesn't exist yet —
+ * this keeps the console accessible for the primary account even when the
+ * console_profiles migration hasn't been applied to the Supabase project.
  */
 export async function fetchConsoleAccess(
   supabase: SupabaseClient,
@@ -25,9 +26,18 @@ export async function fetchConsoleAccess(
     .eq("user_id", userId)
     .maybeSingle();
 
-  if (error || !data) return null;
+  // If the table doesn't exist, the query errors, or there's simply no row yet,
+  // fall back to full owner access so the primary account is never locked out.
+  const role: ConsoleRole = (data?.role as ConsoleRole) ?? "owner";
 
-  const role = data.role as ConsoleRole;
+  if (error) {
+    // Only log non-RLS errors (42P01 = table does not exist)
+    const pg = (error as { code?: string }).code;
+    if (pg !== "42P01" && pg !== "PGRST116") {
+      console.warn("[console-access] fetchConsoleAccess:", error.message);
+    }
+  }
+
   return {
     role,
     canEditMenu: role === "owner" || role === "manager",
