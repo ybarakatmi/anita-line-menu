@@ -6,6 +6,7 @@ import {
 } from "@/lib/menu-fallback";
 import { mergeSiteMediaFromEnv } from "@/lib/merge-site-media-env";
 import { createClient } from "@/lib/supabase/server";
+import { cache } from "react";
 
 export type MenuPayload = {
   items: MenuItemRow[];
@@ -91,7 +92,7 @@ function sortMenuItems(items: MenuItemRow[]) {
   );
 }
 
-export async function getMenuData(): Promise<MenuPayload> {
+async function loadMenuData(): Promise<MenuPayload> {
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
     !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -144,3 +145,6 @@ export async function getMenuData(): Promise<MenuPayload> {
     };
   }
 }
+
+/** One Supabase read per request when used from both `generateMetadata` and the page. */
+export const getMenuData = cache(loadMenuData);
