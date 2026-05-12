@@ -661,7 +661,7 @@ export function MenuBoard({
               src={heroVideoSrc}
               poster={heroPosterSrc}
               className="hero-video"
-              preload="auto"
+              preload={heroVideoSrc.startsWith("/") ? "metadata" : "auto"}
             />
           ) : (
             <div className="hero-video hero-bg-fallback" aria-hidden />
