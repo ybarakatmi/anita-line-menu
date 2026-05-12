@@ -97,7 +97,7 @@ const SECTION_ORDER: MenuSection[] = [
   "sorbet",
 ];
 
-const NAV: { id: string; label: string }[] = [
+const NAV_DEFAULTS: { id: string; label: string }[] = [
   { id: "seasonal", label: "New & Seasonal" },
   { id: "bestsellers", label: "Best Sellers" },
   { id: "coffee", label: "Coffee" },
@@ -107,6 +107,18 @@ const NAV: { id: string; label: string }[] = [
   { id: "gelato", label: "Cream Gelato" },
   { id: "sorbet", label: "Sorbets" },
 ];
+
+/** Derive the nav button label from the same section_labels the heading uses. */
+function navLabel(
+  labels: import("@/types/menu").SiteSettingsRow["section_labels"],
+  sectionId: string,
+  defaultLabel: string
+): string {
+  const line1 = labels?.[sectionId]?.big_line1?.trim();
+  const line2 = labels?.[sectionId]?.big_line2?.trim();
+  if (line1 || line2) return [line1, line2].filter(Boolean).join(" ");
+  return defaultLabel;
+}
 
 const INSTA_LINKS = [
   "https://www.instagram.com/anitagelatousa/",
@@ -748,14 +760,14 @@ export function MenuBoard({
       </header>
 
       <nav className="nav" aria-label="Section navigation">
-        {NAV.map((n) => (
+        {NAV_DEFAULTS.map((n) => (
           <button
             key={n.id}
             type="button"
             className={`nb${navActive === n.id ? " active" : ""}`}
             onClick={(e) => navTo(n.id, e.currentTarget)}
           >
-            {n.label}
+            {navLabel(settings.section_labels, n.id, n.label)}
           </button>
         ))}
       </nav>
