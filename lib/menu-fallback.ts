@@ -15,6 +15,7 @@ export const FALLBACK_SITE_SETTINGS: SiteSettingsRow = {
   hero_eyebrow: "Tarzana · Los Angeles",
   hero_video_url: null,
   hero_video_poster_url: null,
+  hero_bg_image_url: null,
   separator_video_url: null,
   hero_secondary_label: null,
   hero_secondary_href: null,
@@ -22,6 +23,7 @@ export const FALLBACK_SITE_SETTINGS: SiteSettingsRow = {
   pastry_sec_big_line1: "New",
   pastry_sec_big_line2: "Products",
   pastry_sec_tag: "Pastries · Baked goods · Rotating picks",
+  section_labels: null,
 };
 
 /** Shown when Supabase has no `pastries` rows yet (until owner adds real items). */

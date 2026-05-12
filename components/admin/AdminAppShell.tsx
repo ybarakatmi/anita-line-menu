@@ -2,7 +2,7 @@
 
 import { signOutAction } from "@/app/admin/actions";
 import { ADMIN_MENU_SECTIONS, adminSectionHref } from "@/lib/admin-sections";
-import type { ConsoleRole } from "@/lib/console-access";
+import type { ConsoleAccess } from "@/lib/console-access";
 import type { MenuSection } from "@/types/menu";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -10,17 +10,15 @@ import { useEffect, useState } from "react";
 
 type Props = {
   children: React.ReactNode;
-  /** Matches what guests see on the public menu (is_active = true). */
   liveCounts: Record<MenuSection, number>;
-  /** Includes hidden/staged rows (useful for managers). */
   totalCounts: Record<MenuSection, number>;
-  access: { role: ConsoleRole; canEditMenu: boolean };
+  access: ConsoleAccess;
 };
 
-const roleLabels: Record<ConsoleRole, string> = {
+const roleLabels: Record<string, string> = {
   owner: "Owner",
   manager: "Manager",
-  viewer: "Viewer",
+  viewer: "Guest",
 };
 
 export function AdminAppShell({ children, liveCounts, totalCounts, access }: Props) {
@@ -50,57 +48,95 @@ export function AdminAppShell({ children, liveCounts, totalCounts, access }: Pro
         Overview
       </Link>
 
-      <p className="mt-6 px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Menu sections</p>
-      {ADMIN_MENU_SECTIONS.map((s) => {
-        const href = adminSectionHref(s.id);
-        const active = pathname.startsWith(href);
-        const live = liveCounts[s.id] ?? 0;
-        const total = totalCounts[s.id] ?? 0;
-        const title =
-          live === total
-            ? `${live} live item${live === 1 ? "" : "s"} on the public menu`
-            : `${live} live on the public menu · ${total} total in console (includes hidden)`;
-        return (
+      {/* Menu sections — only shown when user can edit products */}
+      {access.canEditProducts && (
+        <>
+          <p className="mt-6 px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Menu sections</p>
+          {ADMIN_MENU_SECTIONS.map((s) => {
+            const href = adminSectionHref(s.id);
+            const active = pathname.startsWith(href);
+            const live = liveCounts[s.id] ?? 0;
+            const total = totalCounts[s.id] ?? 0;
+            const title =
+              live === total
+                ? `${live} live item${live === 1 ? "" : "s"} on the public menu`
+                : `${live} live · ${total} total`;
+            return (
+              <Link
+                key={s.id}
+                href={href}
+                className={`flex items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                  active ? "bg-slate-900 text-white" : "text-slate-700 hover:bg-slate-100"
+                }`}
+              >
+                <span>{s.label}</span>
+                <span
+                  title={title}
+                  className={`rounded-md px-2 py-0.5 text-xs tabular-nums ${
+                    active ? "bg-white/15 text-white" : "bg-slate-200/80 text-slate-600"
+                  }`}
+                >
+                  {live}
+                  {live !== total ? <span className="opacity-70">/{total}</span> : null}
+                </span>
+              </Link>
+            );
+          })}
+        </>
+      )}
+
+      {/* Presentation — shown when user can edit sections */}
+      {access.canEditSections && (
+        <>
+          <p className="mt-6 px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Presentation</p>
           <Link
-            key={s.id}
-            href={href}
-            className={`flex items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-              active ? "bg-slate-900 text-white" : "text-slate-700 hover:bg-slate-100"
+            href="/admin/hero"
+            className={`rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+              linkActive("/admin/hero") ? "bg-slate-900 text-white" : "text-slate-700 hover:bg-slate-100"
             }`}
           >
-            <span>{s.label}</span>
-            <span
-              title={title}
-              className={`rounded-md px-2 py-0.5 text-xs tabular-nums ${
-                active ? "bg-white/15 text-white" : "bg-slate-200/80 text-slate-600"
-              }`}
-            >
-              {live}
-              {live !== total ? <span className="opacity-70">/{total}</span> : null}
-            </span>
+            Hero section
           </Link>
-        );
-      })}
+          <Link
+            href="/admin/sections"
+            className={`rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+              linkActive("/admin/sections") ? "bg-slate-900 text-white" : "text-slate-700 hover:bg-slate-100"
+            }`}
+          >
+            Section headings
+          </Link>
+        </>
+      )}
 
-      <p className="mt-6 px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Inquiries</p>
-      <Link
-        href="/admin/contact-submissions"
-        className={`rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-          linkActive("/admin/contact-submissions") ? "bg-slate-900 text-white" : "text-slate-700 hover:bg-slate-100"
-        }`}
-      >
-        Contact submissions
-      </Link>
+      {/* Inquiries */}
+      {access.canViewInquiries && (
+        <>
+          <p className="mt-6 px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Inquiries</p>
+          <Link
+            href="/admin/contact-submissions"
+            className={`rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+              linkActive("/admin/contact-submissions") ? "bg-slate-900 text-white" : "text-slate-700 hover:bg-slate-100"
+            }`}
+          >
+            Contact submissions
+          </Link>
+        </>
+      )}
 
-      <p className="mt-6 px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Support</p>
-      <Link
-        href="/admin/support"
-        className={`rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-          linkActive("/admin/support") ? "bg-slate-900 text-white" : "text-slate-700 hover:bg-slate-100"
-        }`}
-      >
-        Submit a ticket
-      </Link>
+      {/* Support tickets */}
+      {access.canSubmitTickets && (
+        <>
+          <p className="mt-6 px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Support</p>
+          <Link
+            href="/admin/support"
+            className={`rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+              linkActive("/admin/support") ? "bg-slate-900 text-white" : "text-slate-700 hover:bg-slate-100"
+            }`}
+          >
+            Submit a ticket
+          </Link>
+        </>
+      )}
 
       <p className="mt-6 px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Configuration</p>
       <Link
@@ -110,6 +146,11 @@ export function AdminAppShell({ children, liveCounts, totalCounts, access }: Pro
         }`}
       >
         Settings
+        {access.canManageTeam && (
+          <span className="ml-2 rounded-full bg-slate-200 px-1.5 py-0.5 text-[10px] font-medium text-slate-600">
+            Team
+          </span>
+        )}
       </Link>
     </nav>
   );
@@ -147,6 +188,14 @@ export function AdminAppShell({ children, liveCounts, totalCounts, access }: Pro
           </div>
           {nav}
           <div className="mt-auto border-t border-slate-100 p-3">
+            <div className="mb-2 px-1">
+              <p className="text-xs font-medium text-slate-700">
+                {roleLabels[access.role] ?? "Guest"}
+              </p>
+              <p className="text-[11px] text-slate-400">
+                {access.canManageTeam ? "Full access" : "Limited access"}
+              </p>
+            </div>
             <form action={signOutAction}>
               <button
                 type="submit"
@@ -173,9 +222,9 @@ export function AdminAppShell({ children, liveCounts, totalCounts, access }: Pro
                 </svg>
               </button>
               <span className="hidden text-sm text-slate-500 sm:inline">
-                {access.canEditMenu
-                  ? "Store-facing menu is read-only for guests."
-                  : `Signed in as ${roleLabels[access.role]} — catalog is view-only.`}
+                {access.canManageTeam
+                  ? "Owner — full access"
+                  : `${roleLabels[access.role] ?? "Guest"} — limited access`}
               </span>
             </div>
             <Link

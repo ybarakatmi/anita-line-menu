@@ -8,7 +8,7 @@ export type MenuSection =
   | "drinks"
   | "yogurt";
 
-/** One row in the public “tap for details” pricing list (stored as JSON on `menu_items.price_tiers`). */
+/** One row in the public "tap for details" pricing list (stored as JSON on `menu_items.price_tiers`). */
 export type MenuPriceTier = {
   label: string;
   price: string;
@@ -43,6 +43,13 @@ export type MenuItemRow = {
   updated_at?: string;
 };
 
+export type SectionLabelOverride = {
+  the?: string;
+  big_line1?: string;
+  big_line2?: string;
+  tag?: string;
+};
+
 export type SiteSettingsRow = {
   id: number;
   ticker_segments: string[];
@@ -51,15 +58,23 @@ export type SiteSettingsRow = {
   /** MP4 URL allowed for cross-origin playback (e.g. Supabase Storage public URL). */
   hero_video_url: string | null;
   hero_video_poster_url: string | null;
+  /** Static background image shown when no video is set. Owner-managed via admin Hero section. */
+  hero_bg_image_url: string | null;
   separator_video_url: string | null;
   /** Hero outline button (right): label + link — null uses Tarzana defaults in MenuBoard. */
   hero_secondary_label: string | null;
   hero_secondary_href: string | null;
-  /** Public “New products” carousel headings (after Coffee; DB section id remains `pastries`). */
+  /** Public "New products" carousel headings (after Coffee; DB section id remains `pastries`). */
   pastry_sec_the: string | null;
   pastry_sec_big_line1: string | null;
   pastry_sec_big_line2: string | null;
   pastry_sec_tag: string | null;
+  /**
+   * Per-section heading overrides keyed by MenuSection id.
+   * Fields: the (eyebrow), big_line1, big_line2, tag.
+   * Missing fields fall back to the built-in defaults.
+   */
+  section_labels: Record<string, SectionLabelOverride> | null;
   updated_at?: string | null;
 };
 

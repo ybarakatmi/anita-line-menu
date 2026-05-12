@@ -37,6 +37,7 @@ export function mergeSiteMediaFromEnv(settings: SiteSettingsRow): SiteSettingsRo
     ...settings,
     hero_video_url: dbHero || heroEnv || BUNDLED_HERO_VIDEO_PATH,
     hero_video_poster_url: posterEnv || dbPoster || null,
+    hero_bg_image_url: settings.hero_bg_image_url?.trim() || null,
     separator_video_url: dbSep || sepEnv || BUNDLED_HERO_VIDEO_PATH,
   };
 }

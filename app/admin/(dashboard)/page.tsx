@@ -24,7 +24,7 @@ export default async function AdminOverviewPage({
     data: { user },
   } = await supabase.auth.getUser();
   const access = user ? await fetchConsoleAccess(supabase, user.id) : null;
-  const canEditMenu = !!access?.canEditMenu;
+  const canEditMenu = !!access?.canEditProducts;
 
   const { data: rows, error } = await supabase.from("menu_items").select("id, section, is_active, name, updated_at");
 

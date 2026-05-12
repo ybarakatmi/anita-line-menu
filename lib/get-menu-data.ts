@@ -65,12 +65,36 @@ function normalizeSiteSettingsRow(row: SiteSettingsRow): SiteSettingsRow {
     hero_secondary_href: clipUrl(row.hero_secondary_href),
     hero_video_url: clipUrl(row.hero_video_url),
     hero_video_poster_url: clipUrl(row.hero_video_poster_url),
+    hero_bg_image_url: clipUrl(row.hero_bg_image_url),
     separator_video_url: clipUrl(row.separator_video_url),
     pastry_sec_the: asText(row.pastry_sec_the, fb.pastry_sec_the ?? ""),
     pastry_sec_big_line1: asText(row.pastry_sec_big_line1, fb.pastry_sec_big_line1 ?? ""),
     pastry_sec_big_line2: asText(row.pastry_sec_big_line2, fb.pastry_sec_big_line2 ?? ""),
     pastry_sec_tag: asText(row.pastry_sec_tag, fb.pastry_sec_tag ?? ""),
+    section_labels: normalizeSectionLabels(row.section_labels),
   };
+}
+
+function normalizeSectionLabels(
+  raw: unknown
+): Record<string, import("@/types/menu").SectionLabelOverride> | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const out: Record<string, import("@/types/menu").SectionLabelOverride> = {};
+  let hasAny = false;
+  for (const [section, val] of Object.entries(raw as Record<string, unknown>)) {
+    if (!val || typeof val !== "object" || Array.isArray(val)) continue;
+    const v = val as Record<string, unknown>;
+    const entry: import("@/types/menu").SectionLabelOverride = {};
+    for (const field of ["the", "big_line1", "big_line2", "tag"] as const) {
+      const s = typeof v[field] === "string" ? (v[field] as string).trim() : "";
+      if (s) entry[field] = s;
+    }
+    if (Object.keys(entry).length) {
+      out[section] = entry;
+      hasAny = true;
+    }
+  }
+  return hasAny ? out : null;
 }
 
 const SECTION_ORDER: MenuSection[] = [

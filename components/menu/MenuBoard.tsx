@@ -10,7 +10,7 @@ import {
 } from "@/lib/flavor-image";
 import { withMenuSectionDefaults } from "@/lib/menu-fallback";
 import { MenuItemDetailSheet } from "@/components/menu/MenuItemDetailSheet";
-import type { MenuDataMode, MenuItemRow, MenuSection, SiteSettingsRow } from "@/types/menu";
+import type { MenuDataMode, MenuItemRow, MenuSection, SectionLabelOverride, SiteSettingsRow } from "@/types/menu";
 import type { CSSProperties } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -486,6 +486,17 @@ function useCarouselTrack() {
   return { trackRef, page, jump };
 }
 
+/** Returns the override value for a section label field, or the built-in default. */
+function sl(
+  labels: Record<string, SectionLabelOverride> | null | undefined,
+  section: string,
+  field: keyof SectionLabelOverride,
+  fallback: string
+): string {
+  const v = labels?.[section]?.[field];
+  return v?.trim() || fallback;
+}
+
 export function MenuBoard({
   initialItems,
   initialSettings,
@@ -522,6 +533,7 @@ export function MenuBoard({
   const customSeparatorVideo = Boolean(settings.separator_video_url?.trim());
   const heroVideoSrc = settings.hero_video_url?.trim() ?? "";
   const heroPosterSrc = settings.hero_video_poster_url?.trim() ?? "";
+  const heroBgImageSrc = settings.hero_bg_image_url?.trim() ?? "";
   const separatorVideoSrc = settings.separator_video_url?.trim() ?? "";
   const separatorPosterSrc = heroPosterSrc;
 
@@ -663,6 +675,9 @@ export function MenuBoard({
               className="hero-video"
               preload={heroVideoSrc.startsWith("/") ? "metadata" : "auto"}
             />
+          ) : heroBgImageSrc ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={heroBgImageSrc} alt="" className="hero-video" aria-hidden />
           ) : (
             <div className="hero-video hero-bg-fallback" aria-hidden />
           )}
@@ -754,13 +769,13 @@ export function MenuBoard({
 
       <section className="menu-section seasonal-feature fade-in" id="seasonal">
         <div className="sec-head">
-          <span className="sec-the">Right Now</span>
+          <span className="sec-the">{sl(settings.section_labels, "seasonal", "the", "Right Now")}</span>
           <div className="sec-big">
-            New &amp;
+            {sl(settings.section_labels, "seasonal", "big_line1", "New &")}
             <br />
-            Seasonal
+            {sl(settings.section_labels, "seasonal", "big_line2", "Seasonal")}
           </div>
-          <div className="sec-tag">✦ &nbsp; {settings.seasonal_tagline ?? "Spring 2026 Arrivals"}</div>
+          <div className="sec-tag">✦ &nbsp; {sl(settings.section_labels, "seasonal", "tag", settings.seasonal_tagline ?? "Spring 2026 Arrivals")}</div>
           <p className="seasonal-eyebrow-sub">
             Limited batches · Rotating often · Ask what&apos;s scooping today
           </p>
@@ -820,13 +835,13 @@ export function MenuBoard({
       <span id="best-sellers" />
       <section className="menu-section fade-in" id="bestsellers">
         <div className="sec-head">
-          <span className="sec-the">Customer Favorites</span>
+          <span className="sec-the">{sl(settings.section_labels, "bestsellers", "the", "Customer Favorites")}</span>
           <div className="sec-big">
-            Best
+            {sl(settings.section_labels, "bestsellers", "big_line1", "Best")}
             <br />
-            Sellers
+            {sl(settings.section_labels, "bestsellers", "big_line2", "Sellers")}
           </div>
-          <div className="sec-tag">✦ &nbsp; Most loved scoops</div>
+          <div className="sec-tag">✦ &nbsp; {sl(settings.section_labels, "bestsellers", "tag", "Most loved scoops")}</div>
         </div>
         <Swiper
           id="bestsellerTrack"
@@ -897,14 +912,14 @@ export function MenuBoard({
 
       <section className="coffee-section fade-in" id="coffee">
         <div className="sec-head">
-          <span className="sec-the">Imported from Italy</span>
+          <span className="sec-the">{sl(settings.section_labels, "coffee", "the", "Imported from Italy")}</span>
           <div className="sec-big">
-            Italian
+            {sl(settings.section_labels, "coffee", "big_line1", "Italian")}
             <br />
-            Coffee
+            {sl(settings.section_labels, "coffee", "big_line2", "Coffee")}
           </div>
           <div className="sec-tag">
-            ✦ &nbsp; Beans Flown in from Italy
+            ✦ &nbsp; {sl(settings.section_labels, "coffee", "tag", "Beans Flown in from Italy")}
           </div>
         </div>
         <div className="origin-badge">
@@ -947,13 +962,13 @@ export function MenuBoard({
 
       <section className="menu-section sage-bg fade-in new-products-section" id="pastries">
         <div className="sec-head">
-          <span className="sec-the">{settings.pastry_sec_the ?? "Just in"}</span>
+          <span className="sec-the">{sl(settings.section_labels, "pastries", "the", settings.pastry_sec_the ?? "Just in")}</span>
           <div className="sec-big">
-            {String(settings.pastry_sec_big_line1 ?? "New").trim()}
+            {sl(settings.section_labels, "pastries", "big_line1", String(settings.pastry_sec_big_line1 ?? "New").trim())}
             <br />
-            {String(settings.pastry_sec_big_line2 ?? "Products").trim()}
+            {sl(settings.section_labels, "pastries", "big_line2", String(settings.pastry_sec_big_line2 ?? "Products").trim())}
           </div>
-          <div className="sec-tag">✦ &nbsp; {settings.pastry_sec_tag ?? "Pastries · Baked goods · Rotating picks"}</div>
+          <div className="sec-tag">✦ &nbsp; {sl(settings.section_labels, "pastries", "tag", settings.pastry_sec_tag ?? "Pastries · Baked goods · Rotating picks")}</div>
         </div>
         <div className="car-track" id="newProductsTrack" ref={newProductsCarousel.trackRef}>
           {newProductsItems.map((item) => (
@@ -975,13 +990,13 @@ export function MenuBoard({
 
       <section className="menu-section blush-bg fade-in" id="drinks">
         <div className="sec-head">
-          <span className="sec-the">Also Available</span>
+          <span className="sec-the">{sl(settings.section_labels, "drinks", "the", "Also Available")}</span>
           <div className="sec-big">
-            Drinks
+            {sl(settings.section_labels, "drinks", "big_line1", "Drinks")}
             <br />
-            &amp; More
+            {sl(settings.section_labels, "drinks", "big_line2", "& More")}
           </div>
-          <div className="sec-tag">✦ &nbsp; Sparkling · Sodas · Water</div>
+          <div className="sec-tag">✦ &nbsp; {sl(settings.section_labels, "drinks", "tag", "Sparkling · Sodas · Water")}</div>
         </div>
         <div className="drinks-grid">
           {(bySection.get("drinks") ?? []).map((item) => (
@@ -1015,13 +1030,13 @@ export function MenuBoard({
 
       <section className="menu-section yogurt-section fade-in" id="yogurt">
         <div className="sec-head">
-          <span className="sec-the">Swirled Fresh</span>
+          <span className="sec-the">{sl(settings.section_labels, "yogurt", "the", "Swirled Fresh")}</span>
           <div className="sec-big">
-            Frozen
+            {sl(settings.section_labels, "yogurt", "big_line1", "Frozen")}
             <br />
-            Yogurt
+            {sl(settings.section_labels, "yogurt", "big_line2", "Yogurt")}
           </div>
-          <div className="sec-tag">✦ &nbsp; Tart &amp; soft serve</div>
+          <div className="sec-tag">✦ &nbsp; {sl(settings.section_labels, "yogurt", "tag", "Tart & soft serve")}</div>
         </div>
         <div className="car-track" id="yogurtTrack" ref={yogurtCarousel.trackRef}>
           {(bySection.get("yogurt") ?? []).map((item) => (
@@ -1045,13 +1060,13 @@ export function MenuBoard({
 
       <section className="menu-section sage-bg fade-in" id="gelato">
         <div className="sec-head">
-          <span className="sec-the">Handcrafted Daily</span>
+          <span className="sec-the">{sl(settings.section_labels, "gelato", "the", "Handcrafted Daily")}</span>
           <div className="sec-big">
-            Cream
+            {sl(settings.section_labels, "gelato", "big_line1", "Cream")}
             <br />
-            Gelato
+            {sl(settings.section_labels, "gelato", "big_line2", "Gelato")}
           </div>
-          <div className="sec-tag">✦ &nbsp; 32 Flavors · No Artificial Colors</div>
+          <div className="sec-tag">✦ &nbsp; {sl(settings.section_labels, "gelato", "tag", "32 Flavors · No Artificial Colors")}</div>
         </div>
         <div className="car-filters">
           {(
@@ -1095,13 +1110,13 @@ export function MenuBoard({
 
       <section className="menu-section blush-bg fade-in" id="sorbet">
         <div className="sec-head">
-          <span className="sec-the">Dairy-Free</span>
+          <span className="sec-the">{sl(settings.section_labels, "sorbet", "the", "Dairy-Free")}</span>
           <div className="sec-big">
-            Sorbets
+            {sl(settings.section_labels, "sorbet", "big_line1", "Sorbets")}
             <br />
-            &amp; Vegan
+            {sl(settings.section_labels, "sorbet", "big_line2", "& Vegan")}
           </div>
-          <div className="sec-tag">✦ &nbsp; 100% Plant-Based</div>
+          <div className="sec-tag">✦ &nbsp; {sl(settings.section_labels, "sorbet", "tag", "100% Plant-Based")}</div>
         </div>
         <div className="car-track" id="sorbetTrack" ref={sorbetCarousel.trackRef}>
           {(bySection.get("sorbet") ?? []).map((item) => (
