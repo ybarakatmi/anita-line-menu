@@ -1329,6 +1329,16 @@ export function MenuBoard({
         </div>
         <div className="footer-plaid" />
         <div className="footer-copy">© {new Date().getFullYear()} Anita Gelato · Tarzana</div>
+        <div className="footer-credit">
+          Created by{" "}
+          <a
+            href="https://www.revioconsulting.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Revio
+          </a>
+        </div>
       </footer>
 
       {detailItem ? (
