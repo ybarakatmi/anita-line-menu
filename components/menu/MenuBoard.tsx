@@ -8,7 +8,9 @@ import {
   flavorImagePublicPath,
   flavorImageSlug,
 } from "@/lib/flavor-image";
+import { pushAnalyticsEvent } from "@/lib/gtm";
 import { withMenuSectionDefaults } from "@/lib/menu-fallback";
+import { useSectionViewAnalytics } from "@/lib/use-section-view-analytics";
 import { MenuItemDetailSheet } from "@/components/menu/MenuItemDetailSheet";
 import type { MenuDataMode, MenuItemRow, MenuSection, SectionLabelOverride, SiteSettingsRow } from "@/types/menu";
 import type { CSSProperties } from "react";
@@ -556,6 +558,7 @@ export function MenuBoard({
 
   useFadeSections(items.length);
   useStickyOffset();
+  useSectionViewAnalytics();
 
   const reload = useCallback(async () => {
     if (mode !== "live") return;
@@ -597,6 +600,10 @@ export function MenuBoard({
   }, [mode, reload]);
 
   const openItemDetail = useCallback((item: MenuItemRow) => {
+    pushAnalyticsEvent("menu_item_open", {
+      item_name: item.name,
+      section_id: item.section,
+    });
     setDetailItem(item);
   }, []);
 
@@ -633,6 +640,9 @@ export function MenuBoard({
   }, [newProductsItems.map((g) => g.id).join("|")]);
 
   const navTo = (id: string, btn?: HTMLElement | null) => {
+    if (id !== "top") {
+      pushAnalyticsEvent("nav_section_click", { section_id: id });
+    }
     setNavActive(id);
     const target = document.getElementById(id);
     if (!target) return;
@@ -701,6 +711,11 @@ export function MenuBoard({
           target="_blank"
           rel="nofollow noreferrer"
           aria-label="Get gift card"
+          onClick={() =>
+            pushAnalyticsEvent("hero_gift_card_click", {
+              link_url: "https://app.gift-it.com.au/buy/anita",
+            })
+          }
         >
           GIFT CARD
         </a>
@@ -725,7 +740,16 @@ export function MenuBoard({
             ))}
           </div>
           <div className="hero-actions">
-            <a className="hero-btn hero-btn-primary" href="#bestsellers">
+            <a
+              className="hero-btn hero-btn-primary"
+              href="#bestsellers"
+              onClick={() =>
+                pushAnalyticsEvent("hero_cta_click", {
+                  cta_name: "view_flavors",
+                  link_url: "#bestsellers",
+                })
+              }
+            >
               {settings.hero_primary_label?.trim() || "VIEW FLAVORS"}
             </a>
             <a
@@ -733,6 +757,12 @@ export function MenuBoard({
               href={heroSecondaryHref}
               target="_blank"
               rel="nofollow noreferrer"
+              onClick={() =>
+                pushAnalyticsEvent("hero_cta_click", {
+                  cta_name: "visit_location",
+                  link_url: heroSecondaryHref,
+                })
+              }
             >
               {heroSecondaryLabel}
             </a>
@@ -1098,7 +1128,10 @@ export function MenuBoard({
               key={key}
               type="button"
               className={`car-filter${gelatoFilter === key ? " active" : ""}`}
-              onClick={() => setGelatoFilter(key)}
+              onClick={() => {
+                pushAnalyticsEvent("gelato_filter_click", { filter_value: key });
+                setGelatoFilter(key);
+              }}
             >
               {label}
             </button>
@@ -1264,6 +1297,7 @@ export function MenuBoard({
                     message: (fd.get("message") as string) || null,
                   });
                   if (error) throw error;
+                  pushAnalyticsEvent("contact_form_submit", { form_name: "contact" });
                   setContactStatus("success");
                   (e.target as HTMLFormElement).reset();
                 } catch {
