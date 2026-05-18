@@ -15,8 +15,9 @@ declare global {
 
 export function pushDataLayer(payload: Record<string, unknown>) {
   if (typeof window === "undefined") return;
-  window.dataLayer = window.dataLayer ?? [];
-  window.dataLayer.push(payload);
+  const w = window as Window & { dataLayer?: Record<string, unknown>[] };
+  w.dataLayer = w.dataLayer ?? [];
+  w.dataLayer.push(payload);
 }
 
 /** Persist QR UTMs for the session so later events keep store attribution. */

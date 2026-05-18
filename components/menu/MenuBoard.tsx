@@ -560,6 +560,11 @@ export function MenuBoard({
   useStickyOffset();
   useSectionViewAnalytics();
 
+  // Fires once when the menu hydrates — confirms analytics code is live (GTM → GA4).
+  useEffect(() => {
+    pushAnalyticsEvent("menu_session_start");
+  }, []);
+
   const reload = useCallback(async () => {
     if (mode !== "live") return;
     try {
