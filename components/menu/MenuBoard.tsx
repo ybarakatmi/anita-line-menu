@@ -8,7 +8,11 @@ import {
   flavorImagePublicPath,
   flavorImageSlug,
 } from "@/lib/flavor-image";
-import { pushAnalyticsEvent } from "@/lib/gtm";
+import {
+  normalizeGelatoFilterValue,
+  pushAnalyticsEvent,
+  pushMenuSessionStartOnce,
+} from "@/lib/gtm";
 import { withMenuSectionDefaults } from "@/lib/menu-fallback";
 import { useSectionViewAnalytics } from "@/lib/use-section-view-analytics";
 import { MenuItemDetailSheet } from "@/components/menu/MenuItemDetailSheet";
@@ -560,9 +564,9 @@ export function MenuBoard({
   useStickyOffset();
   useSectionViewAnalytics();
 
-  // Fires once when the menu hydrates — confirms analytics code is live (GTM → GA4).
+  // UTM init → session guard → push (see pushMenuSessionStartOnce in lib/gtm.ts).
   useEffect(() => {
-    pushAnalyticsEvent("menu_session_start");
+    pushMenuSessionStartOnce();
   }, []);
 
   const reload = useCallback(async () => {
@@ -1134,7 +1138,9 @@ export function MenuBoard({
               type="button"
               className={`car-filter${gelatoFilter === key ? " active" : ""}`}
               onClick={() => {
-                pushAnalyticsEvent("gelato_filter_click", { filter_value: key });
+                pushAnalyticsEvent("gelato_filter_click", {
+                  filter_value: normalizeGelatoFilterValue(key),
+                });
                 setGelatoFilter(key);
               }}
             >
