@@ -1,3 +1,7 @@
+import {
+  GoogleTagManager,
+  GoogleTagManagerNoScript,
+} from "@/components/analytics/GoogleTagManager";
 import type { Metadata, Viewport } from "next";
 import { Bodoni_Moda, Josefin_Sans } from "next/font/google";
 import "./globals.css";
@@ -54,7 +58,9 @@ export default function RootLayout({
           } as React.CSSProperties
         }
       >
+        <GoogleTagManagerNoScript />
         {children}
+        <GoogleTagManager />
       </body>
     </html>
   );
