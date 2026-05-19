@@ -62,6 +62,7 @@ export default function RootLayout({
           } as React.CSSProperties
         }
       >
+        {/* Google Tag Manager (noscript) — immediately after <body> per GTM install guide */}
         <GoogleTagManagerNoScript />
         {children}
         <GoogleTagManager />

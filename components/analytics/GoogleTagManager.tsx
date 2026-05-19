@@ -1,9 +1,8 @@
 "use client";
 
+import { GTM_ID } from "@/lib/analytics-ids";
 import Script from "next/script";
 import { usePathname } from "next/navigation";
-
-const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID ?? "GTM-M42FFLW8";
 
 function shouldLoadGtm(pathname: string | null): boolean {
   if (!GTM_ID) return false;
@@ -27,20 +26,3 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   );
 }
 
-/** GTM noscript fallback — place immediately inside <body>. */
-export function GoogleTagManagerNoScript() {
-  const pathname = usePathname();
-  if (!shouldLoadGtm(pathname)) return null;
-
-  return (
-    <noscript>
-      <iframe
-        src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
-        height="0"
-        width="0"
-        style={{ display: "none", visibility: "hidden" }}
-        title="Google Tag Manager"
-      />
-    </noscript>
-  );
-}
