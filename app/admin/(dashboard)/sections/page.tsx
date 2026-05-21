@@ -1,4 +1,4 @@
-import { AdminBreadcrumbs } from "@/components/admin/AdminBreadcrumbs";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { createClient } from "@/lib/supabase/server";
 import type { SectionLabelOverride } from "@/types/menu";
 import { redirect } from "next/navigation";
@@ -23,22 +23,13 @@ export default async function AdminSectionsPage() {
     (row?.section_labels as Record<string, SectionLabelOverride> | null) ?? null;
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2 border-b border-slate-200 pb-6">
-        <AdminBreadcrumbs
-          items={[{ label: "Overview", href: "/admin" }, { label: "Sections" }]}
-        />
-        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-          Presentation
-        </p>
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
-          Section headings
-        </h1>
-        <p className="text-sm text-slate-500">
-          Customise the eyebrow, heading, and tag line for each section on the public menu.
-          Leave any field blank to keep the built-in default.
-        </p>
-      </div>
+    <div className="admin-stack">
+      <AdminPageHeader
+        breadcrumbs={[{ label: "Overview", href: "/admin" }, { label: "Section headings" }]}
+        eyebrow="Presentation"
+        title="Section headings"
+        description="Customise the eyebrow, heading, and tag line for each section on the public menu. Leave any field blank to keep the built-in default."
+      />
 
       <SectionsEditor savedLabels={savedLabels} />
     </div>

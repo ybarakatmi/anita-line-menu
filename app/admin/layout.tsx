@@ -1,3 +1,5 @@
+import "./admin.css";
+
 export default function AdminRootLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return <div className="admin-root">{children}</div>;
 }

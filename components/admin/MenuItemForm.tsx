@@ -175,13 +175,14 @@ export function MenuItemForm({
   return (
     <form
       onSubmit={onSubmit}
-      className="max-w-2xl space-y-5 rounded-xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8"
+      className="admin-card admin-card-padded admin-stack-sm"
+      style={{ maxWidth: "42rem" }}
     >
       <div>
-        <h1 className="text-xl font-semibold tracking-tight text-slate-900">
+        <h1 className="admin-section-title" style={{ fontSize: 20 }}>
           {isNew ? "New item" : readOnly ? "View item" : "Edit item"}
         </h1>
-        <p className="mt-1 text-sm text-slate-600">
+        <p className="admin-page-desc" style={{ marginTop: 4 }}>
           {readOnly
             ? "You can review how this item appears in the console. Changes require a manager or owner."
             : "Updates apply to the public menu after save. Uploads go to the secure media bucket for this project."}
@@ -202,13 +203,13 @@ export function MenuItemForm({
           </p>
         )}
       </div>
-      <label className="block text-sm font-medium text-slate-700">
+      <label className="admin-label">
         Section
         <select
           value={section}
           disabled={readOnly}
           onChange={(e) => setSection(e.target.value as MenuSection)}
-          className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:opacity-70"
+          className="admin-input mt-1.5 disabled:cursor-not-allowed disabled:opacity-70"
         >
           {ADMIN_MENU_SECTIONS.map((s) => (
             <option key={s.id} value={s.id}>
@@ -217,17 +218,18 @@ export function MenuItemForm({
           ))}
         </select>
       </label>
-      <label className="block text-sm font-medium text-slate-700">
+      <label className="admin-label">
         Name
         <input
           required
           readOnly={readOnly}
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200 read-only:bg-slate-50 read-only:opacity-90"
+          className="admin-input mt-1.5 read-only:opacity-90"
+          style={{ background: "var(--admin-bg)" }}
         />
       </label>
-      <label className="block text-sm font-medium text-slate-700">
+      <label className="admin-label">
         Description
         <textarea
           readOnly={readOnly}
@@ -239,17 +241,19 @@ export function MenuItemForm({
               ? "Tasting notes, toppings, or dairy info — shown under the name on the public menu."
               : undefined
           }
-          className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200 read-only:bg-slate-50 read-only:opacity-90"
+          className="admin-input mt-1.5 read-only:opacity-90"
+          style={{ background: "var(--admin-bg)" }}
         />
       </label>
-      <label className="block text-sm font-medium text-slate-700">
+      <label className="admin-label">
         {section === "yogurt" ? "Price & size options" : "Price display"}
         <input
           readOnly={readOnly}
           value={priceDisplay}
           onChange={(e) => setPriceDisplay(e.target.value)}
           placeholder={section === "yogurt" ? "e.g. Small $4 · Medium $5 · Large $6" : "from $7"}
-          className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200 read-only:bg-slate-50 read-only:opacity-90"
+          className="admin-input mt-1.5 read-only:opacity-90"
+          style={{ background: "var(--admin-bg)" }}
         />
         {section === "yogurt" && (
           <span className="mt-1.5 block text-xs font-normal text-slate-500">
@@ -351,28 +355,30 @@ export function MenuItemForm({
         </div>
       )}
 
-      <label className="block text-sm font-medium text-slate-700">
+      <label className="admin-label">
         Emoji (coffee / drinks / pastries / yogurt)
         <input
           readOnly={readOnly}
           value={emoji}
           onChange={(e) => setEmoji(e.target.value)}
           placeholder={section === "yogurt" ? "🍦" : "☕"}
-          className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200 read-only:bg-slate-50 read-only:opacity-90"
+          className="admin-input mt-1.5 read-only:opacity-90"
+          style={{ background: "var(--admin-bg)" }}
         />
       </label>
-      <label className="block text-sm font-medium text-slate-700">
+      <label className="admin-label">
         Badge (internal / filters — not shown on seasonal photo cards)
         <input
           readOnly={readOnly}
           value={badge}
           onChange={(e) => setBadge(e.target.value)}
           placeholder="Seasonal, Limited…"
-          className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200 read-only:bg-slate-50 read-only:opacity-90"
+          className="admin-input mt-1.5 read-only:opacity-90"
+          style={{ background: "var(--admin-bg)" }}
         />
       </label>
       {section === "seasonal" && (
-        <label className="block text-sm font-medium text-slate-700">
+        <label className="admin-label">
           Seasonal corner ribbon
           <input
             readOnly={readOnly}
@@ -380,7 +386,8 @@ export function MenuItemForm({
             onChange={(e) => setSeasonalRibbonLabel(e.target.value)}
             placeholder="Leave blank for auto (Limited if badge mentions limited, else Seasonal)"
             maxLength={28}
-            className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200 read-only:bg-slate-50 read-only:opacity-90"
+            className="admin-input mt-1.5 read-only:opacity-90"
+          style={{ background: "var(--admin-bg)" }}
           />
           <span className="mt-1 block text-xs text-slate-500">
             Short label on the pink diagonal ribbon (max 28 characters). Clear the field to use automatic Seasonal/Limited from the badge field.
@@ -388,35 +395,38 @@ export function MenuItemForm({
         </label>
       )}
       {(section === "seasonal" || section === "gelato" || section === "sorbet") && (
-        <label className="block text-sm font-medium text-slate-700">
+        <label className="admin-label">
           Promo line (optional — shown under description on seasonal cards)
           <input
             readOnly={readOnly}
             value={promoLabel}
             onChange={(e) => setPromoLabel(e.target.value)}
             placeholder="Limited batch · Tarzana exclusive"
-            className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200 read-only:bg-slate-50 read-only:opacity-90"
+            className="admin-input mt-1.5 read-only:opacity-90"
+          style={{ background: "var(--admin-bg)" }}
           />
         </label>
       )}
-      <label className="block text-sm font-medium text-slate-700">
+      <label className="admin-label">
         {section === "yogurt" ? "Tags (optional, internal notes)" : "Tags (gelato filters, comma-separated)"}
         <input
           readOnly={readOnly}
           value={tagsRaw}
           onChange={(e) => setTagsRaw(e.target.value)}
           placeholder={section === "yogurt" ? "e.g. tart, vegan" : "new, choc, nut, fruit"}
-          className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200 read-only:bg-slate-50 read-only:opacity-90"
+          className="admin-input mt-1.5 read-only:opacity-90"
+          style={{ background: "var(--admin-bg)" }}
         />
       </label>
-      <label className="block text-sm font-medium text-slate-700">
+      <label className="admin-label">
         Sort order
         <input
           type="number"
           readOnly={readOnly}
           value={sortOrder}
           onChange={(e) => setSortOrder(Number(e.target.value))}
-          className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200 read-only:bg-slate-50 read-only:opacity-90"
+          className="admin-input mt-1.5 read-only:opacity-90"
+          style={{ background: "var(--admin-bg)" }}
         />
       </label>
       <label className="flex items-center gap-2 text-sm text-slate-700">
@@ -440,7 +450,7 @@ export function MenuItemForm({
         <input type="checkbox" disabled={readOnly} checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
         Active (visible on public menu)
       </label>
-      <label className="block text-sm font-medium text-slate-700">
+      <label className="admin-label">
         Image file (optional — replaces URL)
         <input
           type="file"
@@ -450,7 +460,7 @@ export function MenuItemForm({
           className="mt-1.5 w-full text-sm text-slate-600 disabled:cursor-not-allowed disabled:opacity-50"
         />
       </label>
-      <label className="block text-sm font-medium text-slate-700">
+      <label className="admin-label">
         Image URL (if no file)
         <input
           readOnly={readOnly}
@@ -466,7 +476,7 @@ export function MenuItemForm({
           <button
             type="submit"
             disabled={loading}
-            className="rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
+            className="admin-btn admin-btn--primary disabled:opacity-60"
           >
             {loading ? "Saving…" : "Save"}
           </button>
@@ -483,7 +493,7 @@ export function MenuItemForm({
         )}
         <a
           href={returnHref}
-          className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+          className="admin-btn admin-btn--secondary"
         >
           Cancel
         </a>

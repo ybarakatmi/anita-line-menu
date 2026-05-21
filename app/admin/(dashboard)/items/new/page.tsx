@@ -37,7 +37,7 @@ export default async function NewMenuItemPage({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="admin-stack">
       <AdminBreadcrumbs
         items={[
           { label: "Overview", href: "/admin" },

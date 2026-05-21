@@ -1,6 +1,7 @@
 "use client";
 
 import { clearHeroBgImageAction, saveHeroSettingsAction } from "@/app/admin/hero-actions";
+import { AdminCard, AdminField } from "@/components/admin/AdminUi";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
@@ -35,31 +36,15 @@ function Field({
   type?: string;
 }) {
   return (
-    <div>
-      <label className="mb-1 block text-xs font-medium text-slate-700">
-        {label}
-        {hint && <span className="ml-1 font-normal text-slate-400">({hint})</span>}
-      </label>
+    <AdminField label={label} hint={hint}>
       <input
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-900"
+        className="admin-input"
       />
-    </div>
-  );
-}
-
-function SectionCard({ title, description, children }: { title: string; description: string; children: React.ReactNode }) {
-  return (
-    <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
-      <div>
-        <h2 className="text-base font-semibold text-slate-900">{title}</h2>
-        <p className="mt-0.5 text-sm text-slate-500">{description}</p>
-      </div>
-      {children}
-    </div>
+    </AdminField>
   );
 }
 
@@ -183,10 +168,10 @@ export function HeroEditor({
   const busy = uploading || saving || clearing;
 
   return (
-    <form onSubmit={onSave} className="space-y-6">
+    <form onSubmit={onSave} className="admin-stack">
 
       {/* ── Background image ───────────────────────────────── */}
-      <SectionCard
+      <AdminCard
         title="Background image"
         description="Upload a photo or paste a URL. Replaces the default video behind the hero. Recommended: portrait, at least 430 × 860 px."
       >
@@ -218,7 +203,7 @@ export function HeroEditor({
 
         <div className="flex flex-wrap items-center gap-3">
           <button type="button" onClick={() => fileInputRef.current?.click()} disabled={busy}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50">
+            className="admin-btn admin-btn--secondary">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" />
             </svg>
@@ -244,10 +229,10 @@ export function HeroEditor({
             {clearing ? "Clearing…" : "Remove background image"}
           </button>
         )}
-      </SectionCard>
+      </AdminCard>
 
       {/* ── Brand name ─────────────────────────────────────── */}
-      <SectionCard
+      <AdminCard
         title="Brand name"
         description='The large display text in the centre of the hero. Split across two lines — e.g. "LA MAMMA" and "DEL GELATO".'
       >
@@ -265,10 +250,10 @@ export function HeroEditor({
             {brandLine2 || "DEL GELATO"}
           </p>
         </div>
-      </SectionCard>
+      </AdminCard>
 
       {/* ── Subtitle + eyebrow ─────────────────────────────── */}
-      <SectionCard
+      <AdminCard
         title="Subtitle &amp; eyebrow"
         description="The italic name below the brand and the small location line at the top."
       >
@@ -276,10 +261,10 @@ export function HeroEditor({
           <Field label="Italic subtitle" hint='shows as italic below brand' value={subtitle} onChange={setSubtitle} placeholder="Anita Gelato" />
           <Field label="Eyebrow" hint="top of hero" value={eyebrow} onChange={setEyebrow} placeholder="Tarzana · Los Angeles" />
         </div>
-      </SectionCard>
+      </AdminCard>
 
       {/* ── Tag pills ──────────────────────────────────────── */}
-      <SectionCard
+      <AdminCard
         title="Category pills"
         description='The three small pill labels under the subtitle — e.g. "Gelato", "Yogurt", "Coffee".'
       >
@@ -297,10 +282,10 @@ export function HeroEditor({
             </span>
           ))}
         </div>
-      </SectionCard>
+      </AdminCard>
 
       {/* ── Buttons ────────────────────────────────────────── */}
-      <SectionCard
+      <AdminCard
         title="Hero buttons"
         description='The two call-to-action buttons at the bottom of the hero. "View Flavors" scrolls down the page; "Visit Tarzana" links to an external URL.'
       >
@@ -319,22 +304,16 @@ export function HeroEditor({
             {secondaryLabel || "VISIT TARZANA"}
           </span>
         </div>
-      </SectionCard>
+      </AdminCard>
 
-      {error && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{error}</div>
-      )}
-      {success && (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{success}</div>
-      )}
+      {error && <div className="admin-message admin-message--error">{error}</div>}
+      {success && <div className="admin-message admin-message--success">{success}</div>}
 
-      <div className="flex items-center gap-4">
-        <button type="submit" disabled={busy}
-          className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60">
+      <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+        <button type="submit" disabled={busy} className="admin-btn admin-btn--primary admin-btn--lg">
           {uploading ? "Uploading image…" : saving ? "Saving…" : "Save hero"}
         </button>
-        <a href="/" target="_blank" rel="noopener noreferrer"
-          className="text-sm font-medium text-slate-600 hover:text-slate-900">
+        <a href="/" target="_blank" rel="noopener noreferrer" className="admin-link">
           Preview public menu ↗
         </a>
       </div>

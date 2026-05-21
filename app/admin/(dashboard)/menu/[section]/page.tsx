@@ -1,5 +1,5 @@
 import { duplicateMenuItemAction, reorderMenuItemAction } from "@/app/admin/menu-actions";
-import { AdminBreadcrumbs } from "@/components/admin/AdminBreadcrumbs";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { adminSectionHref, getSectionMeta, isMenuSection } from "@/lib/admin-sections";
 import { fetchConsoleAccess } from "@/lib/console-access";
 import { formatAdminSyncTime } from "@/lib/format-admin-sync";
@@ -32,9 +32,9 @@ export default async function AdminMenuSectionPage({ params }: { params: Promise
 
   if (error) {
     return (
-      <div className="rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
-        <p className="font-medium">Could not load this section</p>
-        <p className="mt-1 text-amber-800/90">{error.message}</p>
+      <div className="admin-message admin-message--warning">
+        <p className="admin-message-title">Could not load this section</p>
+        <p style={{ margin: 0 }}>{error.message}</p>
       </div>
     );
   }
@@ -50,92 +50,85 @@ export default async function AdminMenuSectionPage({ params }: { params: Promise
   const sectionSyncLabel = formatAdminSyncTime(lastSectionTouch);
 
   return (
-    <div className="space-y-8">
-      <div className="space-y-2">
-        <AdminBreadcrumbs items={[{ label: "Overview", href: "/admin" }, { label: meta.label }]} />
-        {sectionSyncLabel && (
-          <p className="text-xs text-slate-500">
-            Most recent change in this section:{" "}
-            <span className="font-medium text-slate-700">{sectionSyncLabel}</span>
-          </p>
-        )}
-      </div>
+    <div className="admin-stack">
+      <AdminPageHeader
+        breadcrumbs={[{ label: "Overview", href: "/admin" }, { label: meta.label }]}
+        eyebrow="Menu section"
+        title={meta.label}
+        description={meta.description}
+        meta={
+          sectionSyncLabel ? (
+            <>
+              Most recent change: <strong>{sectionSyncLabel}</strong>
+            </>
+          ) : undefined
+        }
+        actions={
+          <>
+            <span className="admin-meta" style={{ alignSelf: "center" }}>
+              <strong>{live}</strong> live · <strong>{rows.length}</strong> total
+            </span>
+            {canEditMenu ? (
+              <Link
+                href={`/admin/items/new?section=${section}&returnTo=${encodeURIComponent(returnHref)}`}
+                className="admin-btn admin-btn--primary"
+              >
+                Add item
+              </Link>
+            ) : (
+              <span className="admin-meta">View only — contact an owner or manager to edit.</span>
+            )}
+          </>
+        }
+      />
 
-      <div className="flex flex-col justify-between gap-4 border-b border-slate-200 pb-6 sm:flex-row sm:items-end">
-        <div className="space-y-1">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Menu section</p>
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">{meta.label}</h1>
-          <p className="max-w-2xl text-sm text-slate-600">{meta.description}</p>
-        </div>
-        <div className="flex flex-col items-stretch gap-3 sm:items-end">
-          <div className="text-right text-sm text-slate-600">
-            <span className="font-medium text-slate-900">{live}</span> live ·{" "}
-            <span className="font-medium text-slate-900">{rows.length}</span> total
-          </div>
-          {canEditMenu ? (
-            <Link
-              href={`/admin/items/new?section=${section}&returnTo=${encodeURIComponent(returnHref)}`}
-              className="inline-flex items-center justify-center rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800"
-            >
-              Add item
-            </Link>
-          ) : (
-            <span className="text-xs font-medium text-slate-500">View only — ask an owner or manager to edit.</span>
-          )}
-        </div>
-      </div>
-
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[720px] text-left text-sm">
+      <div className="admin-table-wrap">
+        <div className="admin-table-scroll">
+          <table className="admin-table">
             <thead>
-              <tr className="border-b border-slate-200 bg-slate-50/80">
-                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Name</th>
-                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Status</th>
-                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Order</th>
+              <tr>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Order</th>
                 {canEditMenu ? (
                   <>
-                    <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Actions</th>
-                    <th className="px-4 py-3" />
+                    <th>Actions</th>
+                    <th />
                   </>
                 ) : null}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody>
               {rows.map((row) => (
-                <tr key={row.id} className="hover:bg-slate-50/60">
-                  <td className="px-4 py-3">
-                    <div className="font-medium text-slate-900">{row.name}</div>
+                <tr key={row.id}>
+                  <td>
+                    <div style={{ fontWeight: 600 }}>{row.name}</div>
                     {row.description && (
-                      <div className="mt-0.5 line-clamp-1 text-xs text-slate-500">{row.description}</div>
+                      <div className="admin-meta" style={{ marginTop: 2 }}>
+                        {row.description}
+                      </div>
                     )}
                   </td>
-                  <td className="px-4 py-3">
+                  <td>
                     {row.is_active ? (
-                      <span className="inline-flex rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-800 ring-1 ring-inset ring-emerald-600/20">
-                        Live
-                      </span>
+                      <span className="admin-badge admin-badge--success">Live</span>
                     ) : (
-                      <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-500/10">
-                        Hidden
-                      </span>
+                      <span className="admin-badge admin-badge--neutral">Hidden</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 tabular-nums text-slate-600">{row.sort_order}</td>
+                  <td style={{ fontVariantNumeric: "tabular-nums", color: "var(--admin-text-secondary)" }}>
+                    {row.sort_order}
+                  </td>
                   {canEditMenu ? (
                     <>
-                      <td className="px-4 py-3">
-                        <div className="flex flex-wrap items-center gap-1.5">
+                      <td>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                           <form action={reorderMenuItemAction}>
                             <input type="hidden" name="id" value={row.id} />
                             <input type="hidden" name="direction" value="up" />
                             <input type="hidden" name="returnTo" value={returnHref} />
                             <input type="hidden" name="section" value={section} />
-                            <button
-                              type="submit"
-                              className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
-                              title="Move up"
-                            >
+                            <button type="submit" className="admin-btn admin-btn--secondary" style={{ minHeight: 28, padding: "4px 10px", fontSize: 12 }} title="Move up">
                               Up
                             </button>
                           </form>
@@ -144,11 +137,7 @@ export default async function AdminMenuSectionPage({ params }: { params: Promise
                             <input type="hidden" name="direction" value="down" />
                             <input type="hidden" name="returnTo" value={returnHref} />
                             <input type="hidden" name="section" value={section} />
-                            <button
-                              type="submit"
-                              className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
-                              title="Move down"
-                            >
+                            <button type="submit" className="admin-btn admin-btn--secondary" style={{ minHeight: 28, padding: "4px 10px", fontSize: 12 }} title="Move down">
                               Down
                             </button>
                           </form>
@@ -156,31 +145,21 @@ export default async function AdminMenuSectionPage({ params }: { params: Promise
                             <input type="hidden" name="id" value={row.id} />
                             <input type="hidden" name="returnTo" value={returnHref} />
                             <input type="hidden" name="section" value={section} />
-                            <button
-                              type="submit"
-                              className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
-                              title="Duplicate"
-                            >
+                            <button type="submit" className="admin-btn admin-btn--secondary" style={{ minHeight: 28, padding: "4px 10px", fontSize: 12 }} title="Duplicate">
                               Duplicate
                             </button>
                           </form>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-right">
-                        <Link
-                          href={`/admin/items/${row.id}?returnTo=${encodeURIComponent(returnHref)}`}
-                          className="text-sm font-medium text-slate-900 underline decoration-slate-300 underline-offset-4 hover:decoration-slate-900"
-                        >
+                      <td style={{ textAlign: "right" }}>
+                        <Link href={`/admin/items/${row.id}?returnTo=${encodeURIComponent(returnHref)}`} className="admin-link">
                           Edit
                         </Link>
                       </td>
                     </>
                   ) : (
-                    <td className="px-4 py-3 text-right" colSpan={2}>
-                      <Link
-                        href={`/admin/items/${row.id}?returnTo=${encodeURIComponent(returnHref)}`}
-                        className="text-sm font-medium text-slate-900 underline decoration-slate-300 underline-offset-4 hover:decoration-slate-900"
-                      >
+                    <td style={{ textAlign: "right" }} colSpan={2}>
+                      <Link href={`/admin/items/${row.id}?returnTo=${encodeURIComponent(returnHref)}`} className="admin-link">
                         View
                       </Link>
                     </td>
@@ -191,7 +170,7 @@ export default async function AdminMenuSectionPage({ params }: { params: Promise
           </table>
         </div>
         {rows.length === 0 && (
-          <div className="border-t border-slate-100 px-4 py-10 text-center text-sm text-slate-600">
+          <div className="admin-card-body" style={{ textAlign: "center", color: "var(--admin-text-secondary)" }}>
             No items in this section yet. Add one to sync the public menu.
           </div>
         )}

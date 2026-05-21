@@ -49,7 +49,7 @@ export default async function EditMenuItemPage({
   const meta = getSectionMeta(row.section);
 
   return (
-    <div className="space-y-6">
+    <div className="admin-stack">
       <AdminBreadcrumbs
         items={[
           { label: "Overview", href: "/admin" },

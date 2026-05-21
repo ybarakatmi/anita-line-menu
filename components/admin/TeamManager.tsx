@@ -39,17 +39,19 @@ function PermissionCheckbox({
   disabled?: boolean;
 }) {
   return (
-    <label className={`flex items-start gap-3 rounded-lg border p-3 transition-colors cursor-pointer ${checked ? "border-slate-900 bg-slate-50" : "border-slate-200 bg-white hover:bg-slate-50"} ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}>
+    <label
+      className={`admin-check-tile${checked ? " admin-check-tile--checked" : ""}${disabled ? " opacity-50 cursor-not-allowed" : ""}`}
+    >
       <input
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
         disabled={disabled}
-        className="mt-0.5 h-4 w-4 rounded border-slate-300 accent-slate-900"
+        className="mt-0.5 h-4 w-4"
       />
       <div>
-        <p className="text-sm font-medium text-slate-900">{label}</p>
-        <p className="text-xs text-slate-500">{description}</p>
+        <p style={{ margin: 0, fontSize: 13, fontWeight: 600 }}>{label}</p>
+        <p className="admin-field-hint" style={{ margin: 0 }}>{description}</p>
       </div>
     </label>
   );
@@ -84,32 +86,32 @@ function AddMemberForm({ onSuccess }: { onSuccess: () => void }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-      <h3 className="text-sm font-semibold text-slate-900">Add team member</h3>
+    <form onSubmit={onSubmit} className="admin-card admin-card-padded admin-stack-sm">
+      <h3 className="admin-section-title">Add team member</h3>
       <div className="grid gap-3 sm:grid-cols-3">
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-700">Display name</label>
+          <label className="admin-label">Display name</label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Jane Smith"
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+            className="admin-input"
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-700">Email <span className="text-red-500">*</span></label>
+          <label className="admin-label">Email <span style={{ color: "var(--admin-error)" }}>*</span></label>
           <input
             type="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="jane@example.com"
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+            className="admin-input"
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-700">Password <span className="text-red-500">*</span></label>
+          <label className="admin-label">Password <span style={{ color: "var(--admin-error)" }}>*</span></label>
           <input
             type="password"
             required
@@ -117,13 +119,13 @@ function AddMemberForm({ onSuccess }: { onSuccess: () => void }) {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Min. 8 characters"
             autoComplete="new-password"
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+            className="admin-input"
           />
         </div>
       </div>
 
       <div>
-        <p className="mb-2 text-xs font-medium text-slate-700">Permissions</p>
+        <p className="admin-label" style={{ marginBottom: 8 }}>Permissions</p>
         <div className="grid gap-2 sm:grid-cols-2">
           {PERM_LABELS.map(({ key, label, description }) => (
             <PermissionCheckbox
@@ -142,7 +144,7 @@ function AddMemberForm({ onSuccess }: { onSuccess: () => void }) {
       <button
         type="submit"
         disabled={loading || !email.trim() || !password.trim()}
-        className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+        className="admin-btn admin-btn--primary disabled:opacity-50"
       >
         {loading ? "Creating…" : "Create account"}
       </button>
@@ -195,21 +197,21 @@ function MemberRow({
   }
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-      <div className="flex items-center justify-between gap-3 px-5 py-3.5">
+    <div className="admin-card overflow-hidden">
+      <div className="admin-card-header" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <p className="truncate text-sm font-medium text-slate-900">
+            <p style={{ margin: 0, fontSize: 14, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis" }}>
               {member.display_name || member.email}
             </p>
             {isOwner && (
-              <span className="shrink-0 rounded-full bg-slate-900 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
+              <span className="admin-badge" style={{ background: "var(--admin-brand)", color: "#fff" }}>
                 Owner
               </span>
             )}
           </div>
           {member.display_name && (
-            <p className="text-xs text-slate-500">{member.email}</p>
+            <p className="admin-field-hint" style={{ margin: "2px 0 0" }}>{member.email}</p>
           )}
         </div>
         {!isOwner && (
@@ -217,7 +219,8 @@ function MemberRow({
             <button
               type="button"
               onClick={() => { setEditing((v) => !v); setError(null); }}
-              className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+              className="admin-btn admin-btn--secondary"
+              style={{ minHeight: 28, padding: "4px 12px", fontSize: 12 }}
             >
               {editing ? "Cancel" : "Edit"}
             </button>
@@ -225,7 +228,8 @@ function MemberRow({
               type="button"
               onClick={onRemove}
               disabled={removing}
-              className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 disabled:opacity-50"
+              className="admin-btn admin-btn--danger"
+              style={{ minHeight: 28, padding: "4px 12px", fontSize: 12 }}
             >
               {removing ? "Removing…" : "Remove"}
             </button>
@@ -234,15 +238,11 @@ function MemberRow({
       </div>
 
       {!isOwner && !editing && (
-        <div className="flex flex-wrap gap-1.5 border-t border-slate-100 px-5 py-3">
+        <div className="admin-card-body" style={{ display: "flex", flexWrap: "wrap", gap: 6, paddingTop: 12, paddingBottom: 12 }}>
           {PERM_LABELS.map(({ key, label }) => (
             <span
               key={key}
-              className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
-                perms[key]
-                  ? "bg-emerald-100 text-emerald-800"
-                  : "bg-slate-100 text-slate-400"
-              }`}
+              className={perms[key] ? "admin-badge admin-badge--success" : "admin-badge admin-badge--neutral"}
             >
               {perms[key] ? "✓" : "✗"} {label}
             </span>
@@ -251,16 +251,16 @@ function MemberRow({
       )}
 
       {editing && (
-        <div className="border-t border-slate-100 px-5 py-4 space-y-3">
+        <div className="admin-card-body" style={{ borderTop: "1px solid var(--admin-divider)" }}>
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="sm:col-span-2">
-              <label className="mb-1 block text-xs font-medium text-slate-700">Display name</label>
+              <label className="admin-label">Display name</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Optional"
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+                className="admin-input"
               />
             </div>
             {PERM_LABELS.map(({ key, label, description }) => (
@@ -278,7 +278,7 @@ function MemberRow({
             type="button"
             onClick={onSave}
             disabled={saving}
-            className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+            className="admin-btn admin-btn--primary disabled:opacity-50"
           >
             {saving ? "Saving…" : "Save changes"}
           </button>
@@ -313,15 +313,15 @@ export function TeamManager({ initialMembers }: Props) {
     <section className="space-y-4">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-sm font-semibold text-slate-900">Team members</h2>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <h2 className="admin-section-title">Team members</h2>
+          <p className="admin-page-desc" style={{ marginTop: 4, fontSize: 13 }}>
             Create accounts for staff and assign exactly what they can do. Only you can add or remove members.
           </p>
         </div>
         <button
           type="button"
           onClick={() => setShowAddForm((v) => !v)}
-          className="shrink-0 inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3.5 py-2 text-sm font-medium text-white hover:bg-slate-800"
+          className="admin-btn admin-btn--primary shrink-0"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden>
             <path d="M12 5v14M5 12h14" />
@@ -344,7 +344,7 @@ export function TeamManager({ initialMembers }: Props) {
           <MemberRow key={m.user_id} member={m} onRefresh={refresh} />
         ))}
         {members.length === 0 && (
-          <p className="rounded-xl border border-dashed border-slate-200 px-5 py-8 text-center text-sm text-slate-400">
+          <p className="admin-card admin-card-padded admin-meta" style={{ textAlign: "center", borderStyle: "dashed" }}>
             No team members yet.
           </p>
         )}

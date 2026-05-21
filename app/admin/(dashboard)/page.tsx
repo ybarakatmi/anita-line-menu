@@ -1,4 +1,4 @@
-import { AdminBreadcrumbs } from "@/components/admin/AdminBreadcrumbs";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { ADMIN_MENU_SECTIONS, adminSectionHref, isMenuSection } from "@/lib/admin-sections";
 import { fetchConsoleAccess } from "@/lib/console-access";
 import { formatAdminSyncTime } from "@/lib/format-admin-sync";
@@ -30,11 +30,10 @@ export default async function AdminOverviewPage({
 
   if (error) {
     return (
-      <div className="rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
-        <p className="font-medium">Could not sync with Supabase</p>
-        <p className="mt-1 text-amber-800/90">
-          Confirm <code className="rounded bg-white px-1.5 py-0.5 text-xs">.env.local</code> and that tables exist
-          ({error.message})
+      <div className="admin-message admin-message--warning">
+        <p className="admin-message-title">Could not sync with Supabase</p>
+        <p style={{ margin: 0 }}>
+          Confirm <code className="admin-code">.env.local</code> and that tables exist ({error.message})
         </p>
       </div>
     );
@@ -70,70 +69,56 @@ export default async function AdminOverviewPage({
   const catalogSyncLabel = formatAdminSyncTime(catalogLastTouch);
 
   return (
-    <div className="space-y-8">
-      <div className="space-y-2">
-        <AdminBreadcrumbs items={[{ label: "Overview" }]} />
-        {catalogSyncLabel && (
-          <p className="text-xs text-slate-500">
-            Last catalog change (any section):{" "}
-            <span className="font-medium text-slate-700">{catalogSyncLabel}</span>
-          </p>
-        )}
-      </div>
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Overview</h1>
-      </div>
+    <div className="admin-stack">
+      <AdminPageHeader
+        breadcrumbs={[{ label: "Overview" }]}
+        title="Overview"
+        description="Catalog health across all menu sections. Open a section to edit items on the public site."
+        meta={
+          catalogSyncLabel ? (
+            <>
+              Last catalog change: <strong>{catalogSyncLabel}</strong>
+            </>
+          ) : undefined
+        }
+      />
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Catalog items</p>
-          <p className="mt-2 text-3xl font-semibold tabular-nums text-slate-900">{total}</p>
+      <div className="admin-stat-grid">
+        <div className="admin-stat">
+          <p className="admin-stat-label">Catalog items</p>
+          <p className="admin-stat-value">{total}</p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Live on menu</p>
-          <p className="mt-2 text-3xl font-semibold tabular-nums text-emerald-700">{active}</p>
+        <div className="admin-stat">
+          <p className="admin-stat-label">Live on menu</p>
+          <p className="admin-stat-value admin-stat-value--success">{active}</p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Hidden / staged</p>
-          <p className="mt-2 text-3xl font-semibold tabular-nums text-slate-700">{total - active}</p>
+        <div className="admin-stat">
+          <p className="admin-stat-label">Hidden / staged</p>
+          <p className="admin-stat-value">{total - active}</p>
         </div>
       </div>
 
       <div>
-        <h2 className="mb-3 text-sm font-semibold text-slate-900">Sections</h2>
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <h2 className="admin-section-title" style={{ marginBottom: 12 }}>
+          Sections
+        </h2>
+        <div className="admin-grid-tiles">
           {ADMIN_MENU_SECTIONS.map((meta) => {
             const stats = bySection[meta.id];
             const href = adminSectionHref(meta.id);
             return (
-              <div
-                key={meta.id}
-                className="flex flex-col rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <h3 className="text-base font-semibold text-slate-900">{meta.label}</h3>
-                    <p className="mt-1 text-sm leading-relaxed text-slate-600">{meta.description}</p>
-                  </div>
-                </div>
-                <div className="mt-4 flex items-baseline gap-3 text-sm text-slate-600">
-                  <span>
-                    <span className="font-medium text-slate-900">{stats.active}</span> live
-                  </span>
-                  <span className="text-slate-300">·</span>
-                  <span>
-                    <span className="font-medium text-slate-900">{stats.total}</span> total
-                  </span>
-                </div>
-                <div className="mt-5">
-                  <Link
-                    href={href}
-                    className="inline-flex w-full items-center justify-center rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800"
-                  >
+              <article key={meta.id} className="admin-tile">
+                <h3 className="admin-tile-title">{meta.label}</h3>
+                <p className="admin-tile-desc">{meta.description}</p>
+                <p className="admin-tile-stats">
+                  <strong>{stats.active}</strong> live · <strong>{stats.total}</strong> total
+                </p>
+                <div className="admin-tile-footer">
+                  <Link href={href} className="admin-btn admin-btn--primary admin-btn--block">
                     {canEditMenu ? `Manage ${meta.label.toLowerCase()}` : `View ${meta.label.toLowerCase()}`}
                   </Link>
                 </div>
-              </div>
+              </article>
             );
           })}
         </div>

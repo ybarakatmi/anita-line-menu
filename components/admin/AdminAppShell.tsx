@@ -1,6 +1,16 @@
 "use client";
 
 import { signOutAction } from "@/app/admin/actions";
+import {
+  IconExternal,
+  IconImage,
+  IconMail,
+  IconMenu,
+  IconOverview,
+  IconSettings,
+  IconSupport,
+  IconText,
+} from "@/components/admin/AdminNavIcons";
 import { ADMIN_MENU_SECTIONS, adminSectionHref } from "@/lib/admin-sections";
 import type { ConsoleAccess } from "@/lib/console-access";
 import type { MenuSection } from "@/types/menu";
@@ -21,6 +31,11 @@ const roleLabels: Record<string, string> = {
   viewer: "Guest",
 };
 
+function roleInitial(role: string) {
+  const label = roleLabels[role] ?? "G";
+  return label.charAt(0);
+}
+
 export function AdminAppShell({ children, liveCounts, totalCounts, access }: Props) {
   const pathname = usePathname();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
@@ -36,25 +51,23 @@ export function AdminAppShell({ children, liveCounts, totalCounts, access }: Pro
     return pathname === href || pathname.startsWith(`${href}/`);
   }
 
+  function navLinkClass(href: string) {
+    return `admin-nav-link${linkActive(href) ? " admin-nav-link--active" : ""}`;
+  }
+
   const nav = (
-    <nav className="flex flex-1 flex-col gap-0.5 px-3 py-4">
-      <p className="px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Workspace</p>
-      <Link
-        href="/admin"
-        className={`rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-          overviewActive ? "bg-slate-900 text-white" : "text-slate-700 hover:bg-slate-100"
-        }`}
-      >
+    <nav style={{ display: "flex", flex: 1, flexDirection: "column", padding: "8px 0 16px" }}>
+      <p className="admin-nav-group-label">Workspace</p>
+      <Link href="/admin" className={navLinkClass("/admin")}>
+        <IconOverview />
         Overview
       </Link>
 
-      {/* Menu sections — only shown when user can edit products */}
       {access.canEditProducts && (
         <>
-          <p className="mt-6 px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Menu sections</p>
+          <p className="admin-nav-group-label">Menu sections</p>
           {ADMIN_MENU_SECTIONS.map((s) => {
             const href = adminSectionHref(s.id);
-            const active = pathname.startsWith(href);
             const live = liveCounts[s.id] ?? 0;
             const total = totalCounts[s.id] ?? 0;
             const title =
@@ -62,22 +75,14 @@ export function AdminAppShell({ children, liveCounts, totalCounts, access }: Pro
                 ? `${live} live item${live === 1 ? "" : "s"} on the public menu`
                 : `${live} live · ${total} total`;
             return (
-              <Link
-                key={s.id}
-                href={href}
-                className={`flex items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                  active ? "bg-slate-900 text-white" : "text-slate-700 hover:bg-slate-100"
-                }`}
-              >
-                <span>{s.label}</span>
-                <span
-                  title={title}
-                  className={`rounded-md px-2 py-0.5 text-xs tabular-nums ${
-                    active ? "bg-white/15 text-white" : "bg-slate-200/80 text-slate-600"
-                  }`}
-                >
+              <Link key={s.id} href={href} className={navLinkClass(href)} title={title}>
+                <IconMenu />
+                <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>
+                  {s.label}
+                </span>
+                <span className="admin-nav-badge">
                   {live}
-                  {live !== total ? <span className="opacity-70">/{total}</span> : null}
+                  {live !== total ? <span style={{ opacity: 0.65 }}>/{total}</span> : null}
                 </span>
               </Link>
             );
@@ -85,161 +90,167 @@ export function AdminAppShell({ children, liveCounts, totalCounts, access }: Pro
         </>
       )}
 
-      {/* Presentation — shown when user can edit sections */}
       {access.canEditSections && (
         <>
-          <p className="mt-6 px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Presentation</p>
-          <Link
-            href="/admin/hero"
-            className={`rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-              linkActive("/admin/hero") ? "bg-slate-900 text-white" : "text-slate-700 hover:bg-slate-100"
-            }`}
-          >
+          <p className="admin-nav-group-label">Presentation</p>
+          <Link href="/admin/hero" className={navLinkClass("/admin/hero")}>
+            <IconImage />
             Hero section
           </Link>
-          <Link
-            href="/admin/sections"
-            className={`rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-              linkActive("/admin/sections") ? "bg-slate-900 text-white" : "text-slate-700 hover:bg-slate-100"
-            }`}
-          >
+          <Link href="/admin/sections" className={navLinkClass("/admin/sections")}>
+            <IconText />
             Section headings
           </Link>
         </>
       )}
 
-      {/* Inquiries */}
       {access.canViewInquiries && (
         <>
-          <p className="mt-6 px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Inquiries</p>
-          <Link
-            href="/admin/contact-submissions"
-            className={`rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-              linkActive("/admin/contact-submissions") ? "bg-slate-900 text-white" : "text-slate-700 hover:bg-slate-100"
-            }`}
-          >
+          <p className="admin-nav-group-label">Inquiries</p>
+          <Link href="/admin/contact-submissions" className={navLinkClass("/admin/contact-submissions")}>
+            <IconMail />
             Contact submissions
           </Link>
         </>
       )}
 
-      {/* Support tickets */}
       {access.canSubmitTickets && (
         <>
-          <p className="mt-6 px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Support</p>
-          <Link
-            href="/admin/support"
-            className={`rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-              linkActive("/admin/support") ? "bg-slate-900 text-white" : "text-slate-700 hover:bg-slate-100"
-            }`}
-          >
+          <p className="admin-nav-group-label">Support</p>
+          <Link href="/admin/support" className={navLinkClass("/admin/support")}>
+            <IconSupport />
             Submit a ticket
           </Link>
         </>
       )}
 
-      <p className="mt-6 px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Configuration</p>
-      <Link
-        href="/admin/settings"
-        className={`rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-          linkActive("/admin/settings") ? "bg-slate-900 text-white" : "text-slate-700 hover:bg-slate-100"
-        }`}
-      >
-        Settings
-        {access.canManageTeam && (
-          <span className="ml-2 rounded-full bg-slate-200 px-1.5 py-0.5 text-[10px] font-medium text-slate-600">
+      <p className="admin-nav-group-label">Configuration</p>
+      <Link href="/admin/settings" className={navLinkClass("/admin/settings")}>
+        <IconSettings />
+        <span style={{ flex: 1 }}>Settings</span>
+        {access.canManageTeam ? (
+          <span className="admin-nav-badge" style={{ fontSize: 10 }}>
             Team
           </span>
-        )}
+        ) : null}
       </Link>
     </nav>
   );
 
+  const roleLabel = roleLabels[access.role] ?? "Guest";
+
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
+    <div className="admin-shell">
       {mobileNavOpen && (
         <button
           type="button"
-          className="fixed inset-0 z-40 bg-slate-900/40 lg:hidden"
+          className="fixed inset-0 z-40 lg:hidden"
+          style={{ background: "rgba(36, 36, 36, 0.4)", border: "none", cursor: "pointer" }}
           aria-label="Close navigation"
           onClick={() => setMobileNavOpen(false)}
         />
       )}
 
-      <div className="flex min-h-screen">
+      <div style={{ display: "flex", minHeight: "100vh" }}>
         <aside
-          className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-slate-200 bg-white shadow-sm transition-transform lg:static lg:translate-x-0 ${
+          className={`admin-sidebar fixed inset-y-0 left-0 z-50 flex w-[272px] flex-col transition-transform lg:static lg:translate-x-0 ${
             mobileNavOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
           }`}
         >
-          <div className="flex h-14 items-center justify-between border-b border-slate-100 px-4 lg:h-16">
-            <Link href="/admin" className="flex flex-col leading-tight">
-              <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Anita</span>
-              <span className="text-sm font-semibold text-slate-900">Menu console</span>
+          <div
+            className="admin-topbar"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "0 16px",
+              flexShrink: 0,
+            }}
+          >
+            <Link href="/admin" className="admin-sidebar-brand" style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+              <span className="admin-sidebar-logo" aria-hidden>
+                A
+              </span>
+              <span>
+                <span className="admin-sidebar-brand-eyebrow">Anita Gelato</span>
+                <span className="admin-sidebar-brand-title">Menu console</span>
+              </span>
             </Link>
             <button
               type="button"
-              className="rounded-md p-2 text-slate-500 hover:bg-slate-100 lg:hidden"
+              className="admin-btn admin-btn--ghost lg:hidden"
+              style={{ minWidth: 32, padding: 6 }}
               aria-label="Close menu"
               onClick={() => setMobileNavOpen(false)}
             >
-              <span className="text-lg leading-none">×</span>
+              ×
             </button>
           </div>
+
           {nav}
-          <div className="mt-auto border-t border-slate-100 p-3">
-            <div className="mb-2 px-1">
-              <p className="text-xs font-medium text-slate-700">
-                {roleLabels[access.role] ?? "Guest"}
-              </p>
-              <p className="text-[11px] text-slate-400">
-                {access.canManageTeam ? "Full access" : "Limited access"}
-              </p>
+
+          <div style={{ marginTop: "auto", padding: "8px 0 12px", borderTop: "1px solid var(--admin-divider)" }}>
+            <div className="admin-user-pill">
+              <span className="admin-user-avatar" aria-hidden>
+                {roleInitial(access.role)}
+              </span>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <p style={{ margin: 0, fontSize: 13, fontWeight: 600 }}>{roleLabel}</p>
+                <p style={{ margin: 0, fontSize: 11, color: "var(--admin-text-muted)" }}>
+                  {access.canManageTeam ? "Full access" : "Limited access"}
+                </p>
+              </div>
             </div>
-            <form action={signOutAction}>
-              <button
-                type="submit"
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
-              >
+            <form action={signOutAction} style={{ padding: "0 8px" }}>
+              <button type="submit" className="admin-btn admin-btn--secondary admin-btn--block">
                 Sign out
               </button>
             </form>
           </div>
         </aside>
 
-        <div className="flex min-w-0 flex-1 flex-col lg:pl-0">
-          <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b border-slate-200 bg-white/90 px-4 backdrop-blur lg:h-16 lg:px-8">
-            <div className="flex items-center gap-2">
+        <div style={{ display: "flex", minWidth: 0, flex: 1, flexDirection: "column" }}>
+          <header
+            className="admin-topbar sticky top-0 z-30"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 12,
+              padding: "0 16px",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <button
                 type="button"
-                className="rounded-md p-2 text-slate-600 hover:bg-slate-100 lg:hidden"
+                className="admin-btn admin-btn--ghost lg:hidden"
+                style={{ minWidth: 32, padding: 6 }}
                 aria-label="Open navigation"
                 onClick={() => setMobileNavOpen(true)}
               >
-                <span className="sr-only">Menu</span>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-slate-700" aria-hidden>
-                  <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                </svg>
+                <IconMenu className="admin-nav-icon" />
               </button>
-              <span className="hidden text-sm text-slate-500 sm:inline">
+              <span className="admin-role-hint">
                 {access.canManageTeam
                   ? "Owner — full access"
-                  : `${roleLabels[access.role] ?? "Guest"} — limited access`}
+                  : `${roleLabel} — limited access`}
               </span>
             </div>
             <Link
               href="/"
               target="_blank"
               rel="noopener noreferrer"
-              className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+              className="admin-btn admin-btn--secondary"
             >
               Open public menu
+              <IconExternal />
             </Link>
           </header>
 
-          <main className="flex-1 px-4 py-6 lg:px-8 lg:py-8">{children}</main>
+          <main className="admin-main flex-1">{children}</main>
         </div>
       </div>
+
     </div>
   );
 }

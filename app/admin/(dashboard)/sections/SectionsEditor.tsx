@@ -128,20 +128,19 @@ export function SectionsEditor({ savedLabels }: Props) {
         return (
           <div
             key={section.id}
-            className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden"
+            className="admin-card overflow-hidden"
           >
             <button
               type="button"
               onClick={() => setOpenSection(isOpen ? null : section.id)}
-              className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left hover:bg-slate-50 transition-colors"
+              className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left transition-colors"
+              style={{ background: "transparent", border: "none", cursor: "pointer", fontFamily: "inherit" }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "var(--admin-nav-hover)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
             >
               <div className="flex items-center gap-3">
-                <span className="text-sm font-semibold text-slate-900">{section.displayName}</span>
-                {overridden && (
-                  <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700">
-                    Customised
-                  </span>
-                )}
+                <span style={{ fontSize: 14, fontWeight: 600 }}>{section.displayName}</span>
+                {overridden && <span className="admin-badge admin-badge--success">Customised</span>}
               </div>
               <svg
                 width="16"
@@ -158,14 +157,14 @@ export function SectionsEditor({ savedLabels }: Props) {
             </button>
 
             {isOpen && (
-              <div className="border-t border-slate-100 px-5 pb-5 pt-4 space-y-4">
-                <p className="text-xs text-slate-500">
+              <div className="admin-card-body" style={{ borderTop: "1px solid var(--admin-divider)" }}>
+                <p className="admin-field-hint" style={{ marginBottom: 16 }}>
                   Leave a field blank to keep the default text shown below in grey.
                 </p>
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="mb-1 block text-xs font-medium text-slate-700">
+                    <label className="admin-label">
                       Eyebrow <span className="font-normal text-slate-400">(small line above heading)</span>
                     </label>
                     <input
@@ -173,12 +172,12 @@ export function SectionsEditor({ savedLabels }: Props) {
                       value={l.the}
                       onChange={(e) => update(section.id, "the", e.target.value)}
                       placeholder={section.defaults.the}
-                      className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                      className="admin-input"
                     />
                   </div>
 
                   <div>
-                    <label className="mb-1 block text-xs font-medium text-slate-700">
+                    <label className="admin-label">
                       Tag line <span className="font-normal text-slate-400">(✦ line below heading)</span>
                     </label>
                     <input
@@ -186,12 +185,12 @@ export function SectionsEditor({ savedLabels }: Props) {
                       value={l.tag}
                       onChange={(e) => update(section.id, "tag", e.target.value)}
                       placeholder={section.defaults.tag}
-                      className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                      className="admin-input"
                     />
                   </div>
 
                   <div>
-                    <label className="mb-1 block text-xs font-medium text-slate-700">
+                    <label className="admin-label">
                       Heading — line 1
                     </label>
                     <input
@@ -199,12 +198,12 @@ export function SectionsEditor({ savedLabels }: Props) {
                       value={l.big_line1}
                       onChange={(e) => update(section.id, "big_line1", e.target.value)}
                       placeholder={section.defaults.big_line1}
-                      className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                      className="admin-input"
                     />
                   </div>
 
                   <div>
-                    <label className="mb-1 block text-xs font-medium text-slate-700">
+                    <label className="admin-label">
                       Heading — line 2
                     </label>
                     <input
@@ -212,7 +211,7 @@ export function SectionsEditor({ savedLabels }: Props) {
                       value={l.big_line2}
                       onChange={(e) => update(section.id, "big_line2", e.target.value)}
                       placeholder={section.defaults.big_line2}
-                      className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                      className="admin-input"
                     />
                   </div>
                 </div>
@@ -250,31 +249,14 @@ export function SectionsEditor({ savedLabels }: Props) {
         );
       })}
 
-      {error && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
-          {error}
-        </div>
-      )}
-      {success && (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-          {success}
-        </div>
-      )}
+      {error && <div className="admin-message admin-message--error">{error}</div>}
+      {success && <div className="admin-message admin-message--success">{success}</div>}
 
-      <div className="flex items-center gap-4 pt-2">
-        <button
-          type="submit"
-          disabled={saving}
-          className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
-        >
+      <div style={{ display: "flex", alignItems: "center", gap: 16, paddingTop: 8 }}>
+        <button type="submit" disabled={saving} className="admin-btn admin-btn--primary admin-btn--lg">
           {saving ? "Saving…" : "Save all sections"}
         </button>
-        <a
-          href="/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-sm font-medium text-slate-600 hover:text-slate-900"
-        >
+        <a href="/" target="_blank" rel="noopener noreferrer" className="admin-link">
           Preview public menu ↗
         </a>
       </div>

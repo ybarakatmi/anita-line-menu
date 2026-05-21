@@ -1,5 +1,5 @@
 import { AccountForm } from "@/components/admin/AccountForm";
-import { AdminBreadcrumbs } from "@/components/admin/AdminBreadcrumbs";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { TeamManager } from "@/components/admin/TeamManager";
 import { listTeamMembersAction } from "@/app/admin/team-actions";
 import { fetchConsoleAccess } from "@/lib/console-access";
@@ -21,22 +21,23 @@ export default async function AdminSettingsPage() {
   const members = isOwner ? await listTeamMembersAction().catch(() => []) : [];
 
   return (
-    <div className="space-y-10">
-      <div className="space-y-2 border-b border-slate-200 pb-6">
-        <AdminBreadcrumbs items={[{ label: "Overview", href: "/admin" }, { label: "Settings" }]} />
-        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Account</p>
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Settings</h1>
-      </div>
+    <div className="admin-stack">
+      <AdminPageHeader
+        breadcrumbs={[{ label: "Overview", href: "/admin" }, { label: "Settings" }]}
+        eyebrow="Configuration"
+        title="Settings"
+        description="Manage your account and, if you are an owner, team access for the menu console."
+      />
 
       <AccountForm currentEmail={user.email ?? ""} />
 
       {isOwner && (
-        <div className="space-y-4 border-t border-slate-200 pt-8">
-          <div className="space-y-1">
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Team</p>
-            <p className="text-sm text-slate-600">
-              Create staff accounts and control exactly what each person can do.
-              Guest accounts can never add or remove other users.
+        <div className="admin-divider-section admin-stack-sm">
+          <div>
+            <p className="admin-eyebrow">Team</p>
+            <p className="admin-page-desc" style={{ marginTop: 6 }}>
+              Create staff accounts and control exactly what each person can do. Guest accounts can never add or remove
+              other users.
             </p>
           </div>
           <TeamManager initialMembers={members} />

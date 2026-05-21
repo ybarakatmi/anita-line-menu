@@ -1,7 +1,5 @@
-import {
-  GoogleTagManager,
-  GoogleTagManagerNoScript,
-} from "@/components/analytics/GoogleTagManager";
+import { GoogleTagManager } from "@/components/analytics/GoogleTagManager";
+import { GoogleTagManagerNoScript } from "@/components/analytics/GoogleTagManagerNoScript";
 import { MicrosoftClarity } from "@/components/analytics/MicrosoftClarity";
 import type { Metadata, Viewport } from "next";
 import { Bodoni_Moda, Josefin_Sans } from "next/font/google";

@@ -1,4 +1,4 @@
-import { AdminBreadcrumbs } from "@/components/admin/AdminBreadcrumbs";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { SupportTicketForm } from "@/components/admin/SupportTicketForm";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
@@ -13,15 +13,13 @@ export default async function AdminSupportPage() {
   if (!user) redirect("/admin/login");
 
   return (
-    <div className="space-y-10">
-      <div className="space-y-2 border-b border-slate-200 pb-6">
-        <AdminBreadcrumbs items={[{ label: "Overview", href: "/admin" }, { label: "Support" }]} />
-        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Help</p>
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Submit a ticket</h1>
-        <p className="max-w-2xl text-sm text-slate-600">
-          Found a bug or need help with the menu console? Send a note and we&apos;ll follow up by email.
-        </p>
-      </div>
+    <div className="admin-stack">
+      <AdminPageHeader
+        breadcrumbs={[{ label: "Overview", href: "/admin" }, { label: "Support" }]}
+        eyebrow="Help"
+        title="Submit a ticket"
+        description="Found a bug or need help with the menu console? Send a note and we'll follow up by email."
+      />
 
       <SupportTicketForm />
     </div>

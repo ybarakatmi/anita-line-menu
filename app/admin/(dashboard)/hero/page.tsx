@@ -1,4 +1,4 @@
-import { AdminBreadcrumbs } from "@/components/admin/AdminBreadcrumbs";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { HeroEditor } from "./HeroEditor";
@@ -21,20 +21,13 @@ export default async function AdminHeroPage() {
     .maybeSingle();
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2 border-b border-slate-200 pb-6">
-        <AdminBreadcrumbs
-          items={[{ label: "Overview", href: "/admin" }, { label: "Hero" }]}
-        />
-        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-          Presentation
-        </p>
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Hero section</h1>
-        <p className="text-sm text-slate-500">
-          Control the background image and every piece of text on the hero at the top of the public menu.
-          Leave any field blank to keep the built-in default.
-        </p>
-      </div>
+    <div className="admin-stack">
+      <AdminPageHeader
+        breadcrumbs={[{ label: "Overview", href: "/admin" }, { label: "Hero" }]}
+        eyebrow="Presentation"
+        title="Hero section"
+        description="Control the background image and every piece of text on the hero at the top of the public menu. Leave any field blank to keep the built-in default."
+      />
 
       <HeroEditor
         currentBgImageUrl={row?.hero_bg_image_url ?? null}

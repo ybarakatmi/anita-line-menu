@@ -35,11 +35,12 @@ export function SupportTicketForm() {
   return (
     <section
       aria-label="Support ticket"
-      className="max-w-2xl space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8"
+      className="admin-card admin-card-padded admin-stack-sm"
+      style={{ maxWidth: "42rem" }}
     >
       <form onSubmit={onSubmit} className="space-y-3">
         <div className="space-y-1">
-          <label className="text-xs font-medium uppercase tracking-wide text-slate-500" htmlFor="ticket-subject">
+          <label className="admin-label" htmlFor="ticket-subject">
             Subject
           </label>
           <input
@@ -49,12 +50,12 @@ export function SupportTicketForm() {
             onChange={(e) => setSubject(e.target.value)}
             maxLength={140}
             placeholder="Short summary"
-            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+            className="admin-input"
             disabled={loading}
           />
         </div>
         <div className="space-y-1">
-          <label className="text-xs font-medium uppercase tracking-wide text-slate-500" htmlFor="ticket-message">
+          <label className="admin-label" htmlFor="ticket-message">
             Details
           </label>
           <textarea
@@ -64,16 +65,16 @@ export function SupportTicketForm() {
             maxLength={4000}
             rows={6}
             placeholder="Steps to reproduce, what you expected, what actually happened…"
-            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+            className="admin-textarea"
             disabled={loading}
           />
         </div>
-        {error && <p className="text-sm text-rose-700">{error}</p>}
-        {success && <p className="text-sm text-emerald-700">{success}</p>}
+        {error && <p className="admin-message admin-message--error" style={{ margin: 0, padding: "8px 12px" }}>{error}</p>}
+        {success && <p className="admin-message admin-message--success" style={{ margin: 0, padding: "8px 12px" }}>{success}</p>}
         <button
           type="submit"
           disabled={loading || !subject.trim() || !message.trim()}
-          className="inline-flex items-center justify-center rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+          className="admin-btn admin-btn--primary disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? "Sending…" : "Send ticket"}
         </button>

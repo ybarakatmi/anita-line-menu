@@ -6,9 +6,9 @@ import { useEffect, useState } from "react";
 
 function DetailRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="border-b border-slate-100 py-3 last:border-b-0">
-      <dt className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{label}</dt>
-      <dd className="mt-1 text-sm text-slate-900">{children}</dd>
+    <div style={{ borderBottom: "1px solid var(--admin-divider)", padding: "12px 0" }}>
+      <dt className="admin-eyebrow" style={{ fontSize: 10 }}>{label}</dt>
+      <dd style={{ margin: "6px 0 0", fontSize: 14 }}>{children}</dd>
     </div>
   );
 }
@@ -35,15 +35,15 @@ export function ContactSubmissionsBoard({ submissions }: { submissions: ContactS
 
   return (
     <>
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        <div className="border-b border-slate-100 px-5 py-4">
-          <p className="text-sm text-slate-600">
-            Showing <span className="font-semibold text-slate-900">{submissions.length}</span>
+      <div className="admin-table-wrap">
+        <div className="admin-card-header">
+          <p className="admin-page-desc" style={{ margin: 0 }}>
+            Showing <strong>{submissions.length}</strong>
             {submissions.length >= 500 ? " (most recent 500)" : ""}
           </p>
-          <p className="mt-1 text-xs text-slate-500">Click a row to open details in the side panel.</p>
+          <p className="admin-field-hint" style={{ marginTop: 4 }}>Click a row to open details in the side panel.</p>
         </div>
-        <ul className="divide-y divide-slate-100" role="list">
+        <ul role="list" style={{ margin: 0, padding: 0, listStyle: "none" }}>
           {submissions.map((s) => {
             const open = selectedId === s.id;
             return (
@@ -51,21 +51,33 @@ export function ContactSubmissionsBoard({ submissions }: { submissions: ContactS
                 <button
                   type="button"
                   onClick={() => setSelectedId(open ? null : s.id)}
-                  className={`flex w-full items-start gap-3 px-5 py-4 text-left transition-colors hover:bg-slate-50 ${
-                    open ? "bg-slate-50 ring-inset ring-1 ring-slate-200/80" : ""
-                  }`}
+                  className="flex w-full items-start gap-3 px-5 py-4 text-left transition-colors"
+                  style={{
+                    border: "none",
+                    borderBottom: "1px solid var(--admin-divider)",
+                    background: open ? "var(--admin-brand-subtle)" : "transparent",
+                    cursor: "pointer",
+                    fontFamily: "inherit",
+                    width: "100%",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!open) e.currentTarget.style.background = "var(--admin-nav-hover)";
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!open) e.currentTarget.style.background = "transparent";
+                  }}
                   aria-expanded={open}
                   aria-controls={`submission-panel-${s.id}`}
                 >
                   <span className="min-w-0 flex-1">
-                    <span className="block font-semibold text-slate-900">{s.name}</span>
-                    <span className="mt-0.5 block truncate text-sm text-slate-600">{s.email}</span>
+                    <span style={{ display: "block", fontWeight: 600 }}>{s.name}</span>
+                    <span className="admin-meta" style={{ display: "block", marginTop: 2 }}>{s.email}</span>
                     {s.subject && (
-                      <span className="mt-1 line-clamp-1 text-xs text-slate-500">Re: {s.subject}</span>
+                      <span className="admin-field-hint" style={{ display: "block", marginTop: 4 }}>Re: {s.subject}</span>
                     )}
                   </span>
                   <span className="shrink-0 text-right">
-                    <time className="block text-xs tabular-nums text-slate-500" dateTime={s.created_at}>
+                    <time className="admin-meta" style={{ display: "block" }} dateTime={s.created_at}>
                       {formatAdminSyncTime(s.created_at) ?? s.created_at}
                     </time>
                     <span className="mt-2 block text-slate-400" aria-hidden>
@@ -91,7 +103,8 @@ export function ContactSubmissionsBoard({ submissions }: { submissions: ContactS
         <>
           <button
             type="button"
-            className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-[1px]"
+            className="fixed inset-0 z-40"
+            style={{ background: "rgba(36, 36, 36, 0.4)", border: "none" }}
             aria-label="Close details"
             onClick={() => setSelectedId(null)}
           />
@@ -100,21 +113,27 @@ export function ContactSubmissionsBoard({ submissions }: { submissions: ContactS
             role="dialog"
             aria-modal="true"
             aria-labelledby="submission-panel-title"
-            className="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col border-l border-slate-200 bg-white shadow-2xl"
+            className="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col"
+            style={{
+              borderLeft: "1px solid var(--admin-border)",
+              background: "var(--admin-canvas)",
+              boxShadow: "var(--admin-shadow-md)",
+            }}
           >
-            <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-5 py-4">
+            <div className="admin-card-header" style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
               <div className="min-w-0">
-                <h2 id="submission-panel-title" className="text-lg font-semibold text-slate-900">
+                <h2 id="submission-panel-title" className="admin-section-title">
                   Contact inquiry
                 </h2>
-                <p className="mt-1 text-xs text-slate-500 tabular-nums">
+                <p className="admin-meta" style={{ marginTop: 4 }}>
                   {formatAdminSyncTime(selected.created_at) ?? selected.created_at}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedId(null)}
-                className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+                className="admin-btn admin-btn--ghost"
+                style={{ minWidth: 36, padding: 8 }}
                 aria-label="Close"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
@@ -129,7 +148,7 @@ export function ContactSubmissionsBoard({ submissions }: { submissions: ContactS
                 <DetailRow label="Email">
                   <a
                     href={`mailto:${encodeURIComponent(selected.email)}`}
-                    className="font-medium text-slate-700 underline-offset-2 hover:underline"
+                    className="admin-link"
                   >
                     {selected.email}
                   </a>
@@ -140,7 +159,7 @@ export function ContactSubmissionsBoard({ submissions }: { submissions: ContactS
                       {selected.phone}
                     </a>
                   ) : (
-                    <span className="text-slate-400">—</span>
+                    <span className="admin-meta">—</span>
                   )}
                 </DetailRow>
                 <DetailRow label="Country">
@@ -153,12 +172,12 @@ export function ContactSubmissionsBoard({ submissions }: { submissions: ContactS
                   {selected.message?.trim() ? (
                     <p className="whitespace-pre-wrap leading-relaxed">{selected.message}</p>
                   ) : (
-                    <span className="text-slate-400">—</span>
+                    <span className="admin-meta">—</span>
                   )}
                 </DetailRow>
               </dl>
-              <p className="mt-6 rounded-lg bg-slate-50 px-3 py-2 text-[11px] text-slate-500">
-                Reference ID: <code className="font-mono text-slate-700">{selected.id}</code>
+              <p className="admin-meta" style={{ marginTop: 24, padding: "10px 12px", background: "var(--admin-bg)", borderRadius: "var(--admin-radius)" }}>
+                Reference ID: <code className="admin-code">{selected.id}</code>
               </p>
             </div>
           </aside>
