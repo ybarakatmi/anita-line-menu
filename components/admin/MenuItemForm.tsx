@@ -1,12 +1,13 @@
 "use client";
 
 import { deleteMenuItemAction, saveMenuItemAction } from "@/app/admin/menu-actions";
-import { createClient } from "@/lib/supabase/client";
 import { ADMIN_MENU_SECTIONS } from "@/lib/admin-sections";
 import { formatAdminSyncTime } from "@/lib/format-admin-sync";
+import { detailPricingTitle, getPriceTiersForItem } from "@/lib/menu-item-detail";
+import { createClient } from "@/lib/supabase/client";
 import type { MenuItemRow, MenuPriceTier, MenuSection } from "@/types/menu";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const EMPTY_TIER_ROW: MenuPriceTier = { label: "", price: "", hint: "" };
 
@@ -38,6 +39,33 @@ function filledTiersFromRows(rows: MenuPriceTier[]): MenuPriceTier[] {
       hint: r.hint?.trim() ? r.hint.trim() : undefined,
     }))
     .filter((r) => r.label && r.price);
+}
+
+function previewMenuItem(
+  section: MenuSection,
+  priceDisplay: string,
+  pricingMode: PricingMode,
+  tierRows: MenuPriceTier[]
+): MenuItemRow {
+  return {
+    id: "preview",
+    section,
+    name: "Preview",
+    description: null,
+    price_display: priceDisplay.trim() || null,
+    emoji: null,
+    image_url: null,
+    tags: [],
+    badge: null,
+    is_new: false,
+    is_fave: false,
+    is_vegan: false,
+    sort_order: 0,
+    is_active: true,
+    promo_label: null,
+    seasonal_ribbon_label: null,
+    price_tiers: pricingMode === "auto" ? null : filledTiersFromRows(tierRows),
+  };
 }
 
 type Props = { initial: MenuItemRow | null };
@@ -87,6 +115,15 @@ export function MenuItemForm({
   const [loading, setLoading] = useState(false);
 
   const lastSavedLabel = !isNew ? formatAdminSyncTime(lastSavedAt) : null;
+
+  const publicPricingPreview = useMemo(() => {
+    const preview = previewMenuItem(section, priceDisplay, pricingMode, tierRows);
+    return {
+      cardPrice: preview.price_display,
+      expandTiers: getPriceTiersForItem(preview),
+      expandTitle: detailPricingTitle(section),
+    };
+  }, [section, priceDisplay, pricingMode, tierRows]);
 
   // Re-hydrate tier editor when the loaded row changes (save + router.refresh), not on every RSC object identity.
   useEffect(() => {
@@ -282,11 +319,57 @@ export function MenuItemForm({
           style={{ background: "var(--admin-bg)" }}
         />
         {section === "yogurt" && (
-          <span className="mt-1.5 block text-xs font-normal text-slate-500">
-            One line is fine; guests see this under the flavor name. Use middots or commas between sizes.
+          <span className="admin-field-hint" style={{ display: "block", marginTop: 6 }}>
+            One line is fine; guests see this under the flavor name. With automatic pricing, the same line appears when they tap to expand.
+          </span>
+        )}
+        {pricingMode === "auto" && section !== "yogurt" && ["gelato", "sorbet", "seasonal", "bestsellers"].includes(section) && (
+          <span className="admin-field-hint" style={{ display: "block", marginTop: 6 }}>
+            Shown on the card and on the &quot;Single scoop&quot; line when guests tap to expand (other scoop sizes stay as section defaults).
+          </span>
+        )}
+        {pricingMode === "auto" && section === "coffee" && (
+          <span className="admin-field-hint" style={{ display: "block", marginTop: 6 }}>
+            Shown on the card and as the first line when guests tap to expand.
           </span>
         )}
       </label>
+
+      {!readOnly && (
+        <div
+          className="admin-card admin-card-padded"
+          style={{ background: "var(--admin-brand-subtle)", borderColor: "var(--admin-brand-muted)" }}
+        >
+          <p className="admin-eyebrow" style={{ marginBottom: 8 }}>
+            Public menu preview (unsaved)
+          </p>
+          <p className="admin-meta" style={{ marginBottom: 12 }}>
+            <strong>On the card:</strong>{" "}
+            {publicPricingPreview.cardPrice ? (
+              <span>{publicPricingPreview.cardPrice}</span>
+            ) : (
+              <span style={{ fontStyle: "italic" }}>no price line</span>
+            )}
+          </p>
+          <p className="admin-meta" style={{ marginBottom: 8 }}>
+            <strong>When guests tap to expand ({publicPricingPreview.expandTitle}):</strong>
+          </p>
+          {publicPricingPreview.expandTiers.length > 0 ? (
+            <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 6 }}>
+              {publicPricingPreview.expandTiers.map((t) => (
+                <li key={`${t.label}-${t.price}`} style={{ fontSize: 13 }}>
+                  <span style={{ fontWeight: 600 }}>{t.label}</span>
+                  <span style={{ color: "var(--admin-text-secondary)" }}> — {t.price}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="admin-field-hint" style={{ margin: 0 }}>
+              No expand lines (add custom tiers or switch to automatic pricing).
+            </p>
+          )}
+        </div>
+      )}
 
       {readOnly ? (
         <div className="admin-card admin-card-padded admin-stack-sm">
@@ -322,8 +405,8 @@ export function MenuItemForm({
               </p>
               <p className="admin-page-desc" style={{ marginTop: 6, fontSize: 13 }}>
                 {pricingMode === "auto"
-                  ? "Guests see the built-in size/price list for this section (gelato scoops, coffee sizes, etc.)."
-                  : "Only the rows you add below appear when guests tap this item — no extra default lines."}
+                  ? "Guests see the built-in size/price list for this section. Price display above still updates the card and key lines (see preview)."
+                  : "Only the rows you add below appear when guests tap — price display only affects the card line, not this list."}
               </p>
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>

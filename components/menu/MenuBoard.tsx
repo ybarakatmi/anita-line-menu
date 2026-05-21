@@ -616,6 +616,22 @@ export function MenuBoard({
     setDetailItem(item);
   }, []);
 
+  // Keep the open detail sheet in sync when menu_items reload (admin price edits).
+  useEffect(() => {
+    if (!detailItem) return;
+    const fresh = items.find((it) => it.id === detailItem.id);
+    if (!fresh) return;
+    const tiersChanged =
+      JSON.stringify(fresh.price_tiers ?? null) !== JSON.stringify(detailItem.price_tiers ?? null);
+    if (
+      fresh.updated_at !== detailItem.updated_at ||
+      fresh.price_display !== detailItem.price_display ||
+      tiersChanged
+    ) {
+      setDetailItem(fresh);
+    }
+  }, [items, detailItem]);
+
   const bySection = useMemo(() => {
     const m = new Map<MenuSection, MenuItemRow[]>();
     for (const s of SECTION_ORDER) m.set(s, []);

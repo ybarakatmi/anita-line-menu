@@ -68,7 +68,10 @@ export function getPriceTiersForItem(item: MenuItemRow): PriceTier[] {
   const { section, price_display } = item;
   const base = price_display?.trim() || null;
 
-  if (section === "yogurt") return YOGURT_TIERS;
+  if (section === "yogurt") {
+    if (base) return [{ label: "Sizes", price: base, hint: "Cup options as listed" }];
+    return YOGURT_TIERS;
+  }
   if (section === "coffee") {
     const rows: PriceTier[] = [];
     if (base) rows.push({ label: "Menu · classic prep", price: base, hint: "Bar can customize size" });
@@ -84,10 +87,8 @@ export function getPriceTiersForItem(item: MenuItemRow): PriceTier[] {
       : [{ label: "Regular", price: "—", hint: DRINK_NOTE }];
   }
   if (isFrozenStyleSection(section)) {
-    if (base && base.toLowerCase().includes("from")) {
-      return GELATO_STYLE_TIERS.map((t, i) =>
-        i === 1 ? { ...t, price: base } : t
-      );
+    if (base) {
+      return GELATO_STYLE_TIERS.map((t, i) => (i === 1 ? { ...t, price: base } : t));
     }
     return GELATO_STYLE_TIERS;
   }
