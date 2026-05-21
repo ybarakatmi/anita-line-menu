@@ -98,21 +98,25 @@ export function MenuItemDetailSheet({ item, imageSrc, onClose }: MenuItemDetailS
             <p className="item-detail-promo">{item.promo_label.trim()}</p>
           ) : null}
 
-          <div className="item-detail-tiers-head">
-            <span className="item-detail-tiers-label">{detailPricingTitle(item.section)}</span>
-            <span className="item-detail-tiers-sub">In-store · subject to change</span>
-          </div>
-          <ul className="item-detail-tiers">
-            {tiers.map((t) => (
-              <li key={t.label + t.price} className="item-detail-tier">
-                <div className="item-detail-tier-text">
-                  <span className="item-detail-tier-name">{t.label}</span>
-                  {t.hint ? <span className="item-detail-tier-hint">{t.hint}</span> : null}
-                </div>
-                <span className="item-detail-tier-price">{t.price}</span>
-              </li>
-            ))}
-          </ul>
+          {tiers.length > 0 ? (
+            <>
+              <div className="item-detail-tiers-head">
+                <span className="item-detail-tiers-label">{detailPricingTitle(item.section)}</span>
+                <span className="item-detail-tiers-sub">In-store · subject to change</span>
+              </div>
+              <ul className="item-detail-tiers">
+                {tiers.map((t) => (
+                  <li key={t.label + t.price} className="item-detail-tier">
+                    <div className="item-detail-tier-text">
+                      <span className="item-detail-tier-name">{t.label}</span>
+                      {t.hint ? <span className="item-detail-tier-hint">{t.hint}</span> : null}
+                    </div>
+                    <span className="item-detail-tier-price">{t.price}</span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : null}
 
           <p className="item-detail-foot">
             Tap outside or swipe down to close · Ask our team for allergens &amp; pairings.

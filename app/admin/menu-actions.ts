@@ -66,7 +66,7 @@ export async function saveMenuItemAction(input: {
   sort_order: number;
   promo_label: string | null;
   seasonal_ribbon_label: string | null;
-  /** Null = public menu uses automatic tiers for this section. */
+  /** `null` = automatic section tiers; non-null array = only those rows on the public menu. */
   price_tiers: MenuPriceTier[] | null;
 }) {
   const supabase = await requireMenuEditorClient();

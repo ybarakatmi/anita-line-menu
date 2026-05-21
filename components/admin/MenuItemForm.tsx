@@ -8,23 +8,36 @@ import type { MenuItemRow, MenuPriceTier, MenuSection } from "@/types/menu";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-const BLANK_TIER_TEMPLATE: MenuPriceTier[] = [
-  { label: "", price: "", hint: "" },
-  { label: "", price: "", hint: "" },
-  { label: "", price: "", hint: "" },
-  { label: "", price: "", hint: "" },
-];
+const EMPTY_TIER_ROW: MenuPriceTier = { label: "", price: "", hint: "" };
 
-function tiersStateFromInitial(initial: MenuItemRow | null): MenuPriceTier[] {
+type PricingMode = "auto" | "custom";
+
+function pricingStateFromInitial(initial: MenuItemRow | null): { mode: PricingMode; rows: MenuPriceTier[] } {
   const p = initial?.price_tiers;
-  if (Array.isArray(p) && p.length > 0) {
-    return p.map((t) => ({
-      label: t.label ?? "",
-      price: t.price ?? "",
-      hint: t.hint ?? "",
-    }));
+  if (Array.isArray(p)) {
+    if (p.length === 0) {
+      return { mode: "custom", rows: [{ ...EMPTY_TIER_ROW }] };
+    }
+    return {
+      mode: "custom",
+      rows: p.map((t) => ({
+        label: t.label ?? "",
+        price: t.price ?? "",
+        hint: t.hint ?? "",
+      })),
+    };
   }
-  return BLANK_TIER_TEMPLATE.map((r) => ({ ...r }));
+  return { mode: "auto", rows: [{ ...EMPTY_TIER_ROW }] };
+}
+
+function filledTiersFromRows(rows: MenuPriceTier[]): MenuPriceTier[] {
+  return rows
+    .map((r) => ({
+      label: r.label.trim(),
+      price: r.price.trim(),
+      hint: r.hint?.trim() ? r.hint.trim() : undefined,
+    }))
+    .filter((r) => r.label && r.price);
 }
 
 type Props = { initial: MenuItemRow | null };
@@ -62,7 +75,12 @@ export function MenuItemForm({
   const [imageUrl, setImageUrl] = useState(initial?.image_url ?? "");
   const [promoLabel, setPromoLabel] = useState(initial?.promo_label ?? "");
   const [seasonalRibbonLabel, setSeasonalRibbonLabel] = useState(initial?.seasonal_ribbon_label ?? "");
-  const [tierRows, setTierRows] = useState<MenuPriceTier[]>(() => tiersStateFromInitial(initial));
+  const [pricingMode, setPricingMode] = useState<PricingMode>(
+    () => pricingStateFromInitial(initial).mode
+  );
+  const [tierRows, setTierRows] = useState<MenuPriceTier[]>(
+    () => pricingStateFromInitial(initial).rows
+  );
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -72,7 +90,9 @@ export function MenuItemForm({
 
   // Re-hydrate tier editor when the loaded row changes (save + router.refresh), not on every RSC object identity.
   useEffect(() => {
-    setTierRows(tiersStateFromInitial(initial));
+    const next = pricingStateFromInitial(initial);
+    setPricingMode(next.mode);
+    setTierRows(next.rows);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initial?.id, initial?.updated_at]);
 
@@ -88,8 +108,14 @@ export function MenuItemForm({
     setTierRows((rows) => (rows.length <= 1 ? rows : rows.filter((_, i) => i !== index)));
   }
 
-  function resetTierEditor() {
-    setTierRows(BLANK_TIER_TEMPLATE.map((r) => ({ ...r })));
+  function startCustomPricing() {
+    setPricingMode("custom");
+    setTierRows([{ ...EMPTY_TIER_ROW }]);
+  }
+
+  function useAutomaticPricing() {
+    setPricingMode("auto");
+    setTierRows([{ ...EMPTY_TIER_ROW }]);
   }
 
   async function uploadIfNeeded(): Promise<string | null> {
@@ -115,13 +141,13 @@ export function MenuItemForm({
     try {
       const finalImage = await uploadIfNeeded();
 
-      const filledTiers = tierRows
-        .map((r) => ({
-          label: r.label.trim(),
-          price: r.price.trim(),
-          hint: r.hint?.trim() ? r.hint.trim() : undefined,
-        }))
-        .filter((r) => r.label && r.price);
+      const filledTiers = filledTiersFromRows(tierRows);
+
+      if (pricingMode === "custom" && filledTiers.length === 0) {
+        setError("Add at least one pricing row with both a label and a price, or switch back to automatic pricing.");
+        setLoading(false);
+        return;
+      }
 
       await saveMenuItemAction({
         id: initial?.id,
@@ -143,7 +169,7 @@ export function MenuItemForm({
           section === "seasonal" && seasonalRibbonLabel.trim()
             ? seasonalRibbonLabel.trim().slice(0, 28)
             : null,
-        price_tiers: filledTiers.length > 0 ? filledTiers : null,
+        price_tiers: pricingMode === "auto" ? null : filledTiers,
       });
 
       setSuccess("Saved successfully.");
@@ -263,45 +289,68 @@ export function MenuItemForm({
       </label>
 
       {readOnly ? (
-        <div className="rounded-lg border border-slate-100 bg-slate-50 p-4">
-          <p className="text-sm font-medium text-slate-800">Tap-to-expand pricing (public menu)</p>
-          {initial?.price_tiers && initial.price_tiers.length > 0 ? (
-            <ul className="mt-3 space-y-2 text-sm text-slate-700">
-              {initial.price_tiers.map((t) => (
-                <li key={`${t.label}-${t.price}`}>
-                  <span className="font-medium">{t.label}</span>
-                  <span className="text-slate-600"> — {t.price}</span>
-                  {t.hint ? (
-                    <span className="mt-0.5 block text-xs text-slate-500">{t.hint}</span>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
+        <div className="admin-card admin-card-padded admin-stack-sm">
+          <p className="admin-section-title" style={{ fontSize: 14 }}>
+            Tap-to-expand pricing (public menu)
+          </p>
+          {Array.isArray(initial?.price_tiers) ? (
+            initial.price_tiers.length > 0 ? (
+              <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 8 }}>
+                {initial.price_tiers.map((t) => (
+                  <li key={`${t.label}-${t.price}`} style={{ fontSize: 14 }}>
+                    <span style={{ fontWeight: 600 }}>{t.label}</span>
+                    <span style={{ color: "var(--admin-text-secondary)" }}> — {t.price}</span>
+                    {t.hint ? <span className="admin-field-hint" style={{ display: "block" }}>{t.hint}</span> : null}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="admin-page-desc">Custom pricing is saved but has no rows (nothing shown when guests expand).</p>
+            )
           ) : (
-            <p className="mt-2 text-sm text-slate-500">
-              Uses automatic size/price suggestions for this section (nothing custom saved).
+            <p className="admin-page-desc">
+              Uses automatic size/price suggestions for this section (gelato scoops, coffee sizes, etc.).
             </p>
           )}
         </div>
       ) : (
-        <div className="rounded-lg border border-slate-200 bg-slate-50/80 p-4">
-          <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="admin-card admin-card-padded admin-stack-sm">
+          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
             <div>
-              <p className="text-sm font-medium text-slate-800">Tap-to-expand pricing</p>
-              <p className="mt-1 max-w-xl text-xs text-slate-600">
-                Shown when guests tap this item on the public menu. Leave every row empty to use automatic
-                tiers for this section (gelato scoops, coffee sizes, etc.).
+              <p className="admin-section-title" style={{ fontSize: 14 }}>
+                Tap-to-expand pricing
+              </p>
+              <p className="admin-page-desc" style={{ marginTop: 6, fontSize: 13 }}>
+                {pricingMode === "auto"
+                  ? "Guests see the built-in size/price list for this section (gelato scoops, coffee sizes, etc.)."
+                  : "Only the rows you add below appear when guests tap this item — no extra default lines."}
               </p>
             </div>
-            <button
-              type="button"
-              onClick={resetTierEditor}
-              className="shrink-0 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
-            >
-              Clear rows
-            </button>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {pricingMode === "auto" ? (
+                <button type="button" onClick={startCustomPricing} className="admin-btn admin-btn--secondary">
+                  Customize pricing
+                </button>
+              ) : (
+                <>
+                  <button type="button" onClick={useAutomaticPricing} className="admin-btn admin-btn--secondary">
+                    Use automatic pricing
+                  </button>
+                  <button
+                    type="button"
+                    onClick={startCustomPricing}
+                    className="admin-btn admin-btn--ghost"
+                    style={{ fontSize: 12 }}
+                  >
+                    Clear rows
+                  </button>
+                </>
+              )}
+            </div>
           </div>
-          <div className="mt-4 space-y-3">
+
+          {pricingMode === "custom" ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {tierRows.map((row, i) => (
               <div
                 key={i}
@@ -344,14 +393,15 @@ export function MenuItemForm({
                 </button>
               </div>
             ))}
-          </div>
-          <button
-            type="button"
-            onClick={addTierRow}
-            className="mt-3 text-xs font-medium text-slate-700 underline decoration-slate-300 underline-offset-2 hover:text-slate-900"
-          >
-            + Add tier
+          <button type="button" onClick={addTierRow} className="admin-link" style={{ fontSize: 13, alignSelf: "flex-start" }}>
+            + Add row
           </button>
+          </div>
+          ) : (
+            <p className="admin-meta" style={{ margin: 0 }}>
+              Switch to custom pricing to control exactly which lines appear in the expand panel.
+            </p>
+          )}
         </div>
       )}
 

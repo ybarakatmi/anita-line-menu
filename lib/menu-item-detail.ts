@@ -37,8 +37,17 @@ function isFrozenStyleSection(section: MenuSection): boolean {
   );
 }
 
-function tiersFromDatabase(raw: MenuItemRow["price_tiers"]): PriceTier[] | null {
-  if (!raw || !Array.isArray(raw) || raw.length === 0) return null;
+/**
+ * Parse `price_tiers` from the database.
+ * - `null` / `undefined` → automatic section defaults
+ * - `[]` → custom list intentionally empty
+ * - `[{ label, price, … }]` → only those rows (no padding with defaults)
+ */
+function tiersFromDatabase(raw: MenuItemRow["price_tiers"]): PriceTier[] | undefined {
+  if (raw == null) return undefined;
+  if (!Array.isArray(raw)) return undefined;
+  if (raw.length === 0) return [];
+
   const out: PriceTier[] = [];
   for (const row of raw) {
     if (!row || typeof row !== "object") continue;
@@ -49,12 +58,12 @@ function tiersFromDatabase(raw: MenuItemRow["price_tiers"]): PriceTier[] | null 
     const hint = hintRaw != null && String(hintRaw).trim() ? String(hintRaw).trim() : undefined;
     out.push({ label, price, hint });
   }
-  return out.length ? out : null;
+  return out;
 }
 
 export function getPriceTiersForItem(item: MenuItemRow): PriceTier[] {
   const custom = tiersFromDatabase(item.price_tiers);
-  if (custom) return custom;
+  if (custom !== undefined) return custom;
 
   const { section, price_display } = item;
   const base = price_display?.trim() || null;
