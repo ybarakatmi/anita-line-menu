@@ -27,14 +27,14 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
-      { url: "/icon-16.png", sizes: "16x16", type: "image/png" },
-      { url: "/icon-32.png", sizes: "32x32", type: "image/png" },
-      { url: "/icon-48.png", sizes: "48x48", type: "image/png" },
+      { url: "/favicon-16x16.png", type: "image/png", sizes: "16x16" },
+      { url: "/favicon-32x32.png", type: "image/png", sizes: "32x32" },
+      { url: "/favicon-96x96.png", type: "image/png", sizes: "96x96" },
     ],
-    apple: [
-      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+    other: [
+      { rel: "mask-icon", url: "/safari-pinned-tab.svg", color: "#b8a572" },
     ],
-    shortcut: "/favicon.ico",
   },
   appleWebApp: {
     capable: true,
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#faf7f2",
+  themeColor: "#fce8e0",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -62,10 +62,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/icon-32.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/icon-16.png" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <MicrosoftClarity />
       </head>
       <body
