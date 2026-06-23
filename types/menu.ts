@@ -60,6 +60,8 @@ export type SiteSettingsRow = {
   hero_video_poster_url: string | null;
   /** Static background image shown when no video is set. Owner-managed via admin Hero section. */
   hero_bg_image_url: string | null;
+  /** Photo below the footer contact form. Owner-managed via admin Contact section. */
+  footer_contact_image_url: string | null;
   separator_video_url: string | null;
   /** Hero main brand name — two display lines (e.g. "LA MAMMA" / "DEL GELATO"). */
   hero_brand_line1: string | null;

@@ -1556,10 +1556,11 @@ body {
   max-width: 360px;
   margin: 0 auto;
 }
-.footer-contact-logo {
+.footer-contact-image {
   display: block;
   margin: 16px auto 0;
-  width: 72px;
+  width: 100%;
+  max-width: 360px;
   height: auto;
 }
 .footer-contact-form {

@@ -16,6 +16,7 @@ export const FALLBACK_SITE_SETTINGS: SiteSettingsRow = {
   hero_video_url: null,
   hero_video_poster_url: null,
   hero_bg_image_url: null,
+  footer_contact_image_url: null,
   separator_video_url: null,
   hero_brand_line1: null,
   hero_brand_line2: null,

@@ -97,6 +97,10 @@ export function AdminAppShell({ children, liveCounts, totalCounts, access }: Pro
             <IconImage />
             Hero section
           </Link>
+          <Link href="/admin/contact-section" className={navLinkClass("/admin/contact-section")}>
+            <IconImage />
+            Contact section
+          </Link>
           <Link href="/admin/sections" className={navLinkClass("/admin/sections")}>
             <IconText />
             Section headings

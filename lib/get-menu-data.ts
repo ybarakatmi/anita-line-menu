@@ -66,6 +66,7 @@ function normalizeSiteSettingsRow(row: SiteSettingsRow): SiteSettingsRow {
     hero_video_url: clipUrl(row.hero_video_url),
     hero_video_poster_url: clipUrl(row.hero_video_poster_url),
     hero_bg_image_url: clipUrl(row.hero_bg_image_url),
+    footer_contact_image_url: clipUrl(row.footer_contact_image_url),
     separator_video_url: clipUrl(row.separator_video_url),
     hero_brand_line1: asNullableText(row.hero_brand_line1),
     hero_brand_line2: asNullableText(row.hero_brand_line2),

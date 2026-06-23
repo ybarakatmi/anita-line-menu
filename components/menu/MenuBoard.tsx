@@ -1379,13 +1379,16 @@ export function MenuBoard({
                 </button>
               </div>
             </form>
-            <Image
-              className="footer-contact-logo"
-              src="https://www.anita-gelato.com/wp-content/uploads/2020/12/Isolation_Mode-1.svg"
-              alt="Anita Gelato logo"
-              width={100}
-              height={126}
-            />
+            {settings.footer_contact_image_url?.trim() ? (
+              <Image
+                className="footer-contact-image"
+                src={settings.footer_contact_image_url.trim()}
+                alt="Anita Gelato"
+                width={640}
+                height={400}
+                loading="lazy"
+              />
+            ) : null}
           </div>
         </div>
         <div className="footer-plaid" />
