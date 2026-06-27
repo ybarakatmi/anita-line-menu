@@ -431,22 +431,10 @@ function useStickyOffset() {
 
 type GelatoFilter = "all" | "new" | "choc" | "nut" | "fruit";
 
-function loosenMenuName(s: string) {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
-}
-
-function resolveShowcaseMenuItem(
-  items: MenuItemRow[],
-  showcase: (typeof BEST_SELLER_SHOWCASE)[number]
+function showcaseFallbackMenuItem(
+  showcase: (typeof BEST_SELLER_SHOWCASE)[number],
+  index: number
 ): MenuItemRow {
-  const key = loosenMenuName(showcase.name);
-  const exact = items.find((r) => loosenMenuName(r.name) === key);
-  if (exact) return exact;
-  const partial = items.find((r) => {
-    const n = loosenMenuName(r.name);
-    return n.includes(key) || key.includes(n);
-  });
-  if (partial) return partial;
   const words = showcase.name.split(/\s+/).filter(Boolean);
   const title = words.map((w) => w.charAt(0) + w.slice(1).toLowerCase()).join(" ");
   return {
@@ -462,7 +450,7 @@ function resolveShowcaseMenuItem(
     is_new: false,
     is_fave: true,
     is_vegan: /\bvegan\b/i.test(showcase.name),
-    sort_order: 0,
+    sort_order: index,
     is_active: true,
     promo_label: null,
     seasonal_ribbon_label: null,
@@ -646,6 +634,11 @@ export function MenuBoard({
     () => (bySection.get("gelato") ?? []).slice().sort((a, b) => a.sort_order - b.sort_order),
     [bySection]
   );
+  const bestSellerCarouselItems = useMemo(() => {
+    const fromDb = (bySection.get("bestsellers") ?? []).slice().sort((a, b) => a.sort_order - b.sort_order);
+    if (fromDb.length > 0) return fromDb;
+    return BEST_SELLER_SHOWCASE.map(showcaseFallbackMenuItem);
+  }, [bySection]);
   const gelatoFiltered = useMemo(() => {
     if (gelatoFilter === "all") return gelatoItems;
     if (gelatoFilter === "new") return gelatoItems.filter((i) => i.is_new);
@@ -663,6 +656,12 @@ export function MenuBoard({
     newProductsCarousel.trackRef.current?.scrollTo({ left: 0 });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newProductsItems.map((g) => g.id).join("|")]);
+
+  useEffect(() => {
+    setActiveBestSeller(0);
+    bestSellerSwiperRef.current?.slideTo(0, 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bestSellerCarouselItems.map((item) => item.id).join("|")]);
 
   const navTo = (id: string, btn?: HTMLElement | null) => {
     if (id !== "top") {
@@ -914,71 +913,86 @@ export function MenuBoard({
           </div>
           <div className="sec-tag">✦ &nbsp; {sl(settings.section_labels, "bestsellers", "tag", "Most loved scoops")}</div>
         </div>
-        <Swiper
-          id="bestsellerTrack"
-          className="bestsellers-swiper"
-          modules={[Navigation, Pagination]}
-          speed={500}
-          spaceBetween={10}
-          centeredSlides
-          watchSlidesProgress
-          navigation
-          pagination={{ clickable: true }}
-          onSwiper={(swiper) => {
-            bestSellerSwiperRef.current = swiper;
-            setActiveBestSeller(swiper.activeIndex);
-          }}
-          onSlideChange={(swiper) => setActiveBestSeller(swiper.realIndex)}
-          breakpoints={{
-            0: { slidesPerView: 1.45, centeredSlides: true },
-            640: { slidesPerView: 2.4, centeredSlides: true },
-            1024: { slidesPerView: 4.8, centeredSlides: false },
-          }}
-        >
-          {BEST_SELLER_SHOWCASE.map((item, idx) => (
-            <SwiperSlide
-              key={item.name}
-              className="bestseller-slide"
-              onClick={() => {
-                bestSellerSwiperRef.current?.slideTo(idx);
-                openItemDetail(resolveShowcaseMenuItem(items, BEST_SELLER_SHOWCASE[idx]));
+        {bestSellerCarouselItems.length > 0 ? (
+          <>
+            <Swiper
+              id="bestsellerTrack"
+              className="bestsellers-swiper"
+              modules={[Navigation, Pagination]}
+              speed={500}
+              spaceBetween={10}
+              centeredSlides
+              watchSlidesProgress
+              navigation
+              pagination={{ clickable: true }}
+              onSwiper={(swiper) => {
+                bestSellerSwiperRef.current = swiper;
+                setActiveBestSeller(swiper.activeIndex);
+              }}
+              onSlideChange={(swiper) => setActiveBestSeller(swiper.realIndex)}
+              breakpoints={{
+                0: { slidesPerView: 1.45, centeredSlides: true },
+                640: { slidesPerView: 2.4, centeredSlides: true },
+                1024: { slidesPerView: 4.8, centeredSlides: false },
               }}
             >
-              <div className="bestseller-scoop-wrap">
-                <Image
-                  src={item.image}
-                  alt={item.name}
-                  width={530}
-                  height={640}
-                  className="bestseller-scoop"
-                  sizes="(max-width: 768px) 40vw, 160px"
-                />
-              </div>
-            </SwiperSlide>
-          ))}
-        </Swiper>
-        <div className="bestseller-focus">
-          <h3 className="bestseller-focus-name">{BEST_SELLER_SHOWCASE[activeBestSeller]?.name}</h3>
-          <p className="bestseller-focus-desc">{BEST_SELLER_SHOWCASE[activeBestSeller]?.description}</p>
-          <button
-            type="button"
-            className="bestseller-detail-btn"
-            onClick={() => {
-              const sc = BEST_SELLER_SHOWCASE[activeBestSeller];
-              if (sc) openItemDetail(resolveShowcaseMenuItem(items, sc));
-            }}
-          >
-            Sizes &amp; pricing
-          </button>
-          <a
-            className="bestseller-focus-btn"
-            href="https://www.anita-gelato.com/flavors/"
-            target="_blank"
-            rel="nofollow noreferrer"
-          >
-            ALL FLAVORS
-          </a>
-        </div>
+              {bestSellerCarouselItems.map((item, idx) => {
+                const imageSrc = item.image_url ?? getFlavorImageUrl(item);
+                return (
+                  <SwiperSlide
+                    key={item.id}
+                    className="bestseller-slide"
+                    onClick={() => {
+                      bestSellerSwiperRef.current?.slideTo(idx);
+                      openItemDetail(item);
+                    }}
+                  >
+                    <div className="bestseller-scoop-wrap">
+                      {imageSrc ? (
+                        <Image
+                          src={imageSrc}
+                          alt={item.name}
+                          width={530}
+                          height={640}
+                          className="bestseller-scoop"
+                          sizes="(max-width: 768px) 40vw, 160px"
+                        />
+                      ) : (
+                        <div className="bestseller-scoop flex items-center justify-center text-5xl" aria-hidden>
+                          🍦
+                        </div>
+                      )}
+                    </div>
+                  </SwiperSlide>
+                );
+              })}
+            </Swiper>
+            <div className="bestseller-focus">
+              <h3 className="bestseller-focus-name">{bestSellerCarouselItems[activeBestSeller]?.name}</h3>
+              <p className="bestseller-focus-desc">{bestSellerCarouselItems[activeBestSeller]?.description}</p>
+              <button
+                type="button"
+                className="bestseller-detail-btn"
+                onClick={() => {
+                  const item = bestSellerCarouselItems[activeBestSeller];
+                  if (item) openItemDetail(item);
+                }}
+              >
+                Sizes &amp; pricing
+              </button>
+              <a
+                className="bestseller-focus-btn"
+                href="https://www.anita-gelato.com/flavors/"
+                target="_blank"
+                rel="nofollow noreferrer"
+              >
+                ALL FLAVORS
+              </a>
+            </div>
+          </>
+        ) : (
+          <p className="px-6 text-center text-sm text-[var(--olive)]">No items yet.</p>
+        )}
       </section>
 
       <section className="coffee-section fade-in" id="coffee">
