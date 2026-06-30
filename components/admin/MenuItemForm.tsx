@@ -1,11 +1,11 @@
 "use client";
 
-import { deleteMenuItemAction, saveMenuItemAction } from "@/app/admin/menu-actions";
-import { ADMIN_MENU_SECTIONS } from "@/lib/admin-sections";
+import { saveMenuItemAction, deleteMenuItemAction } from "@/app/admin/menu-actions";
+import type { AdminSectionMeta } from "@/lib/admin-sections";
 import { formatAdminSyncTime } from "@/lib/format-admin-sync";
 import { detailPricingTitle, getPriceTiersForItem } from "@/lib/menu-item-detail";
 import { createClient } from "@/lib/supabase/client";
-import type { MenuItemRow, MenuPriceTier, MenuSection } from "@/types/menu";
+import type { MenuItemRow, MenuPriceTier } from "@/types/menu";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
@@ -42,7 +42,7 @@ function filledTiersFromRows(rows: MenuPriceTier[]): MenuPriceTier[] {
 }
 
 function previewMenuItem(
-  section: MenuSection,
+  section: string,
   priceDisplay: string,
   pricingMode: PricingMode,
   tierRows: MenuPriceTier[]
@@ -68,17 +68,18 @@ function previewMenuItem(
   };
 }
 
-type Props = { initial: MenuItemRow | null };
+type Props = { initial: MenuItemRow | null; sections: AdminSectionMeta[] };
 
 export function MenuItemForm({
   initial,
+  sections,
   initialSection,
   returnHref = "/admin",
   lastSavedAt,
   navigateAfterSave = true,
   readOnly = false,
 }: Props & {
-  initialSection?: MenuSection;
+  initialSection?: string;
   returnHref?: string;
   lastSavedAt?: string | null;
   /** If false, stay on the edit screen and refresh server data (better UX for edits). */
@@ -88,7 +89,8 @@ export function MenuItemForm({
 }) {
   const router = useRouter();
   const isNew = !initial;
-  const [section, setSection] = useState<MenuSection>(initial?.section ?? initialSection ?? "gelato");
+  const defaultSection = sections[0]?.id ?? "gelato";
+  const [section, setSection] = useState<string>(initial?.section ?? initialSection ?? defaultSection);
   const [name, setName] = useState(initial?.name ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
   const [priceDisplay, setPriceDisplay] = useState(initial?.price_display ?? "");
@@ -271,10 +273,10 @@ export function MenuItemForm({
         <select
           value={section}
           disabled={readOnly}
-          onChange={(e) => setSection(e.target.value as MenuSection)}
+          onChange={(e) => setSection(e.target.value)}
           className="admin-input mt-1.5 disabled:cursor-not-allowed disabled:opacity-70"
         >
-          {ADMIN_MENU_SECTIONS.map((s) => (
+          {sections.map((s) => (
             <option key={s.id} value={s.id}>
               {s.label}
             </option>

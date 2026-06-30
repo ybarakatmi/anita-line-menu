@@ -13,10 +13,18 @@ import {
   pushAnalyticsEvent,
   pushMenuSessionStartOnce,
 } from "@/lib/gtm";
+import { CustomCarouselSection } from "@/components/menu/CustomCarouselSection";
+import { CustomGridSection } from "@/components/menu/CustomGridSection";
 import { withMenuSectionDefaults } from "@/lib/menu-fallback";
+import {
+  defaultNavLabel,
+  FALLBACK_MENU_SECTIONS,
+  sectionSortIndex,
+  sortMenuSections,
+} from "@/lib/menu-sections";
 import { useSectionViewAnalytics } from "@/lib/use-section-view-analytics";
 import { MenuItemDetailSheet } from "@/components/menu/MenuItemDetailSheet";
-import type { MenuDataMode, MenuItemRow, MenuSection, SectionLabelOverride, SiteSettingsRow } from "@/types/menu";
+import type { MenuDataMode, MenuItemRow, MenuSectionRow, SectionLabelOverride, SiteSettingsRow } from "@/types/menu";
 import type { CSSProperties } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -91,28 +99,6 @@ function InlineBackgroundVideo({
     </video>
   );
 }
-
-const SECTION_ORDER: MenuSection[] = [
-  "seasonal",
-  "bestsellers",
-  "coffee",
-  "pastries",
-  "drinks",
-  "yogurt",
-  "gelato",
-  "sorbet",
-];
-
-const NAV_DEFAULTS: { id: string; label: string }[] = [
-  { id: "seasonal", label: "New & Seasonal" },
-  { id: "bestsellers", label: "Best Sellers" },
-  { id: "coffee", label: "Coffee" },
-  { id: "pastries", label: "New products" },
-  { id: "drinks", label: "Drinks" },
-  { id: "yogurt", label: "Yogurt" },
-  { id: "gelato", label: "Cream Gelato" },
-  { id: "sorbet", label: "Sorbets" },
-];
 
 /** Derive the nav button label from the same section_labels the heading uses. */
 function navLabel(
@@ -385,16 +371,16 @@ function getFlavorImageUrl(item: MenuItemRow) {
   return item.image_url || undefined;
 }
 
-function sortItems(items: MenuItemRow[]) {
+function sortItems(items: MenuItemRow[], sections: MenuSectionRow[]) {
   return [...items].sort(
     (a, b) =>
-      SECTION_ORDER.indexOf(a.section) - SECTION_ORDER.indexOf(b.section) ||
+      sectionSortIndex(sections, a.section) - sectionSortIndex(sections, b.section) ||
       a.sort_order - b.sort_order
   );
 }
 
-function sortItemsWithNewProductsDefaults(items: MenuItemRow[]) {
-  return sortItems(withMenuSectionDefaults(items));
+function sortItemsWithNewProductsDefaults(items: MenuItemRow[], sections: MenuSectionRow[]) {
+  return sortItems(withMenuSectionDefaults(items), sections);
 }
 
 function useFadeSections(deps: unknown) {
@@ -506,13 +492,15 @@ function sl(
 export function MenuBoard({
   initialItems,
   initialSettings,
+  initialSections = FALLBACK_MENU_SECTIONS,
   mode,
 }: {
   initialItems: MenuItemRow[];
   initialSettings: SiteSettingsRow;
+  initialSections?: MenuSectionRow[];
   mode: MenuDataMode;
 }) {
-  const [items, setItems] = useState(() => sortItemsWithNewProductsDefaults(initialItems));
+  const [items, setItems] = useState(() => sortItemsWithNewProductsDefaults(initialItems, initialSections));
   const [settings, setSettings] = useState(initialSettings);
   const [navActive, setNavActive] = useState("seasonal");
   const [gelatoFilter, setGelatoFilter] = useState<GelatoFilter>("all");
@@ -528,8 +516,8 @@ export function MenuBoard({
   // After admin saves, Next.js refreshes RSC props but useState keeps the first snapshot.
   // Re-sync so new images (e.g. coffee uploads) show without a hard reload.
   useEffect(() => {
-    setItems(sortItemsWithNewProductsDefaults(initialItems));
-  }, [initialItems]);
+    setItems(sortItemsWithNewProductsDefaults(initialItems, initialSections));
+  }, [initialItems, initialSections]);
 
   useEffect(() => {
     setSettings(initialSettings);
@@ -550,7 +538,6 @@ export function MenuBoard({
 
   useFadeSections(items.length);
   useStickyOffset();
-  useSectionViewAnalytics();
 
   // UTM init → session guard → push (see pushMenuSessionStartOnce in lib/gtm.ts).
   useEffect(() => {
@@ -567,11 +554,11 @@ export function MenuBoard({
         .eq("is_active", true)
         .order("sort_order", { ascending: true });
       if (error) throw error;
-      if (data?.length) setItems(sortItemsWithNewProductsDefaults(data as MenuItemRow[]));
+      if (data?.length) setItems(sortItemsWithNewProductsDefaults(data as MenuItemRow[], initialSections));
     } catch {
       /* keep current */
     }
-  }, [mode]);
+  }, [mode, initialSections]);
 
   useEffect(() => {
     if (mode !== "live") return;
@@ -620,15 +607,48 @@ export function MenuBoard({
     }
   }, [items, detailItem]);
 
+  const orderedSections = useMemo(() => sortMenuSections(initialSections), [initialSections]);
+  const orderedActiveSections = useMemo(
+    () => orderedSections.filter((s) => s.is_active),
+    [orderedSections]
+  );
+  const navSections = useMemo(
+    () =>
+      orderedActiveSections.map((s) => ({
+        id: s.id,
+        label: navLabel(settings.section_labels, s.id, defaultNavLabel(s)),
+      })),
+    [orderedActiveSections, settings.section_labels]
+  );
+  const analyticsSectionIds = useMemo(
+    () => orderedActiveSections.map((s) => s.id),
+    [orderedActiveSections]
+  );
+  const customSections = useMemo(
+    () => orderedActiveSections.filter((s) => !s.is_system && s.layout !== "system"),
+    [orderedActiveSections]
+  );
+
+  useSectionViewAnalytics(analyticsSectionIds);
+
+  const activeSectionIds = useMemo(
+    () => new Set(orderedActiveSections.map((s) => s.id)),
+    [orderedActiveSections]
+  );
+
   const bySection = useMemo(() => {
-    const m = new Map<MenuSection, MenuItemRow[]>();
-    for (const s of SECTION_ORDER) m.set(s, []);
+    const m = new Map<string, MenuItemRow[]>();
+    for (const s of orderedSections) m.set(s.id, []);
     for (const it of items) {
       const list = m.get(it.section);
       if (list) list.push(it);
+      else {
+        const extra: MenuItemRow[] = [it];
+        m.set(it.section, extra);
+      }
     }
     return m;
-  }, [items]);
+  }, [items, orderedSections]);
 
   const gelatoItems = useMemo(
     () => (bySection.get("gelato") ?? []).slice().sort((a, b) => a.sort_order - b.sort_order),
@@ -814,7 +834,7 @@ export function MenuBoard({
       </header>
 
       <nav className="nav" aria-label="Section navigation">
-        {NAV_DEFAULTS.map((n) => (
+        {navSections.map((n) => (
           <button
             key={n.id}
             type="button"
@@ -837,6 +857,7 @@ export function MenuBoard({
         </div>
       </div>
 
+      {activeSectionIds.has("seasonal") ? (
       <section className="menu-section seasonal-feature fade-in" id="seasonal">
         <div className="sec-head">
           <span className="sec-the">{sl(settings.section_labels, "seasonal", "the", "Right Now")}</span>
@@ -901,7 +922,10 @@ export function MenuBoard({
           })}
         </div>
       </section>
+      ) : null}
 
+      {activeSectionIds.has("bestsellers") ? (
+      <>
       <span id="best-sellers" />
       <section className="menu-section fade-in" id="bestsellers">
         <div className="sec-head">
@@ -994,7 +1018,10 @@ export function MenuBoard({
           <p className="px-6 text-center text-sm text-[var(--olive)]">No items yet.</p>
         )}
       </section>
+      </>
+      ) : null}
 
+      {activeSectionIds.has("coffee") ? (
       <section className="coffee-section fade-in" id="coffee">
         <div className="sec-head">
           <span className="sec-the">{sl(settings.section_labels, "coffee", "the", "Imported from Italy")}</span>
@@ -1044,7 +1071,9 @@ export function MenuBoard({
           ))}
         </div>
       </section>
+      ) : null}
 
+      {activeSectionIds.has("pastries") ? (
       <section className="menu-section sage-bg fade-in new-products-section" id="pastries">
         <div className="sec-head">
           <span className="sec-the">{sl(settings.section_labels, "pastries", "the", settings.pastry_sec_the ?? "Just in")}</span>
@@ -1072,7 +1101,9 @@ export function MenuBoard({
           ))}
         </div>
       </section>
+      ) : null}
 
+      {activeSectionIds.has("drinks") ? (
       <section className="menu-section blush-bg fade-in" id="drinks">
         <div className="sec-head">
           <span className="sec-the">{sl(settings.section_labels, "drinks", "the", "Also Available")}</span>
@@ -1112,7 +1143,9 @@ export function MenuBoard({
           ))}
         </div>
       </section>
+      ) : null}
 
+      {activeSectionIds.has("yogurt") ? (
       <section className="menu-section yogurt-section fade-in" id="yogurt">
         <div className="sec-head">
           <span className="sec-the">{sl(settings.section_labels, "yogurt", "the", "Swirled Fresh")}</span>
@@ -1142,7 +1175,9 @@ export function MenuBoard({
           ))}
         </div>
       </section>
+      ) : null}
 
+      {activeSectionIds.has("gelato") ? (
       <section className="menu-section sage-bg fade-in" id="gelato">
         <div className="sec-head">
           <span className="sec-the">{sl(settings.section_labels, "gelato", "the", "Handcrafted Daily")}</span>
@@ -1197,7 +1232,9 @@ export function MenuBoard({
           )}
         </div>
       </section>
+      ) : null}
 
+      {activeSectionIds.has("sorbet") ? (
       <section className="menu-section blush-bg fade-in" id="sorbet">
         <div className="sec-head">
           <span className="sec-the">{sl(settings.section_labels, "sorbet", "the", "Dairy-Free")}</span>
@@ -1227,6 +1264,34 @@ export function MenuBoard({
           ))}
         </div>
       </section>
+      ) : null}
+
+      {customSections.map((sectionMeta) => {
+        const sectionItems = (bySection.get(sectionMeta.id) ?? [])
+          .slice()
+          .sort((a, b) => a.sort_order - b.sort_order);
+        if (!sectionItems.length) return null;
+        if (sectionMeta.layout === "grid") {
+          return (
+            <CustomGridSection
+              key={sectionMeta.id}
+              section={sectionMeta}
+              settings={settings}
+              items={sectionItems}
+              onOpenDetail={openItemDetail}
+            />
+          );
+        }
+        return (
+          <CustomCarouselSection
+            key={sectionMeta.id}
+            section={sectionMeta}
+            settings={settings}
+            items={sectionItems}
+            onOpenDetail={openItemDetail}
+          />
+        );
+      })}
 
       <section className="separator-video-section fade-in" aria-label="Decorative strip">
         {customSeparatorVideo ? (

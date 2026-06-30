@@ -1,9 +1,10 @@
-import type { MenuDataMode, MenuItemRow, MenuSection, SiteSettingsRow } from "@/types/menu";
+import type { MenuDataMode, MenuItemRow, MenuSectionRow, SiteSettingsRow } from "@/types/menu";
 import {
   FALLBACK_MENU_ITEMS,
   FALLBACK_SITE_SETTINGS,
   withMenuSectionDefaults,
 } from "@/lib/menu-fallback";
+import { FALLBACK_MENU_SECTIONS, fetchMenuSections, sectionSortIndex } from "@/lib/menu-sections";
 import { mergeSiteMediaFromEnv } from "@/lib/merge-site-media-env";
 import { createClient } from "@/lib/supabase/server";
 import { cache } from "react";
@@ -11,6 +12,7 @@ import { cache } from "react";
 export type MenuPayload = {
   items: MenuItemRow[];
   settings: SiteSettingsRow;
+  sections: MenuSectionRow[];
   mode: MenuDataMode;
 };
 
@@ -105,21 +107,10 @@ function normalizeSectionLabels(
   return hasAny ? out : null;
 }
 
-const SECTION_ORDER: MenuSection[] = [
-  "seasonal",
-  "bestsellers",
-  "coffee",
-  "pastries",
-  "drinks",
-  "yogurt",
-  "gelato",
-  "sorbet",
-];
-
-function sortMenuItems(items: MenuItemRow[]) {
+function sortMenuItems(items: MenuItemRow[], sections: MenuSectionRow[]) {
   return [...items].sort(
     (a, b) =>
-      SECTION_ORDER.indexOf(a.section) - SECTION_ORDER.indexOf(b.section) ||
+      sectionSortIndex(sections, a.section) - sectionSortIndex(sections, b.section) ||
       a.sort_order - b.sort_order
   );
 }
@@ -132,13 +123,14 @@ async function loadMenuData(): Promise<MenuPayload> {
     return {
       items: FALLBACK_MENU_ITEMS,
       settings: normalizeSiteSettingsRow(mergeSiteMediaFromEnv(FALLBACK_SITE_SETTINGS)),
+      sections: FALLBACK_MENU_SECTIONS,
       mode: "fallback",
     };
   }
 
   try {
     const supabase = await createClient();
-    const [itemsRes, settingsRes] = await Promise.all([
+    const [itemsRes, settingsRes, sections] = await Promise.all([
       supabase
         .from("menu_items")
         .select("*")
@@ -146,6 +138,7 @@ async function loadMenuData(): Promise<MenuPayload> {
         .order("section")
         .order("sort_order", { ascending: true }),
       supabase.from("site_settings").select("*").eq("id", 1).maybeSingle(),
+      fetchMenuSections(supabase),
     ]);
 
     if (itemsRes.error) throw itemsRes.error;
@@ -153,6 +146,7 @@ async function loadMenuData(): Promise<MenuPayload> {
       return {
         items: FALLBACK_MENU_ITEMS,
         settings: normalizeSiteSettingsRow(mergeSiteMediaFromEnv(FALLBACK_SITE_SETTINGS)),
+        sections,
         mode: "fallback",
       };
     }
@@ -165,14 +159,16 @@ async function loadMenuData(): Promise<MenuPayload> {
 
     const merged = withMenuSectionDefaults(itemsRes.data as MenuItemRow[]);
     return {
-      items: sortMenuItems(merged),
+      items: sortMenuItems(merged, sections),
       settings,
+      sections,
       mode: "live",
     };
   } catch {
     return {
       items: FALLBACK_MENU_ITEMS,
       settings: normalizeSiteSettingsRow(mergeSiteMediaFromEnv(FALLBACK_SITE_SETTINGS)),
+      sections: FALLBACK_MENU_SECTIONS,
       mode: "fallback",
     };
   }

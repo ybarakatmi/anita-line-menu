@@ -66,6 +66,7 @@ export default async function HomePage() {
     <MenuBoard
       initialItems={data.items}
       initialSettings={data.settings}
+      initialSections={data.sections}
       mode={data.mode}
     />
   );

@@ -1,12 +1,37 @@
-export type MenuSection =
-  | "seasonal"
-  | "bestsellers"
-  | "gelato"
-  | "sorbet"
-  | "coffee"
-  | "pastries"
-  | "drinks"
-  | "yogurt";
+/** Built-in section ids with specialized public-menu layouts. */
+export const BUILTIN_MENU_SECTIONS = [
+  "seasonal",
+  "bestsellers",
+  "gelato",
+  "sorbet",
+  "coffee",
+  "pastries",
+  "drinks",
+  "yogurt",
+] as const;
+
+export type BuiltinMenuSection = (typeof BUILTIN_MENU_SECTIONS)[number];
+
+/** Legacy alias — section ids are now dynamic strings backed by `menu_sections`. */
+export type MenuSection = BuiltinMenuSection | (string & {});
+
+export type MenuSectionLayout = "system" | "carousel" | "grid";
+
+export type MenuSectionRow = {
+  id: string;
+  label: string;
+  description: string;
+  sort_order: number;
+  is_active: boolean;
+  is_system: boolean;
+  layout: MenuSectionLayout;
+  heading_the: string | null;
+  heading_big_line1: string | null;
+  heading_big_line2: string | null;
+  heading_tag: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
 
 /** One row in the public "tap for details" pricing list (stored as JSON on `menu_items.price_tiers`). */
 export type MenuPriceTier = {
@@ -17,7 +42,7 @@ export type MenuPriceTier = {
 
 export type MenuItemRow = {
   id: string;
-  section: MenuSection;
+  section: string;
   name: string;
   description: string | null;
   price_display: string | null;

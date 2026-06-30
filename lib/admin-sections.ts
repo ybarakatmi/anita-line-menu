@@ -1,70 +1,59 @@
-import type { MenuSection } from "@/types/menu";
+import { FALLBACK_MENU_SECTIONS, fetchMenuSections } from "@/lib/menu-sections";
+import type { MenuSectionRow } from "@/types/menu";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 export type AdminSectionMeta = {
-  id: MenuSection;
+  id: string;
   label: string;
   description: string;
+  sort_order: number;
+  is_active: boolean;
+  is_system: boolean;
+  layout: MenuSectionRow["layout"];
 };
 
-/** Navigation order and copy for the admin console (franchise / multi-store tone). */
-export const ADMIN_MENU_SECTIONS: AdminSectionMeta[] = [
-  {
-    id: "seasonal",
-    label: "Seasonal",
-    description: "Rotating and limited-time offerings shown in the seasonal strip.",
-  },
-  {
-    id: "bestsellers",
-    label: "Best sellers",
-    description: "Hero carousel — your highest-velocity flavors and combos.",
-  },
-  {
-    id: "gelato",
-    label: "Gelato",
-    description: "Cream gelato grid and carousel; filters use tags on each item.",
-  },
-  {
-    id: "sorbet",
-    label: "Sorbet",
-    description: "Plant-based and sorbet lineup; vegan flag drives badges.",
-  },
-  {
-    id: "coffee",
-    label: "Coffee",
-    description: "Espresso bar items; emoji displays on the public menu cards.",
-  },
-  {
-    id: "pastries",
-    label: "New products",
-    description: "Pastries and rotating specials — carousel after Coffee; public title is “New products”.",
-  },
-  {
-    id: "drinks",
-    label: "Drinks",
-    description: "Beverages and add-ons in the drinks section.",
-  },
-  {
-    id: "yogurt",
-    label: "Yogurt",
-    description: "Frozen yogurt flavors — photo, copy, price, and size lines on the public menu.",
-  },
-];
-
-export function isMenuSection(value: string): value is MenuSection {
-  return ADMIN_MENU_SECTIONS.some((s) => s.id === value);
+function toAdminMeta(row: MenuSectionRow): AdminSectionMeta {
+  return {
+    id: row.id,
+    label: row.label,
+    description: row.description,
+    sort_order: row.sort_order,
+    is_active: row.is_active,
+    is_system: row.is_system,
+    layout: row.layout,
+  };
 }
 
-export function adminSectionHref(section: MenuSection) {
+/** Static fallback for offline / missing table — mirrors seeded built-ins. */
+export const ADMIN_MENU_SECTIONS: AdminSectionMeta[] = FALLBACK_MENU_SECTIONS.map(toAdminMeta);
+
+export async function getAdminMenuSections(supabase: SupabaseClient): Promise<AdminSectionMeta[]> {
+  const rows = await fetchMenuSections(supabase);
+  return rows.map(toAdminMeta);
+}
+
+export function isMenuSection(value: string, sections: AdminSectionMeta[] = ADMIN_MENU_SECTIONS): boolean {
+  return sections.some((s) => s.id === value);
+}
+
+export function adminSectionHref(section: string) {
   return `/admin/menu/${section}`;
 }
 
-export function getSectionMeta(section: MenuSection): AdminSectionMeta {
-  const meta = ADMIN_MENU_SECTIONS.find((s) => s.id === section);
+export function getSectionMeta(
+  section: string,
+  sections: AdminSectionMeta[] = ADMIN_MENU_SECTIONS
+): AdminSectionMeta {
+  const meta = sections.find((s) => s.id === section);
   if (!meta) {
     return {
       id: section,
       label: section,
       description: "Menu items for this category.",
+      sort_order: 999,
+      is_active: true,
+      is_system: false,
+      layout: "carousel",
     };
   }
   return meta;

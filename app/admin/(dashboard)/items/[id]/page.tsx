@@ -1,9 +1,9 @@
 import { MenuItemForm } from "@/components/admin/MenuItemForm";
 import { AdminBreadcrumbs } from "@/components/admin/AdminBreadcrumbs";
-import { adminSectionHref, getSectionMeta, isMenuSection } from "@/lib/admin-sections";
+import { adminSectionHref, getAdminMenuSections, getSectionMeta, isMenuSection } from "@/lib/admin-sections";
 import { fetchConsoleAccess } from "@/lib/console-access";
 import { createClient } from "@/lib/supabase/server";
-import type { MenuItemRow, MenuSection } from "@/types/menu";
+import type { MenuItemRow } from "@/types/menu";
 import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
@@ -30,6 +30,7 @@ export default async function EditMenuItemPage({
   const { section: legacySection, returnTo } = await searchParams;
 
   const supabase = await createClient();
+  const adminSections = await getAdminMenuSections(supabase);
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -43,10 +44,12 @@ export default async function EditMenuItemPage({
   const row = data as MenuItemRow;
 
   const legacyHref =
-    legacySection && isMenuSection(legacySection) ? adminSectionHref(legacySection as MenuSection) : null;
+    legacySection && isMenuSection(legacySection, adminSections)
+      ? adminSectionHref(legacySection)
+      : null;
 
   const returnHref = safeReturnHref(returnTo) ?? legacyHref ?? adminSectionHref(row.section);
-  const meta = getSectionMeta(row.section);
+  const meta = getSectionMeta(row.section, adminSections);
 
   return (
     <div className="admin-stack">
@@ -59,6 +62,7 @@ export default async function EditMenuItemPage({
       />
       <MenuItemForm
         initial={row}
+        sections={adminSections}
         returnHref={returnHref}
         lastSavedAt={row.updated_at ?? null}
         navigateAfterSave={false}

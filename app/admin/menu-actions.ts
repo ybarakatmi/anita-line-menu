@@ -2,8 +2,9 @@
 
 import { fetchConsoleAccess } from "@/lib/console-access";
 import { createClient } from "@/lib/supabase/server";
-import { isMenuSection, adminSectionHref } from "@/lib/admin-sections";
-import type { MenuItemRow, MenuPriceTier, MenuSection } from "@/types/menu";
+import { adminSectionHref, getAdminMenuSections, isMenuSection } from "@/lib/admin-sections";
+import { sectionExists } from "@/lib/menu-sections";
+import type { MenuItemRow, MenuPriceTier } from "@/types/menu";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -19,7 +20,7 @@ function parseTags(raw: string) {
     .filter(Boolean);
 }
 
-function revalidateMenuSurfaces(section: MenuSection) {
+function revalidateMenuSurfaces(section: string) {
   revalidatePath("/", "layout");
   revalidatePath("/admin", "layout");
   revalidatePath(adminSectionHref(section), "page");
@@ -51,7 +52,7 @@ async function getMenuEditorClientOrRedirect(redirectPath: string) {
 
 export async function saveMenuItemAction(input: {
   id?: string | null;
-  section: MenuSection;
+  section: string;
   name: string;
   description: string | null;
   price_display: string | null;
@@ -70,6 +71,8 @@ export async function saveMenuItemAction(input: {
   price_tiers: MenuPriceTier[] | null;
 }) {
   const supabase = await requireMenuEditorClient();
+  const exists = await sectionExists(supabase, input.section);
+  if (!exists) throw new Error("Invalid menu section.");
   const tags = parseTags(input.tagsRaw);
 
   const payload = {
@@ -104,7 +107,7 @@ export async function saveMenuItemAction(input: {
   return { ok: true as const, mode: "update" as const };
 }
 
-export async function deleteMenuItemAction(input: { id: string; section: MenuSection }) {
+export async function deleteMenuItemAction(input: { id: string; section: string }) {
   const supabase = await requireMenuEditorClient();
   const { error } = await supabase.from("menu_items").delete().eq("id", input.id);
   if (error) throw new Error(error.message);
@@ -117,11 +120,12 @@ export async function reorderMenuItemAction(formData: FormData) {
   const direction = String(formData.get("direction") ?? "");
   const returnTo = safeReturnTo(String(formData.get("returnTo") ?? ""));
   const sectionHint = String(formData.get("section") ?? "");
-  const section: MenuSection | null = isMenuSection(sectionHint) ? sectionHint : null;
 
   if (!id || (direction !== "up" && direction !== "down")) return;
 
   const supabase = await getMenuEditorClientOrRedirect(returnTo);
+  const adminSections = await getAdminMenuSections(supabase);
+  const section: string | null = isMenuSection(sectionHint, adminSections) ? sectionHint : null;
   const { data: current } = await supabase
     .from("menu_items")
     .select("id, section, sort_order")
@@ -159,10 +163,11 @@ export async function duplicateMenuItemAction(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const returnTo = safeReturnTo(String(formData.get("returnTo") ?? ""));
   const sectionHint = String(formData.get("section") ?? "");
-  const section: MenuSection | null = isMenuSection(sectionHint) ? sectionHint : null;
   if (!id) return;
 
   const supabase = await getMenuEditorClientOrRedirect(returnTo);
+  const adminSections = await getAdminMenuSections(supabase);
+  const section: string | null = isMenuSection(sectionHint, adminSections) ? sectionHint : null;
   const { data: source } = await supabase.from("menu_items").select("*").eq("id", id).maybeSingle();
   if (!source) return;
 

@@ -1,9 +1,8 @@
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
-import { ADMIN_MENU_SECTIONS, adminSectionHref, isMenuSection } from "@/lib/admin-sections";
+import { adminSectionHref, getAdminMenuSections, isMenuSection } from "@/lib/admin-sections";
 import { fetchConsoleAccess } from "@/lib/console-access";
 import { formatAdminSyncTime } from "@/lib/format-admin-sync";
 import { createClient } from "@/lib/supabase/server";
-import type { MenuSection } from "@/types/menu";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -15,11 +14,14 @@ export default async function AdminOverviewPage({
   searchParams: Promise<{ section?: string }>;
 }) {
   const { section: legacySection } = await searchParams;
-  if (legacySection && isMenuSection(legacySection)) {
+
+  const supabase = await createClient();
+  const adminSections = await getAdminMenuSections(supabase);
+
+  if (legacySection && isMenuSection(legacySection, adminSections)) {
     redirect(adminSectionHref(legacySection));
   }
 
-  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -43,20 +45,14 @@ export default async function AdminOverviewPage({
   const total = items.length;
   const active = items.filter((r) => r.is_active).length;
 
-  const bySection: Record<MenuSection, { total: number; active: number }> = {
-    seasonal: { total: 0, active: 0 },
-    bestsellers: { total: 0, active: 0 },
-    gelato: { total: 0, active: 0 },
-    sorbet: { total: 0, active: 0 },
-    coffee: { total: 0, active: 0 },
-    pastries: { total: 0, active: 0 },
-    drinks: { total: 0, active: 0 },
-    yogurt: { total: 0, active: 0 },
-  };
+  const bySection: Record<string, { total: number; active: number }> = {};
+  for (const meta of adminSections) {
+    bySection[meta.id] = { total: 0, active: 0 };
+  }
 
   for (const r of items) {
-    const s = r.section as MenuSection;
-    if (!(s in bySection)) continue;
+    const s = r.section as string;
+    if (!bySection[s]) bySection[s] = { total: 0, active: 0 };
     bySection[s].total += 1;
     if (r.is_active) bySection[s].active += 1;
   }
@@ -103,8 +99,8 @@ export default async function AdminOverviewPage({
           Sections
         </h2>
         <div className="admin-grid-tiles">
-          {ADMIN_MENU_SECTIONS.map((meta) => {
-            const stats = bySection[meta.id];
+          {adminSections.map((meta) => {
+            const stats = bySection[meta.id] ?? { total: 0, active: 0 };
             const href = adminSectionHref(meta.id);
             return (
               <article key={meta.id} className="admin-tile">

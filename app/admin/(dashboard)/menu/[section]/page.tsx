@@ -1,10 +1,10 @@
 import { duplicateMenuItemAction, reorderMenuItemAction } from "@/app/admin/menu-actions";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
-import { adminSectionHref, getSectionMeta, isMenuSection } from "@/lib/admin-sections";
+import { adminSectionHref, getAdminMenuSections, getSectionMeta } from "@/lib/admin-sections";
 import { fetchConsoleAccess } from "@/lib/console-access";
 import { formatAdminSyncTime } from "@/lib/format-admin-sync";
 import { createClient } from "@/lib/supabase/server";
-import type { MenuItemRow, MenuSection } from "@/types/menu";
+import type { MenuItemRow } from "@/types/menu";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -12,12 +12,14 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminMenuSectionPage({ params }: { params: Promise<{ section: string }> }) {
   const { section: raw } = await params;
-  if (!isMenuSection(raw)) notFound();
-  const section: MenuSection = raw;
-  const meta = getSectionMeta(section);
-  const returnHref = adminSectionHref(section);
 
   const supabase = await createClient();
+  const adminSections = await getAdminMenuSections(supabase);
+  if (!adminSections.some((s) => s.id === raw)) notFound();
+  const section = raw;
+  const meta = getSectionMeta(section, adminSections);
+  const returnHref = adminSectionHref(section);
+
   const {
     data: { user },
   } = await supabase.auth.getUser();

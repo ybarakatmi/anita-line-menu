@@ -11,17 +11,17 @@ import {
   IconSupport,
   IconText,
 } from "@/components/admin/AdminNavIcons";
-import { ADMIN_MENU_SECTIONS, adminSectionHref } from "@/lib/admin-sections";
+import { adminSectionHref, type AdminSectionMeta } from "@/lib/admin-sections";
 import type { ConsoleAccess } from "@/lib/console-access";
-import type { MenuSection } from "@/types/menu";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 type Props = {
   children: React.ReactNode;
-  liveCounts: Record<MenuSection, number>;
-  totalCounts: Record<MenuSection, number>;
+  adminSections: AdminSectionMeta[];
+  liveCounts: Record<string, number>;
+  totalCounts: Record<string, number>;
   access: ConsoleAccess;
 };
 
@@ -36,7 +36,7 @@ function roleInitial(role: string) {
   return label.charAt(0);
 }
 
-export function AdminAppShell({ children, liveCounts, totalCounts, access }: Props) {
+export function AdminAppShell({ children, adminSections, liveCounts, totalCounts, access }: Props) {
   const pathname = usePathname();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
@@ -66,7 +66,7 @@ export function AdminAppShell({ children, liveCounts, totalCounts, access }: Pro
       {access.canEditProducts && (
         <>
           <p className="admin-nav-group-label">Menu sections</p>
-          {ADMIN_MENU_SECTIONS.map((s) => {
+          {adminSections.map((s) => {
             const href = adminSectionHref(s.id);
             const live = liveCounts[s.id] ?? 0;
             const total = totalCounts[s.id] ?? 0;
@@ -93,6 +93,10 @@ export function AdminAppShell({ children, liveCounts, totalCounts, access }: Pro
       {access.canEditSections && (
         <>
           <p className="admin-nav-group-label">Presentation</p>
+          <Link href="/admin/menu-sections" className={navLinkClass("/admin/menu-sections")}>
+            <IconMenu />
+            Menu sections
+          </Link>
           <Link href="/admin/hero" className={navLinkClass("/admin/hero")}>
             <IconImage />
             Hero section

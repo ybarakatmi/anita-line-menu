@@ -1,5 +1,7 @@
 import type { MenuItemRow, SiteSettingsRow } from "@/types/menu";
 
+export { FALLBACK_MENU_SECTIONS } from "@/lib/menu-sections";
+
 const id = (section: string, i: number) => `fb-${section}-${i}`;
 
 export const FALLBACK_SITE_SETTINGS: SiteSettingsRow = {

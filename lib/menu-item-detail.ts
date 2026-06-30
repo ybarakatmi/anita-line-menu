@@ -1,8 +1,19 @@
-import type { MenuItemRow, MenuPriceTier, MenuSection } from "@/types/menu";
+import type { BuiltinMenuSection, MenuItemRow, MenuPriceTier } from "@/types/menu";
 
 export type PriceTier = MenuPriceTier;
 
-const FROZEN_SECTIONS: MenuSection[] = ["gelato", "sorbet", "yogurt"];
+const FROZEN_SECTIONS: BuiltinMenuSection[] = ["gelato", "sorbet", "yogurt"];
+
+const BUILTIN_SECTIONS = new Set<string>([
+  "seasonal",
+  "bestsellers",
+  "gelato",
+  "sorbet",
+  "coffee",
+  "pastries",
+  "drinks",
+  "yogurt",
+]);
 
 /** Scoop / cup ladder — aligns with existing “from $7” gelato line on the menu. */
 const GELATO_STYLE_TIERS: PriceTier[] = [
@@ -29,12 +40,16 @@ const PASTRY_NOTE =
 
 const DRINK_NOTE = "Chilled & sparkling options — perfect with a scoop.";
 
-function isFrozenStyleSection(section: MenuSection): boolean {
+function isFrozenStyleSection(section: string): section is BuiltinMenuSection {
   return (
-    FROZEN_SECTIONS.includes(section) ||
+    FROZEN_SECTIONS.includes(section as BuiltinMenuSection) ||
     section === "bestsellers" ||
     section === "seasonal"
   );
+}
+
+function isBuiltinSection(section: string): section is BuiltinMenuSection {
+  return BUILTIN_SECTIONS.has(section);
 }
 
 /**
@@ -68,6 +83,12 @@ export function getPriceTiersForItem(item: MenuItemRow): PriceTier[] {
   const { section, price_display } = item;
   const base = price_display?.trim() || null;
 
+  if (!isBuiltinSection(section)) {
+    return base
+      ? [{ label: "Menu price", price: base, hint: "Ask in store for sizes and add-ons." }]
+      : [{ label: "Menu price", price: "—", hint: "Ask in store for sizes and add-ons." }];
+  }
+
   if (section === "yogurt") {
     if (base) return [{ label: "Sizes", price: base, hint: "Cup options as listed" }];
     return YOGURT_TIERS;
@@ -95,7 +116,7 @@ export function getPriceTiersForItem(item: MenuItemRow): PriceTier[] {
   return base ? [{ label: "Menu price", price: base }] : [];
 }
 
-export function detailSectionLabel(section: MenuSection): string {
+export function detailSectionLabel(section: string): string {
   switch (section) {
     case "gelato":
       return "Cream gelato";
@@ -114,11 +135,12 @@ export function detailSectionLabel(section: MenuSection): string {
     case "seasonal":
       return "Seasonal";
     default:
-      return "Menu";
+      return section.replace(/-/g, " ");
   }
 }
 
-export function detailPricingTitle(section: MenuSection): string {
+export function detailPricingTitle(section: string): string {
+  if (!isBuiltinSection(section)) return "Pricing";
   if (FROZEN_SECTIONS.includes(section) || section === "bestsellers" || section === "seasonal") {
     return "Scoops & sizes";
   }

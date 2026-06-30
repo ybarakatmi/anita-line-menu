@@ -3,19 +3,10 @@
 import { pushAnalyticsEvent } from "@/lib/gtm";
 import { useEffect } from "react";
 
-const SECTION_IDS = [
-  "seasonal",
-  "bestsellers",
-  "coffee",
-  "pastries",
-  "drinks",
-  "yogurt",
-  "gelato",
-  "sorbet",
-] as const;
-
 /** Fire `section_view` once per section when ~50% visible (GTM → GA4). */
-export function useSectionViewAnalytics() {
+export function useSectionViewAnalytics(sectionIds: string[]) {
+  const idsKey = sectionIds.join("|");
+
   useEffect(() => {
     const seen = new Set<string>();
 
@@ -32,11 +23,11 @@ export function useSectionViewAnalytics() {
       { threshold: [0.5] }
     );
 
-    for (const id of SECTION_IDS) {
+    for (const id of sectionIds) {
       const el = document.getElementById(id);
       if (el) observer.observe(el);
     }
 
     return () => observer.disconnect();
-  }, []);
+  }, [idsKey, sectionIds]);
 }
