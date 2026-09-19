@@ -1,6 +1,5 @@
 import { GoogleTagManager } from "@/components/analytics/GoogleTagManager";
 import { GoogleTagManagerNoScript } from "@/components/analytics/GoogleTagManagerNoScript";
-import { MicrosoftClarity } from "@/components/analytics/MicrosoftClarity";
 import type { Metadata, Viewport } from "next";
 import { Bodoni_Moda, Josefin_Sans } from "next/font/google";
 import "./globals.css";
@@ -61,9 +60,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <MicrosoftClarity />
-      </head>
       <body
         className={`${serif.variable} ${sans.variable} antialiased`}
         style={

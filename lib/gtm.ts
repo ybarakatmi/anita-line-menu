@@ -93,6 +93,49 @@ export function pushMenuSessionStartOnce(): void {
   pushAnalyticsEvent("menu_session_start");
 }
 
+/**
+ * Fire `event` at most once per page load, keyed by `key`.
+ * Used for signals that would otherwise repeat on every render or scroll tick
+ * (form starts, carousel depth, data-health warnings).
+ */
+const firedOnce = new Set<string>();
+
+export function pushAnalyticsEventOnce(
+  key: string,
+  event: string,
+  params: Record<string, unknown> = {}
+) {
+  if (typeof window === "undefined") return;
+  if (firedOnce.has(key)) return;
+  firedOnce.add(key);
+  pushAnalyticsEvent(event, params);
+}
+
+/**
+ * Item names come from admin free-text and have carried stray whitespace
+ * ("Greenberry "), which GA4 would report as a separate dimension value.
+ */
+export function normalizeItemName(name: string | null | undefined): string {
+  return (name ?? "").replace(/\s+/g, " ").trim();
+}
+
+/**
+ * Supabase rejects with a PostgrestError object, not an Error instance, so an
+ * `instanceof Error` check reports every outage as "unknown". Read `message`
+ * (and `code`) off whatever shape we are handed.
+ */
+export function describeError(err: unknown): string {
+  if (typeof err === "string") return err.slice(0, 100);
+  if (err && typeof err === "object") {
+    const e = err as { message?: unknown; code?: unknown };
+    const message = typeof e.message === "string" ? e.message : "";
+    const code = typeof e.code === "string" ? e.code : "";
+    const combined = [code, message].filter(Boolean).join(" ");
+    if (combined) return combined.slice(0, 100);
+  }
+  return "unknown";
+}
+
 /** Normalize gelato filter chip keys to consistent snake_case slugs for GA4. */
 const GELATO_FILTER_SLUGS: Record<string, string> = {
   all: "all",

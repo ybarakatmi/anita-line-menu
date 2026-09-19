@@ -9,8 +9,11 @@ import {
   flavorImageSlug,
 } from "@/lib/flavor-image";
 import {
+  describeError,
   normalizeGelatoFilterValue,
+  normalizeItemName,
   pushAnalyticsEvent,
+  pushAnalyticsEventOnce,
   pushMenuSessionStartOnce,
 } from "@/lib/gtm";
 import { CustomCarouselSection } from "@/components/menu/CustomCarouselSection";
@@ -443,9 +446,11 @@ function showcaseFallbackMenuItem(
   };
 }
 
-function useCarouselTrack() {
+function useCarouselTrack(carouselId: string) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [page, setPage] = useState(0);
+  // Deepest page already reported, so a scroll back and forth does not re-fire.
+  const deepestReported = useRef(0);
 
   const sync = useCallback(() => {
     const track = trackRef.current;
@@ -454,8 +459,17 @@ function useCarouselTrack() {
     if (!card) return;
     const w = card.offsetWidth + 12;
     const p = Math.round(track.scrollLeft / (w * 2));
-    setPage(Math.max(0, p));
-  }, []);
+    const clamped = Math.max(0, p);
+    setPage(clamped);
+
+    if (clamped > deepestReported.current) {
+      deepestReported.current = clamped;
+      pushAnalyticsEvent("carousel_advance", {
+        carousel_id: carouselId,
+        carousel_page: clamped,
+      });
+    }
+  }, [carouselId]);
 
   useEffect(() => {
     const track = trackRef.current;
@@ -508,10 +522,11 @@ export function MenuBoard({
   const [detailItem, setDetailItem] = useState<MenuItemRow | null>(null);
   const [contactStatus, setContactStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
   const bestSellerSwiperRef = useRef<SwiperType | null>(null);
-  const gelatoCarousel = useCarouselTrack();
-  const newProductsCarousel = useCarouselTrack();
-  const sorbetCarousel = useCarouselTrack();
-  const yogurtCarousel = useCarouselTrack();
+  const deepestBestSeller = useRef(0);
+  const gelatoCarousel = useCarouselTrack("gelato");
+  const newProductsCarousel = useCarouselTrack("new_products");
+  const sorbetCarousel = useCarouselTrack("sorbet");
+  const yogurtCarousel = useCarouselTrack("yogurt");
 
   // After admin saves, Next.js refreshes RSC props but useState keeps the first snapshot.
   // Re-sync so new images (e.g. coffee uploads) show without a hard reload.
@@ -544,6 +559,15 @@ export function MenuBoard({
     pushMenuSessionStartOnce();
   }, []);
 
+  // A customer in line seeing the demo menu instead of the real one used to be
+  // invisible — the page renders fine, it is just the wrong data.
+  useEffect(() => {
+    if (mode === "live") return;
+    pushAnalyticsEventOnce("menu_data_fallback", "menu_data_fallback", {
+      data_mode: mode,
+    });
+  }, [mode]);
+
   const reload = useCallback(async () => {
     if (mode !== "live") return;
     try {
@@ -555,8 +579,11 @@ export function MenuBoard({
         .order("sort_order", { ascending: true });
       if (error) throw error;
       if (data?.length) setItems(sortItemsWithNewProductsDefaults(data as MenuItemRow[], initialSections));
-    } catch {
-      /* keep current */
+    } catch (err) {
+      // Keep showing the current menu, but say so — a stale board is a real failure.
+      pushAnalyticsEventOnce("menu_reload_error", "menu_reload_error", {
+        error_message: describeError(err),
+      });
     }
   }, [mode, initialSections]);
 
@@ -585,7 +612,10 @@ export function MenuBoard({
 
   const openItemDetail = useCallback((item: MenuItemRow) => {
     pushAnalyticsEvent("menu_item_open", {
-      item_name: item.name,
+      // item_id is the stable key; item_name is free-text and changes on rename.
+      item_id: item.id,
+      item_name: normalizeItemName(item.name),
+      item_price: item.price_display ?? undefined,
       section_id: item.section,
     });
     setDetailItem(item);
@@ -621,7 +651,9 @@ export function MenuBoard({
     [orderedActiveSections, settings.section_labels]
   );
   const analyticsSectionIds = useMemo(
-    () => orderedActiveSections.map((s) => s.id),
+    // "follow" is the Instagram block — not in the section registry, but it is the
+    // last thing a customer sees, so it belongs in the scroll-depth picture.
+    () => [...orderedActiveSections.map((s) => s.id), "follow"],
     [orderedActiveSections]
   );
   const customSections = useMemo(
@@ -953,7 +985,16 @@ export function MenuBoard({
                 bestSellerSwiperRef.current = swiper;
                 setActiveBestSeller(swiper.activeIndex);
               }}
-              onSlideChange={(swiper) => setActiveBestSeller(swiper.realIndex)}
+              onSlideChange={(swiper) => {
+                setActiveBestSeller(swiper.realIndex);
+                if (swiper.realIndex > deepestBestSeller.current) {
+                  deepestBestSeller.current = swiper.realIndex;
+                  pushAnalyticsEvent("carousel_advance", {
+                    carousel_id: "bestsellers",
+                    carousel_page: swiper.realIndex,
+                  });
+                }
+              }}
               breakpoints={{
                 0: { slidesPerView: 1.45, centeredSlides: true },
                 640: { slidesPerView: 2.4, centeredSlides: true },
@@ -1387,6 +1428,12 @@ export function MenuBoard({
             <span className="footer-sub-head">CONTACT US</span>
             <form
               className="gform_wrapper gform-theme--no-framework footer-contact-form"
+              // Capture-phase focus fires once per load, giving a start→submit funnel.
+              onFocusCapture={() =>
+                pushAnalyticsEventOnce("contact_form_start", "contact_form_start", {
+                  form_name: "contact",
+                })
+              }
               onSubmit={async (e) => {
                 e.preventDefault();
                 if (contactStatus === "sending" || contactStatus === "success") return;
@@ -1406,7 +1453,12 @@ export function MenuBoard({
                   pushAnalyticsEvent("contact_form_submit", { form_name: "contact" });
                   setContactStatus("success");
                   (e.target as HTMLFormElement).reset();
-                } catch {
+                } catch (err) {
+                  // Previously silent: a failing insert looked identical to no traffic.
+                  pushAnalyticsEvent("contact_form_error", {
+                    form_name: "contact",
+                    error_message: describeError(err),
+                  });
                   setContactStatus("error");
                 }
               }}
