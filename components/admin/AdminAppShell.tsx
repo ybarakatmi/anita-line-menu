@@ -7,6 +7,7 @@ import {
   IconMail,
   IconMenu,
   IconOverview,
+  IconQr,
   IconSettings,
   IconSupport,
   IconText,
@@ -111,6 +112,12 @@ export function AdminAppShell({ children, adminSections, liveCounts, totalCounts
           </Link>
         </>
       )}
+
+      <p className="admin-nav-group-label">Tracking</p>
+      <Link href="/admin/qr" className={navLinkClass("/admin/qr")}>
+        <IconQr />
+        QR codes
+      </Link>
 
       {access.canViewInquiries && (
         <>

@@ -1,6 +1,8 @@
+import { ConsentBanner } from "@/components/analytics/ConsentBanner";
 import { MenuBoard } from "@/components/menu/MenuBoard";
 import { getMenuData } from "@/lib/get-menu-data";
 import { resolvePublicOrigin, toAbsoluteMediaUrl } from "@/lib/resolve-public-origin";
+import { consentRequired } from "@/lib/visitor-region";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -61,13 +63,16 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
-  const data = await getMenuData();
+  const [data, needsConsent] = await Promise.all([getMenuData(), consentRequired()]);
   return (
-    <MenuBoard
-      initialItems={data.items}
-      initialSettings={data.settings}
-      initialSections={data.sections}
-      mode={data.mode}
-    />
+    <>
+      <MenuBoard
+        initialItems={data.items}
+        initialSettings={data.settings}
+        initialSections={data.sections}
+        mode={data.mode}
+      />
+      {needsConsent ? <ConsentBanner /> : null}
+    </>
   );
 }

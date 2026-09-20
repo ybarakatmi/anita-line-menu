@@ -2171,3 +2171,57 @@ body {
     padding: 10px 20px 16px;
   }
 }
+
+/* ── Consent banner (EEA/UK visitors only — see lib/visitor-region.ts) ────── */
+.consent-banner {
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  z-index: 500;
+  width: min(560px, calc(100vw - 32px));
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 2px solid var(--olive);
+  border-radius: 14px;
+  background: var(--warm-white);
+  box-shadow: 0 10px 30px rgba(31, 65, 54, 0.18);
+  padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+}
+.consent-banner-text {
+  flex: 1 1 260px;
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 12px;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  color: var(--olive);
+}
+.consent-banner-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.consent-btn {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 9px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  border: 1.5px solid var(--olive);
+  min-height: 40px;
+}
+.consent-btn-primary { background: var(--olive); color: var(--warm-white); }
+.consent-btn-secondary { background: transparent; color: var(--olive); }
+@media (max-width: 420px) {
+  .consent-banner { flex-direction: column; align-items: stretch; }
+  .consent-banner-actions { justify-content: stretch; }
+  .consent-btn { flex: 1; }
+}

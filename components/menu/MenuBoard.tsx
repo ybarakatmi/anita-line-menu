@@ -26,6 +26,11 @@ import {
   sortMenuSections,
 } from "@/lib/menu-sections";
 import { useSectionViewAnalytics } from "@/lib/use-section-view-analytics";
+import {
+  pushSelectItem,
+  pushViewItem,
+  pushViewItemList,
+} from "@/lib/ecommerce";
 import { MenuItemDetailSheet } from "@/components/menu/MenuItemDetailSheet";
 import type { MenuDataMode, MenuItemRow, MenuSectionRow, SectionLabelOverride, SiteSettingsRow } from "@/types/menu";
 import type { CSSProperties } from "react";
@@ -610,6 +615,13 @@ export function MenuBoard({
     };
   }, [mode, reload]);
 
+  // openItemDetail is passed down to every card and runs before bySection/sectionListName
+  // are declared, so the list context is read through a ref instead of a dependency.
+  const listContextRef = useRef<{
+    itemsBySection: Map<string, MenuItemRow[]>;
+    listName: (id: string) => string;
+  }>({ itemsBySection: new Map(), listName: (id) => id });
+
   const openItemDetail = useCallback((item: MenuItemRow) => {
     pushAnalyticsEvent("menu_item_open", {
       // item_id is the stable key; item_name is free-text and changes on rename.
@@ -618,6 +630,16 @@ export function MenuBoard({
       item_price: item.price_display ?? undefined,
       section_id: item.section,
     });
+
+    // Same tap, told two ways: menu_item_open drives the QR/placement reporting,
+    // select_item + view_item drive GA4's built-in item reports.
+    const { itemsBySection, listName } = listContextRef.current;
+    const list = itemsBySection.get(item.section) ?? [];
+    const index = Math.max(0, list.findIndex((it) => it.id === item.id));
+    const label = listName(item.section);
+    pushSelectItem(item, item.section, label, index);
+    pushViewItem(item, item.section, label, index);
+
     setDetailItem(item);
   }, []);
 
@@ -661,8 +683,6 @@ export function MenuBoard({
     [orderedActiveSections]
   );
 
-  useSectionViewAnalytics(analyticsSectionIds);
-
   const activeSectionIds = useMemo(
     () => new Set(orderedActiveSections.map((s) => s.id)),
     [orderedActiveSections]
@@ -681,6 +701,29 @@ export function MenuBoard({
     }
     return m;
   }, [items, orderedSections]);
+
+  /** Human-readable list name for GA4 item reports; falls back to the raw id. */
+  const sectionListName = useCallback(
+    (sectionId: string) =>
+      navSections.find((n) => n.id === sectionId)?.label ?? sectionId,
+    [navSections]
+  );
+
+  // A section scrolling into view is the moment its flavors were "impressed".
+  const handleSectionSeen = useCallback(
+    (sectionId: string) => {
+      const sectionItems = bySection.get(sectionId);
+      if (!sectionItems?.length) return;
+      pushViewItemList(sectionId, sectionListName(sectionId), sectionItems);
+    },
+    [bySection, sectionListName]
+  );
+
+  useEffect(() => {
+    listContextRef.current = { itemsBySection: bySection, listName: sectionListName };
+  }, [bySection, sectionListName]);
+
+  useSectionViewAnalytics(analyticsSectionIds, handleSectionSeen);
 
   const gelatoItems = useMemo(
     () => (bySection.get("gelato") ?? []).slice().sort((a, b) => a.sort_order - b.sort_order),

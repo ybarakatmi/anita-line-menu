@@ -833,3 +833,52 @@
   margin-top: 8px;
   border-top: 1px solid var(--admin-divider);
 }
+
+/* ── QR code builder ──────────────────────────────────────────────────────── */
+.qr-builder-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+.qr-suggestions { display: flex; flex-wrap: wrap; gap: 6px; }
+.qr-chip {
+  font-size: 12px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--admin-border, #d7d7d7);
+  background: transparent;
+  cursor: pointer;
+  text-transform: capitalize;
+}
+.qr-chip-active {
+  background: var(--admin-accent, #1f4136);
+  border-color: var(--admin-accent, #1f4136);
+  color: #fff;
+}
+.qr-result {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: flex-start;
+  padding-top: 4px;
+}
+.qr-preview {
+  width: 200px;
+  height: 200px;
+  border-radius: 10px;
+  border: 1px solid var(--admin-border, #d7d7d7);
+  flex-shrink: 0;
+}
+.qr-preview-empty { background: #f1f1f1; }
+.qr-result-body { flex: 1 1 260px; display: flex; flex-direction: column; gap: 10px; }
+.qr-url {
+  display: block;
+  font-size: 12px;
+  line-height: 1.5;
+  word-break: break-all;
+  padding: 9px 11px;
+  border-radius: 8px;
+  background: #f5f5f5;
+  border: 1px solid var(--admin-border, #d7d7d7);
+}
+.qr-actions { display: flex; flex-wrap: wrap; gap: 8px; }

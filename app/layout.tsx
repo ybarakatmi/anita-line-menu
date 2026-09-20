@@ -1,3 +1,4 @@
+import { ConsentMode } from "@/components/analytics/ConsentMode";
 import { GoogleTagManager } from "@/components/analytics/GoogleTagManager";
 import { GoogleTagManagerNoScript } from "@/components/analytics/GoogleTagManagerNoScript";
 import type { Metadata, Viewport } from "next";
@@ -60,6 +61,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        {/* Consent defaults must execute before gtm.js loads. */}
+        <ConsentMode />
+      </head>
       <body
         className={`${serif.variable} ${sans.variable} antialiased`}
         style={

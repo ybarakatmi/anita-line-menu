@@ -63,3 +63,14 @@ export function IconExternal({ className }: IconProps) {
     </svg>
   );
 }
+
+export function IconQr({ className = "admin-nav-icon" }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" aria-hidden>
+      <rect x="2.5" y="2.5" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.4" />
+      <rect x="11.5" y="2.5" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.4" />
+      <rect x="2.5" y="11.5" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.4" />
+      <path d="M11.5 11.5h2.5v2.5h-2.5zM15.5 15.5h2v2h-2z" fill="currentColor" />
+    </svg>
+  );
+}
